@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "881714975000",
+    "project_id": "admin-1e0a1",
+    "storage_bucket": "admin-1e0a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881714975000:android:811dafd76ccac8c1fa0e6d",
+        "android_client_info": {
+          "package_name": "com.example.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "881714975000-c8v75jkrcg64p6epkjcc5c61an1jdupp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHAE8fHVBexZYvHpzzEdLr8TV3wZd0HTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "881714975000-c8v75jkrcg64p6epkjcc5c61an1jdupp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881714975000:android:3dea94ee03f4e3e7fa0e6d",
+        "android_client_info": {
+          "package_name": "com.example.adminoffice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "881714975000-c8v75jkrcg64p6epkjcc5c61an1jdupp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHAE8fHVBexZYvHpzzEdLr8TV3wZd0HTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "881714975000-c8v75jkrcg64p6epkjcc5c61an1jdupp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

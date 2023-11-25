@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DABS ADMIN</string>
+    <string name="baseURl">https://dabs-mobile-b496e76ea549.herokuapp.com/</string>
+</resources>

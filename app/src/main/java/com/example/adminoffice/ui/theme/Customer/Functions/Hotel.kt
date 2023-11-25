@@ -1,0 +1,30 @@
+package com.example.adminoffice.ui.theme.Customer.Functions
+
+data class Hotel(
+    val __v: Int,
+    val _id: String,
+    val city: String,
+    val createdAt: String,
+    val deletedAt: Any,
+    val description: String,
+    val facebookURL: String,
+    val floors: List<String>,
+    val hotelOwner: String,
+    val images: List<String>,
+    val instagramURL: String,
+    val isDeleted: Boolean,
+    val lat: Double,
+    val lng: Double,
+    val location: String,
+    val name: String,
+    val phoneNo: String,
+    val refundPolicy: RefundPolicy,
+    val reviews: List<Any>,
+    val rules: List<Any>,
+    val services: List<Any>,
+    val status: String,
+    val telephoneNo: String,
+    val updatedAt: String,
+    val videos: List<String>,
+    val websiteURL: String
+)
