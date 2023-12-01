@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -96,6 +97,9 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
+import com.example.adminoffice.ui.theme.Customer.CartFunctions.Services
+import com.example.adminoffice.ui.theme.Customer.CartFunctions.getRoomsIdinCart
+import com.example.adminoffice.ui.theme.Customer.LandingPage
 import com.example.adminoffice.ui.theme.Utils.CustomTopAppBar
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Booking
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
@@ -146,6 +150,11 @@ import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.example.adminoffice.ui.theme.Utils.isValidDescription
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
+import com.stripe.android.createPaymentMethod
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -171,6 +180,7 @@ data class ExtendBookingCustomer(
     var message = ""
     var ClientSecret = mutableStateOf("")
     val datecorrect= mutableStateOf(true)
+
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -178,12 +188,24 @@ data class ExtendBookingCustomer(
     override fun Content(){
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
-
+        PaymentConfiguration.init(context, "pk_test_51NAwR3IoGI30N9jFX4aSt1YTus7cMnAgtRDxZJjI9zsboH5zlyyhkm2ggxJolNaaqX2FwYAJw3lboYtjnNiEPZ3G00b7f4qQ0X")
         val DaysBetween = remember {
             mutableStateOf(0)
         }
-        val added = remember {
-            mutableStateOf(0)
+        val year = remember {
+            mutableStateOf("")
+        }
+        val datee = remember {
+            mutableStateOf("")
+        }
+        val month = remember {
+            mutableStateOf("")
+        }
+        val cvc = remember {
+            mutableStateOf("")
+        }
+        val cardNumber = remember {
+            mutableStateOf("")
         }
         val addi = remember {
             mutableStateOf(0)
@@ -215,6 +237,64 @@ data class ExtendBookingCustomer(
                 // Update minDate for eDatePickerDialog
 
                 eDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+                var abc = ""
+                var date = ""
+                try{
+                    val inputDateStr = eDate.value
+                    Log.d("AAAAAAAAAAAEDATE",eDate.value.toString())
+                    Log.d("AAAAAAAAAAAEDATE",mYear.toString())
+                    Log.d("AAAAAAAAAAAEDATE",mDay.toString())
+                    Log.d("AAAAAAAAAAAEDATE",mMonth.toString())
+                    // Replace '/' with '-'
+                    val formattedDate = inputDateStr.replace("/", "-")
+                    Log.d("AAAAAAAAAAAEDATE",formattedDate.toString())
+                    Log.d("AAAAAAAAAAAEDATE",formattedDate.length.toString())
+                    // Define the two dates as strings
+                    abc = booking.checkOut.substring(0,10)
+                    if(formattedDate.length==10){
+                        date = formattedDate.substring(6,10)+"-"+formattedDate.substring(3,5)+"-"+formattedDate.substring(0,2)
+                    }
+                    else{
+                        val parts = formattedDate.split("-")
+                        if(parts[2].length==4){
+                            date=parts[2]+"-"
+                        }
+                        if(parts[1].length==1){
+                            date=date+"0"+parts[1]+"-"
+                        }
+                        else{
+                            date=date+parts[1]+"-"
+                        }
+                        if(parts[0].length==1){
+                            date=date+"0"+parts[0]
+                        }
+                        else{
+                            date=date+parts[0]
+                        }
+                        Log.d("AAAAAAAAAAAEDATE",date.toString())
+                        //date = formattedDate.substring(5,9)+"-"+formattedDate.substring(2,4)+"-0"+formattedDate.substring(0,1)
+                    }
+                    Log.d("AAAAAAAAAAAEDATEggg",daysBetweenDates(abc,date,context).toString())
+                    Log.d("AAAAAAAAAAAEDATE1",abc.toString())
+                    Log.d("AAAAAAAAAAAEDATE2",date.toString())
+                    DaysBetween.value = daysBetweenDates(abc,date,context).toInt()
+//                        addi.value = DaysBetween.value*booking.rooms[0].price
+                    Log.d("AAAAAAAAAAAEDATE2","HERECode")
+                    for(b in booking.rooms){
+                        addi.value= addi.value+ b.price*DaysBetween.value
+
+                    }
+                    Log.d("AAAAAAAAAAAEDATE2","HERECode22")
+                    if(!datecorrect.value){
+                        addi.value=0
+                    }
+                    Log.d("AAAAAAAAAAAEDATE2","HERECode44")
+                    datee.value = date
+                }
+                catch(e:Exception){
+                    e.printStackTrace()
+                }
+
             }, mYear, mMonth, mDay
         )
 //        // Set maxDate for the eDatePickerDialog initially
@@ -368,7 +448,13 @@ data class ExtendBookingCustomer(
                             }
                             else{
                                 val formattedDate = eDate.value.replace("/", "-")
-                                formattedDate.substring(6,10)+"-"+formattedDate.substring(3,5)+"-"+formattedDate.substring(0,2)
+                                if(formattedDate.length==10){
+                                    formattedDate.substring(6,10)+"-"+formattedDate.substring(3,5)+"-"+formattedDate.substring(0,2)
+                                }
+                                else{
+                                    datee.value
+                                }
+//                                formattedDate.substring(6,10)+"-"+formattedDate.substring(3,5)+"-"+formattedDate.substring(0,2)
 
                             },
                                 color =  if(eDate.value==""){
@@ -380,33 +466,7 @@ data class ExtendBookingCustomer(
                             )
                         }
                     }
-                    try{
-                        val inputDateStr = eDate.value
-                        Log.d("AAAAAAAAAAAEDATE",eDate.value.toString())
-                        Log.d("AAAAAAAAAAAEDATE",mYear.toString())
-                        Log.d("AAAAAAAAAAAEDATE",mDay.toString())
-                        Log.d("AAAAAAAAAAAEDATE",mMonth.toString())
-                        // Replace '/' with '-'
-                        val formattedDate = inputDateStr.replace("/", "-")
-                        Log.d("AAAAAAAAAAAEDATE",formattedDate.toString())
-                        // Define the two dates as strings
-                        val abc = booking.checkOut.substring(0,10)
-                        val date = formattedDate.substring(6,10)+"-"+formattedDate.substring(3,5)+"-"+formattedDate.substring(0,2)
-                        Log.d("AAAAAAAAAAAEDATEggg",daysBetweenDates(abc,date,context).toString())
-                        Log.d("AAAAAAAAAAAEDATE1",abc.toString())
-                        Log.d("AAAAAAAAAAAEDATE2",date.toString())
-                        DaysBetween.value = daysBetweenDates(abc,date,context).toInt()
-//                        addi.value = DaysBetween.value*booking.rooms[0].price
-                        for(b in booking.rooms){
-                            addi.value= b.price*DaysBetween.value
-                        }
-                        if(!datecorrect.value){
-                            addi.value=0
-                        }
-                    }
-                    catch(e:Exception){
-                        e.printStackTrace()
-                    }
+
                     if (!datecorrect.value) {
                         Text(
                             text = "You have selected a date which is before your last check out",
@@ -458,18 +518,160 @@ data class ExtendBookingCustomer(
                         Text(text = addi.value.toString(), fontSize = 14.sp, fontWeight = FontWeight.Light,)
                     }
                     Spacer(modifier = Modifier.size(10.dp))
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(5.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            errorBorderColor = Color.Red,
+                            placeholderColor = Color.Gray,
+                            disabledPlaceholderColor = Color.Gray
+                        ),
+                        value = cardNumber.value,
+                        onValueChange = {
+                            if(cardNumber.value.length<16)
+                                cardNumber.value =it
+                        },
+                        leadingIcon = {
+                            Icon(painterResource(id = R.drawable.card), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                        },
+                        label = {
+                            Text(text = "Card Number", color = Color.Gray)
+                        },
+                        placeholder = {
+                            Text(text = "Enter Card Number")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Phone
+                        ),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(5.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            errorBorderColor = Color.Red,
+                            placeholderColor = Color.Gray,
+                            disabledPlaceholderColor = Color.Gray
+                        ),
+                        value = cvc.value,
+                        onValueChange = {
+                            if(cvc.value.length<3)
+                                cvc.value =it
+                        },
+                        leadingIcon = {
+                            Icon(painterResource(id = R.drawable.card), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                        },
+                        label = {
+                            Text(text = "CVC", color = Color.Gray)
+                        },
+                        placeholder = {
+                            Text(text = "Enter CVC")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(5.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            errorBorderColor = Color.Red,
+                            placeholderColor = Color.Gray,
+                            disabledPlaceholderColor = Color.Gray
+                        ),
+                        value = month.value,
+                        onValueChange = {
+                            if(month.value.length<2)
+                                month.value =it
+                        },
+                        leadingIcon = {
+                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                        },
+                        label = {
+                            Text(text = "Month", color = Color.Gray)
+                        },
+                        placeholder = {
+                            Text(text = "Enter Expiry Month")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(5.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            errorBorderColor = Color.Red,
+                            placeholderColor = Color.Gray,
+                            disabledPlaceholderColor = Color.Gray
+                        ),
+                        value = year.value,
+                        onValueChange = {
+                            if(year.value.length<4)
+                                year.value =it
+                        },
+                        leadingIcon = {
+                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                        },
+                        label = {
+                            Text(text = "Year", color = Color.Gray)
+                        },
+                        placeholder = {
+                            Text(text = "Enter Expiry Year")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
                     Box(modifier = Modifier.clickable {
                         if(eDate.value!=""){
                             scope.launch {
                                 if(datecorrect.value){
-                                        getIntentStripe(context = context, amount = addi.value.toInt(), hotelid = booking.hotel._id){
+                                        getIntentStripe(context = context, amount = addi.value.toInt(), hotelid = booking.hotel.description){
+                                            // Create a Stripe instance
 
                                             if(it){
-                                                ExtendBookingInSystem(context=context,id=booking._id, roomCharges=addi.value, checkOutDate=eDate.value){
-                                                    if(it){
-                                                        navigator.replace(ViewBookings)
+                                                scope.launch {
+                                                    val stripe = Stripe(context, PaymentConfiguration.getInstance(context).publishableKey)
+                                                    val params = PaymentMethodCreateParams.create(
+                                                        card = PaymentMethodCreateParams.Card(
+                                                            number = cardNumber.value,expiryMonth = month.value.toInt(),expiryYear = year.value.toInt(),
+                                                            cvc = cvc.value.toString(), token = null,attribution = null)
+                                                    )
+                                                    try {
+                                                        val paymentMethod = stripe.createPaymentMethod(params)
+                                                        // Handle successful creation of PaymentMethod
+                                                        val paymentMethodId = paymentMethod.id
+                                                        Log.d("KKKKKKKpaymentid",paymentMethodId.toString())
+                                                        val paymentIntentResult = stripe.confirmPayment(context as ComponentActivity, ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                                                            paymentMethodId.toString(),
+                                                            Services.ClientSecret.value // ID obtained from your server
+                                                        ))
+                                                        Log.d("KKKKKKKpaymentintent",paymentIntentResult.toString())
+                                                        ExtendBookingInSystem(context=context,id=booking._id, roomCharges=addi.value, checkOutDate=eDate.value){
+                                                            navigator.pop()
+
+                                                        }
+
+                                                        // Now you can use this PaymentMethod for payments
+                                                    } catch (e: Exception) {
+                                                        // Handle error
+                                                        Log.d("KKKKKKK","paymentMethodId".toString())
                                                     }
                                                 }
+
                                             }
                                         }
 
@@ -526,6 +728,7 @@ data class ExtendBookingCustomer(
                 { error ->
                     // Handle error response
                     Log.e("Register", error.toString())
+                    Log.e("Register", error.networkResponse.statusCode.toString())
                     progressDialog.dismiss()
                     Toast
                         .makeText(
@@ -616,14 +819,15 @@ data class ExtendBookingCustomer(
                 { error ->
                     // Handle error response
                     Log.e("ASDWFVSA", error.toString())
+                    Log.e("ASDWFVSA", error.networkResponse.statusCode.toString())
                     progressDialog.dismiss()
-                    Toast
-                        .makeText(
-                            context,
-                            "There is some error.",
-                            Toast.LENGTH_SHORT
-                        )
-                        .show()
+//                    Toast
+//                        .makeText(
+//                            context,
+//                            "There is some error.",
+//                            Toast.LENGTH_SHORT
+//                        )
+//                        .show()
                     callback(false)
                 }) {
 

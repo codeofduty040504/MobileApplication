@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Star
@@ -67,6 +68,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.AddRoomInCart
+import com.example.adminoffice.ui.theme.Customer.CartFunctions.Services
 import com.example.adminoffice.ui.theme.Customer.Coupons.MapsCoupon
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Hotel
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.HotelOwner
@@ -74,12 +76,17 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Refund
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.RefundPolicy
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Room
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Service
+import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
 import com.example.adminoffice.ui.theme.Utils.DataClasses.RoomBook
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddBooking
+import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddReview
+import com.example.adminoffice.ui.theme.Utils.Screens.Reviews.ViewReview
 import com.example.adminoffice.ui.theme.Utils.Screens.Services.ViewService
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.CircleOptions
@@ -95,11 +102,13 @@ import org.json.JSONObject
 data class HotelScreen(
     val hotel:com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Hotel
 )  : Screen {
-    var rooms = mutableStateListOf<RoomCustomer>()
+    var rooms = mutableStateListOf<RoomCustomerBooking>()
     var imageURL = ""
     var HotelJsonArrayError = mutableStateOf("")
     var Hotel = mutableStateOf("")
     var Hotels = mutableStateListOf<Hotel>()
+    var roomservices= mutableStateListOf<String>()
+    var services = mutableStateListOf<Service>()
     private var userLocation = LatLng(0.0, 0.0)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SuspiciousIndentation")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -113,7 +122,11 @@ data class HotelScreen(
         var selectedTab = remember {
             mutableStateOf(1)
         }
+        var user = getUserFromLocal(context)
         var descshow = remember {
+            mutableStateOf(false)
+        }
+        var fav = remember {
             mutableStateOf(false)
         }
         val cameraPositionState = rememberCameraPositionState {
@@ -135,7 +148,27 @@ data class HotelScreen(
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)) {
-                    Text(text = hotel.name, fontSize = 18.sp, fontWeight = FontWeight.W800, lineHeight = 17.sp)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                        Text(text = hotel.name, fontSize = 18.sp, fontWeight = FontWeight.W800, lineHeight = 17.sp)
+                        Box(modifier = Modifier.clickable {
+                            if(fav.value==false){
+                                AddToWishlist(context=context,hotelid= hotel._id, customerid = user._id){
+                                    if(it){
+                                        fav.value=true
+                                    }
+                                }
+                            }
+                            else{
+                                RemoveToWishlist(context=context,hotelid= hotel._id, customerid = user._id){
+                                    if(it){
+                                        fav.value=false
+                                    }
+                                }
+                            }
+                        }){
+                            Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(30.dp), tint = if(fav.value){Color.Red}else{Color.Gray})
+                        }
+                    }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                         Row(verticalAlignment = Alignment.Bottom){
 //                            Image(
@@ -145,11 +178,11 @@ data class HotelScreen(
 //                                    .size(20.dp),
 //                                contentScale = ContentScale.FillBounds
 //                            )
-                            Icon(painterResource(id = R.drawable.location), contentDescription = null, tint = GlobalStrings.CustomerColorMain,modifier=Modifier.size(20.dp))
+                            Icon(painterResource(id = R.drawable.location), contentDescription = null, tint = GlobalStrings.CustomerColorMain,modifier=Modifier)
 
                             Text(text = hotel.location, fontSize = 12.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Gray)
                         }
-                        Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom){
+                        Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically){
                             Icon(
                                 Icons.Outlined.Star, contentDescription =null, tint = Color(
                                     0xFFFFC107
@@ -160,6 +193,21 @@ data class HotelScreen(
                         }
                     }
                         Spacer(modifier = Modifier.size(10.dp))
+
+                }
+                Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                    Box(modifier = Modifier
+                        .clickable {
+                            navigator.push(CompareHotel(hotel))
+                        }
+                        .background(
+                            Color.Black,
+                            RoundedCornerShape(15.dp)
+                        )
+                        .width(120.dp)
+                        .height(25.dp), contentAlignment = Alignment.Center){
+                        Text(text = "Compare", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
             item{
@@ -387,7 +435,7 @@ data class HotelScreen(
                     Column(modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)) {
-                        Text(text = if(descshow.value==true){hotel.description}else{hotel.description.substring(0,(hotel.description.length)/2)}, fontSize = 14.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Black)
+                        Text(text = if(descshow.value==true){hotel.description}else{hotel.description.substring(0,(29))}, fontSize = 14.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Black)
                         Box(modifier = Modifier.clickable { descshow.value=!descshow.value }){
                             Text(text = if(descshow.value==true){"Show Less"}else{"Show More"}, color = GlobalStrings.CustomerColorMain,fontSize = 12.sp)
                         }
@@ -395,7 +443,6 @@ data class HotelScreen(
                         Text(text = "Social Links", fontSize = 16.sp, fontWeight = FontWeight.W600)
                         Spacer(modifier = Modifier.size(15.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Femail.png?alt=media&token=389e7cff-3268-4c97-a115-29b9234a5e0d&_gl=1*1kcjhwe*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDU5MzguNjAuMC4w"),
                                 contentDescription = "image",
@@ -411,7 +458,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Ftelephone.png?alt=media&token=40116725-d680-4382-bc01-5fcb28e65b98&_gl=1*w5rdiy*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDYyOTcuNjAuMC4w"),
                                 contentDescription = "image",
@@ -427,7 +473,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Fphone.png?alt=media&token=6a600beb-78ae-496a-9743-7d42d038e623&_gl=1*flafsv*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDY0MjAuNjAuMC4w"),
                                 contentDescription = "image",
@@ -443,7 +488,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Ffacebook.png?alt=media&token=dc207d4f-a1fa-44b9-8193-086d2fe2f4fc&_gl=1*1hktox3*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDY1MTUuNjAuMC4w"),
                                 contentDescription = "image",
@@ -459,7 +503,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Finstagram.png?alt=media&token=d26fc3ab-76b8-4a6c-a4ca-ef0dcb843c5b&_gl=1*1pyemye*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDY1NDIuMzMuMC4w"),
                                 contentDescription = "image",
@@ -475,7 +518,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Ftwitter.png?alt=media&token=fd39f1b5-cb24-4f88-8180-d27823595b57&_gl=1*3nuhvy*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDY2MDAuNjAuMC4w"),
                                 contentDescription = "image",
@@ -491,7 +533,6 @@ data class HotelScreen(
                         }
                         Spacer(modifier = Modifier.size(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically){
-                            Spacer(modifier = Modifier.size(15.dp))
                             Image(
                                 painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Fyoutube.png?alt=media&token=6ca7e4b5-aecd-4db0-a176-5a68cd6c1dd9&_gl=1*1rzbm*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTIwNDU3Mi4zMi4xLjE2OTkyMDY2MTcuNDMuMC4w"),
                                 contentDescription = "image",
@@ -517,6 +558,9 @@ data class HotelScreen(
                             for(room in rooms){
                                 Box(modifier = Modifier.padding(horizontal=15.dp)){
                                     Box(modifier = Modifier
+                                        .clickable {
+                                            navigator.push(ViewRoom(room, hotel.name, hotel._id))
+                                        }
                                         .width(300.dp)
                                         // .background(Color(0xFFFEFEFE))
                                         .border(
@@ -565,9 +609,15 @@ data class HotelScreen(
                                                 Spacer(modifier = Modifier.size(10.dp))
                                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
                                                     Text(text = "Rs. "+room.price+"/Night", fontSize = 14.sp, fontWeight = FontWeight.W600)
-                                                    Box(modifier = Modifier.clickable {
-                                                        AddRoomInCart(context,hotel._id,room._id,hotel.name)
-                                                    }
+                                                    Box(modifier = Modifier
+                                                        .clickable {
+                                                            AddRoomInCart(
+                                                                context,
+                                                                hotel._id,
+                                                                room._id,
+                                                                hotel.name
+                                                            )
+                                                        }
                                                         .background(
                                                             GlobalStrings.CustomerColorMain,
                                                             RoundedCornerShape(5.dp)
@@ -667,9 +717,15 @@ data class HotelScreen(
                     val isErrorReview = remember {
                         mutableStateOf(false)
                     }
+                    val title = remember {
+                        mutableStateOf("")
+                    }
+                    val isErrorTitle = remember {
+                        mutableStateOf(false)
+                    }
                     Spacer(modifier = Modifier.size(10.dp))
                     Row (modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Bottom){
-                        Text(text = "5.0", fontSize = 36.sp, fontWeight = FontWeight.W800)
+                        Text(text = hotel.averageRating.toString()+".0", fontSize = 36.sp, fontWeight = FontWeight.W800)
                         Spacer(modifier = Modifier.size(5.dp))
                         Column {
                             Row {
@@ -681,14 +737,15 @@ data class HotelScreen(
                                     )
                                 }
                             }
-                            Text(text = "(Based on 234 reviews)", fontSize = 12.sp, color = Color.Gray)
+                            Text(text = "(Based on ${hotel.totalReviews} reviews)", fontSize = 12.sp, color = Color.Gray)
                         }
                     }
                     Spacer(modifier = Modifier.size(10.dp))
                     Row(modifier = Modifier
-                        .fillMaxWidth().padding(10.dp)
+                        .fillMaxWidth()
+                        .padding(10.dp)
                         .horizontalScroll(rememberScrollState())){
-                        for(i in 0 until 8){
+                        for(review in hotel.reviews){
                             Box(modifier = Modifier.padding(horizontal=5.dp)){
                                 Box(modifier = Modifier
                                     .width(280.dp)
@@ -703,7 +760,9 @@ data class HotelScreen(
                                     Column(
                                         Modifier
                                             .fillMaxWidth()){
-                                        Row (modifier = Modifier.padding(5.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                                        Row (modifier = Modifier
+                                            .padding(5.dp)
+                                            .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
                                             Row{
                                                 Image(
                                                     painter = rememberAsyncImagePainter("https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Outdoors-man-portrait_%28cropped%29.jpg/800px-Outdoors-man-portrait_%28cropped%29.jpg"),
@@ -721,8 +780,8 @@ data class HotelScreen(
                                                 )
                                                 Spacer(modifier = Modifier.size(10.dp))
                                                 Column {
-                                                    Text(text = "Abdul Mateen", fontWeight = FontWeight.W700, fontSize = 14.sp)
-                                                    Text(text = "25-10-2022", fontWeight = FontWeight.W400, fontSize = 11.sp, color = Color.Gray)
+                                                    Text(text = review.customer.name, fontWeight = FontWeight.W700, fontSize = 14.sp)
+                                                    Text(text = review.title, fontWeight = FontWeight.W400, fontSize = 11.sp, color = Color.Gray)
                                                 }
                                             }
                                             Row(verticalAlignment = Alignment.Bottom){
@@ -731,7 +790,7 @@ data class HotelScreen(
                                                         0xFFFFC107
                                                     ), modifier = Modifier.size(22.dp)
                                                 )
-                                                Text(text = "3.5", fontSize = 15.sp)
+                                                Text(text = review.stars.toString(), fontSize = 15.sp)
                                             }
 
                                         }
@@ -740,7 +799,7 @@ data class HotelScreen(
                                             .height(50.dp)) {
                                             Box(modifier = Modifier
                                                 .fillMaxWidth()){
-                                                Text(text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ornare arcu a dolor lacinia egestas. Aliquam faucibus, magna eget laoreet aliquam, leo est dapibus felis, quis tincidunt lacus urna quis neque. Pellentesque accumsan quis sapien pulvinar pharetra. Etiam efficitur nisl sem, ut dignissim lectus pulvinar at. Quisque mattis euismod bibendum. Donec magna leo, ultricies id molestie sit amet, vehicula sit amet orci. Integer nec arcu sit amet ex fermentum suscipit. Cras massa mi, viverra ornare nisi sed, euismod molestie sapien. Aliquam ut arcu dolor. ", fontSize = 14.sp, fontWeight = FontWeight.W300, letterSpacing = 0.2.sp, color = Color.Black, lineHeight = 15.sp)
+                                                Text(text = review.description, fontSize = 14.sp, fontWeight = FontWeight.W300, letterSpacing = 0.2.sp, color = Color.Black, lineHeight = 15.sp)
                                             }
                                         }
                                     }
@@ -749,59 +808,123 @@ data class HotelScreen(
                             }
                         }
                     }
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)) {
-                        Spacer(modifier = Modifier.size(10.dp))
-                        OutlinedTextField(
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = review.value,
-                            onValueChange = {
-                                if (it.length <= 300)
-                                    review.value=it
-                            },
-                            label = {
-                                Text(text = "Review",color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Give Us a Review")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        )
-                        if (isErrorReview.value) {
-                            Text(
-                                text = "Review should be more than 30 characters.",
-                                color = Color.Red,
-                                fontSize = 11.sp
-                            )
-                        }
-                        OutlinedButton(
-                            border = BorderStroke(2.dp,GlobalStrings.CustomerColorMain),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = GlobalStrings.CustomerColorMain,
-                                contentColor = Color.White),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp, 10.dp)
-                                .size(400.dp, 45.dp),
-                            onClick = {
-                                if(review.value==""){
-
-                                }
-                            },
-                            shape = RoundedCornerShape(15.dp),
-                        ) {
-                            Text(text = "Add Review", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                    }
+//                    Column(modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(10.dp)) {
+//                        Spacer(modifier = Modifier.size(10.dp))
+//                        OutlinedTextField(
+//                            shape = RoundedCornerShape(5.dp),
+//                            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                focusedBorderColor = Color.Black,
+//                                unfocusedBorderColor = Color.Gray,
+//                                errorBorderColor = Color.Red,
+//                                placeholderColor = Color.Gray,
+//                                disabledPlaceholderColor = Color.Gray
+//                            ),
+//                            value = title.value,
+//                            onValueChange = {
+//                                if (it.length <= 300)
+//                                    title.value=it
+//                            },
+//                            label = {
+//                                Text(text = "Title",color = Color.Gray)
+//                            },
+//                            placeholder = {
+//                                Text(text = "Title of Review")
+//                            },
+//                            modifier = Modifier
+//                                .fillMaxWidth(),
+//                        )
+//                        if (isErrorTitle.value) {
+//                            Text(
+//                                text = "Review Title should be more than 30 characters.",
+//                                color = Color.Red,
+//                                fontSize = 11.sp
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.size(10.dp))
+//                        OutlinedTextField(
+//                            shape = RoundedCornerShape(5.dp),
+//                            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                focusedBorderColor = Color.Black,
+//                                unfocusedBorderColor = Color.Gray,
+//                                errorBorderColor = Color.Red,
+//                                placeholderColor = Color.Gray,
+//                                disabledPlaceholderColor = Color.Gray
+//                            ),
+//                            value = review.value,
+//                            onValueChange = {
+//                                if (it.length <= 300)
+//                                    review.value=it
+//                            },
+//                            label = {
+//                                Text(text = "Review",color = Color.Gray)
+//                            },
+//                            placeholder = {
+//                                Text(text = "Give Us a Review")
+//                            },
+//                            modifier = Modifier
+//                                .fillMaxWidth(),
+//                        )
+//                        if (isErrorReview.value) {
+//                            Text(
+//                                text = "Review should be more than 30 characters.",
+//                                color = Color.Red,
+//                                fontSize = 11.sp
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.size(10.dp))
+//                        var rating = remember {
+//                            mutableStateOf(5)
+//                        }
+//                        Row(modifier = Modifier){
+//                            for(i in 0 until 5){
+//                                Box(modifier = Modifier.clickable {
+//                                    rating.value= i+1
+//                                    Log.d("HHHHHHHH",rating.value.toString())
+//                                }){
+//                                    Icon(
+//                                        Icons.Outlined.Star, contentDescription =null, tint = if(i>=rating.value){
+//                                            Color(0xFF9B9B9B)
+//                                                                                                          }else{
+//                                            Color(
+//                                                0xFFFFC107
+//                                            )
+//                                                                                                               }, modifier = Modifier.size(22.dp)
+//                                    )
+//                                }
+//                            }
+//                        }
+//                        Spacer(modifier = Modifier.size(10.dp))
+//                        Box(modifier = Modifier
+//                            .clickable {
+//                                isErrorReview.value = review.value.length < 29
+//                                isErrorReview.value = title.value == ""
+//                                if (!isErrorReview.value && !isErrorTitle.value) {
+//                                    AddReviewToSystem(
+//                                        context = context,
+//                                        customerid = user._id,
+//                                        stars = rating.value,
+//                                        description = review.value,
+//                                        hotelid = hotel._id,
+//                                        title = title.value
+//                                    ) {
+//                                        if (it) {
+//                                            navigator.replace(ViewReview)
+//                                        }
+//                                    }
+//
+//                                }
+//                            }
+//                            .background(
+//                                GlobalStrings.CustomerColorMain,
+//                                RoundedCornerShape(15.dp)
+//                            )
+//                            .fillMaxWidth()
+//                            .height(45.dp), contentAlignment = Alignment.Center){
+//                            Text(text = "Add Review", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold)
+//                        }
+//                    }
 
                 }
             }
@@ -846,18 +969,23 @@ data class HotelScreen(
                     }
                 }
             }
+            if(selectedTab.value==6){
+                item{
+                    Text(text = "Menus")
+                }
+            }
             if(selectedTab.value==7){
                 item{
-                    var desc = "Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia. It is the world's fifth-most populous country, with a population of 241.5 million people, and has the world's largest Muslim population as of year 2023. Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia. It is the world's fifth-most populous country, with a population of 241.5 million people, and has the world's largest Muslim population as of year 2023."
+                    var desc = hotel.refundPolicy.description
                     Column(modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)) {
-                        Text(text = if(descshow.value==true){desc}else{desc.substring(0,200)}, fontSize = 14.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Black)
+                        Text(text = if(descshow.value==true){desc}else{desc.substring(0,(desc.length)/2)}, fontSize = 14.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Black)
                         Box(modifier = Modifier.clickable { descshow.value=!descshow.value }){
                             Text(text = if(descshow.value==true){"Show Less"}else{"Show More"}, color = GlobalStrings.CustomerColorMain,fontSize = 12.sp)
                         }
                         Spacer(modifier = Modifier.size(15.dp))
-                        for(i in 0 until 4){
+                        for(policy in hotel.refundPolicy.refunds){
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(5.dp)){
                                 Image(
                                     rememberAsyncImagePainter(model = "https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Fspeedometer.png?alt=media&token=1c5edf2a-304f-46c3-929e-614b794ea6dd&_gl=1*y4cxpf*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTQ1MTg3My4zMy4xLjE2OTk0NTE4ODUuNDguMC4w"),
@@ -869,9 +997,9 @@ data class HotelScreen(
                                 )
                                 Spacer(Modifier.width(10.dp))
                                 Row{
-                                    Text(text = "25%" , fontWeight = FontWeight.W800)
+                                    Text(text = "${policy.percentage}%" , fontWeight = FontWeight.W800)
                                     Text(text = " refund in ", fontWeight = FontWeight.W200)
-                                    Text(text = "5", fontWeight = FontWeight.W800)
+                                    Text(text = policy.days.toString(), fontWeight = FontWeight.W800)
                                     Text(text = " Days", fontWeight = FontWeight.W200)
                                 }
                             }
@@ -887,12 +1015,227 @@ data class HotelScreen(
 
 
     }
+
+    fun AddReviewToSystem(context: Context, customerid : String,stars: Int,description: String, hotelid: String,title:String, callback: (Boolean) -> Unit){
+        val url = "${GlobalStrings.baseURL}customer/reviews/addReview"
+
+
+        // Request parameters
+        val params = JSONObject()
+        params.put("customerid", customerid)
+        params.put("stars", stars)
+        params.put("hotelid", hotelid)
+        params.put("description", description)
+        params.put("title", title)
+        Log.d("ASDWFVSA", params.toString())
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Please Wait")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet is not Available",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+            progressDialog.dismiss()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.POST, url, params,
+                { response ->
+                    // Handle successful login response
+                    Log.d("ASDWFVSA", response.toString())
+                    Toast
+                        .makeText(
+                            context,
+                            "Review Added",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    progressDialog.dismiss()
+
+                    callback(true)
+                },
+                { error ->
+                    // Handle error response
+                    Log.e("ASDWFVSA", error.toString())
+                    Log.e("ASDWFVSA", error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "There is some error.",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    callback(false)
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
+    fun AddToWishlist(context: Context, customerid : String, hotelid: String,callback: (Boolean) -> Unit){
+        val url = "${GlobalStrings.baseURL}customer/hotels/wishlist/addHotel"
+
+
+        // Request parameters
+        val params = JSONObject()
+       // params.put("customerid", customerid)
+        params.put("hotelid", hotelid)
+        Log.d("ASDWFVSA", params.toString())
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Please Wait")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet is not Available",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+            progressDialog.dismiss()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.POST, url, params,
+                { response ->
+                    // Handle successful login response
+                    Log.d("ASDWFVSA", response.toString())
+                    Toast
+                        .makeText(
+                            context,
+                            "Added To WishList",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    progressDialog.dismiss()
+
+                    callback(true)
+                },
+                { error ->
+                    // Handle error response
+                    Log.e("ASDWFVSA", error.toString())
+                    Log.e("ASDWFVSA", error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "There is some error.",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    callback(false)
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
+    fun RemoveToWishlist(context: Context, customerid : String, hotelid: String,callback: (Boolean) -> Unit){
+        val url = "${GlobalStrings.baseURL}customer/hotels/wishlist/deleteHotel"
+
+
+        // Request parameters
+        val params = JSONObject()
+        // params.put("customerid", customerid)
+        params.put("hotelid", hotelid)
+        Log.d("ASDWFVSA11", params.toString())
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Please Wait")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet is not Available",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+            progressDialog.dismiss()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.DELETE, url, params,
+                { response ->
+                    // Handle successful login response
+                    Log.d("ASDWFVSA11", response.toString())
+                    Toast
+                        .makeText(
+                            context,
+                            "Removed from WishList",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    progressDialog.dismiss()
+
+                    callback(true)
+                },
+                { error ->
+                    // Handle error response
+                    Log.e("ASDWFVSA", error.toString())
+                    Log.e("ASDWFVSA", error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "There is some error.",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    callback(false)
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
     // GET Categories Function
     fun getRoomByHotel(context: Context,hotelid:String) {
         if(rooms.isNotEmpty()){
             return
         }
         val url = "${GlobalStrings.baseURL}customer/rooms/getHotelRooms/${hotelid}"
+        Log.d("AAAAA",url)
         var roomservices= mutableStateListOf<String>()
         val progressDialog = ProgressDialog(context)
         progressDialog.show()
@@ -906,7 +1249,9 @@ data class HotelScreen(
                 .show()
         }
         else{
-            val request = object : JsonObjectRequest(
+            val request =
+            @SuppressLint("SuspiciousIndentation")
+            object : JsonObjectRequest(
                 Request.Method.GET, url, ViewService.params,
                 { response ->
                     Log.d("HASHDASDAS555",response.toString())
@@ -928,30 +1273,87 @@ data class HotelScreen(
                         var inventory = dd.getJSONArray("inventories")
                         var inventories = mutableStateListOf<String>()
                         for(i in 0 until inventory.length()){
-                            inventories.add(images.get(i).toString())
+                            inventories.add(inventory.get(i).toString())
                         }
                         var adults = dd.getInt("adults")
                         var children = dd.getInt("children")
                         //var roomNumber = dd.getString("roomNumber")
-                        var roomType = dd.getString("type")
+                        var hotel = dd.getJSONObject("hotel")
+                        var hotelname = hotel.getString("name")
 //
                         var price = dd.getInt("price")
                         var size = dd.getString("size")
                         // var deletedAt = category.get("deletedAt")
                         var type = dd.getString("type")
-                        var services = dd.getJSONArray("services")
-                        for(i in 0 until services.length()){
-                            var iij = services.getJSONObject(i)
-                            var iii = iij.getString("_id")
-                            roomservices.add(iii)
-                        }
+                          var servieee  = dd.getJSONArray("services")
+                        services.clear()
+                        for(i in 0 until servieee.length()){
+                            var category = servieee.getJSONObject(i)
 
-                        rooms.add(
-                            RoomCustomer(_id=_id,adults=adults,children=children,description=description, floor = floor,images=imagesroom, inventories = inventories,price=price,roomNumber=roomNumber, services = roomservices,size=size,type=type, videos = imagesroom
+                            //var id = category.getInt("id")
+                            var _id = category.getString("_id")
+                            var serviceImage = category.getString("image")
+                            var serviceName = category.getString("name")
+                            var servicedescription = category.getString("description")
+                            var serviceprice = category.getInt("price")
+                            var servicepriceRate = category.getString("priceRate")
+                            var serviceaddedByRole = category.getString("addedByRole")
+                            var servicevisible = category.getBoolean("visible")
+                            var serviceisDeleted = category.getBoolean("isDeleted")
+                            var servicedeletedAt = category.getString("deletedAt")
+                            var servicecreatedAt = category.getString("createdAt")
+                            var serviceupdatedAt = category.getString("updatedAt")
+                            var service__v = category.getInt("__v")
+                            var serviceType = category.getString("type")
+//                            var serviceCa = category.getJSONObject("serviceCategory")
+//                            var serviceCategoryID = serviceCa.getString("_id")
+//                            var serviceCategoryTitle = serviceCa.getString("title")
+//                            var serviceCategoryImage = serviceCa.getString("image")
+//                            var serviceCategoryDeletedAt = serviceCa.getString("deletedAt")
+//                            var serviceCategoryIsDeleted = serviceCa.getBoolean("isDeleted")
+//                            var serviceCategoryCreatedAt = serviceCa.getString("createdAt")
+//                            var serviceCategoryUpdatedAt = serviceCa.getString("updatedAt")
+//                            var serviceCategory__V = serviceCa.getInt("__v")
+                            var serviceCategoryObject =
+                                ServiceCategory(
+                                    _id = "serviceCategoryID",
+                                    title = "serviceCategoryTitle",
+                                    image = "serviceCategoryImage",
+                                    isDeleted = false,
+                                    deletedAt = "serviceCategoryDeletedAt",
+                                    createdAt = "serviceCategoryCreatedAt",
+                                    updatedAt = "serviceCategoryUpdatedAt",
+                                    __v = 0
                                 )
+                            services.add(
+                                Service(
+                                    _id = _id,
+                                    serviceCategory = serviceCategoryObject,
+                                    type = serviceType,
+                                    name = serviceName,
+                                    description = servicedescription,
+                                    image = serviceImage,
+                                    priceRate = servicepriceRate,
+                                    price = serviceprice,
+                                    addedByRole = serviceaddedByRole,
+                                    visible = servicevisible,
+                                    isDeleted = serviceisDeleted,
+                                    deletedAt = servicedeletedAt,
+                                    createdAt = servicecreatedAt,
+                                    updatedAt = serviceupdatedAt,
+                                    __v = service__v
+                                )
+                            )
+                        }
+                        var room = RoomCustomerBooking(_id=_id,adults=adults,children=children,description=hotelname, floor = floor,images=imagesroom, inventories = inventories,price=price,roomNumber=roomNumber, services = services,size=size,type=type, videos = imagesroom
                         )
+                                rooms.add(
+                                    room
+                                )
+
                     }
                     progressDialog.dismiss()
+                    Log.d("HASHDASDAS555","HOgya")
                 },
                 { error ->
 //                    ViewService.serviceCategories.clear()

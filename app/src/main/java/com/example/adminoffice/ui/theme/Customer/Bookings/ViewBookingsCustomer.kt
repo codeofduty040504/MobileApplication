@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Divider
@@ -74,6 +75,8 @@ import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.Services
 import com.example.adminoffice.ui.theme.Customer.Coupons.MapsCoupon
+import com.example.adminoffice.ui.theme.Customer.Coupons.responseAsli
+import com.example.adminoffice.ui.theme.Customer.Functions.CompareHotel
 import com.example.adminoffice.ui.theme.Customer.LandingPage
 import com.example.adminoffice.ui.theme.Customer.Profile.ViewProfile
 import com.example.adminoffice.ui.theme.Customer.Wishlist.WishList
@@ -85,11 +88,15 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Refund
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.RefundPolicy
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Room
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Userid
+import com.example.adminoffice.ui.theme.Utils.DataClasses.Payments.Payment
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.ViewBookings
 import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.AddHotel
+import com.example.adminoffice.ui.theme.Utils.Screens.Payments.ViewPayments
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -98,6 +105,7 @@ object ViewBookingsCustomer  : Screen {
     val keyboardController = LocalSoftwareKeyboardController
     var bookings = mutableStateListOf<Booking>()
     var UserDABS = mutableStateListOf<DabsUser>()
+    var payments = mutableStateListOf<Payment>()
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(){
@@ -284,16 +292,41 @@ object ViewBookingsCustomer  : Screen {
                                               )
                                               Column(
                                                   modifier = Modifier
-                                                      .padding(start = 10.dp).width(screenWidthDp-140.dp),
+                                                      .padding(start = 10.dp)
+                                                      .width(screenWidthDp - 140.dp),
                                               ) {
                                                   Text(text = booking.hotelName, fontSize = 16.sp, fontWeight = FontWeight.Black)
                                                   Text(text = booking.hotel.city, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
-
+                                                 // Text(text = booking.status, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
+                                                  Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                                                      Box(modifier = Modifier
+                                                          .background(
+                                                              (if (booking.status == "new") {
+                                                                  Color(0x90355E3B)
+                                                              } else if (booking.status == "cancelled") {
+                                                                  Color(0x90EB0325)
+                                                              } else if (booking.status == "refunded") {
+                                                                  Color(0x901435D3)
+                                                              } else if (booking.status == "checked-in") {
+                                                                  Color(0x906215CF)
+                                                              } else if (booking.status == "checked-out") {
+                                                                  Color(0x90ECAF1C)
+                                                              } else {
+                                                                  Color(0x90E10AF8)
+                                                              }),
+                                                              RoundedCornerShape(15.dp)
+                                                          )
+                                                          .width(120.dp)
+                                                          .height(18.dp), contentAlignment = Alignment.Center){
+                                                          Text(text = booking.status, color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                                                      }
+                                                  }
 //                                           Row{
 //                                               Text(text = "Deluxe Room", color = Color.Gray)
 //                                           }
 
                                               }
+
                                           }
                                           Box(modifier = Modifier.clickable {
                                                 bookingdropdown.value=true
@@ -304,12 +337,20 @@ object ViewBookingsCustomer  : Screen {
                                                   onDismissRequest = {bookingdropdown.value=false },
                                                   modifier = Modifier
                                                       .width(screenWidthDp - 140.dp)
-                                                      .height(160.dp).background(Color.White)
+                                                      .height(if(booking.status =="cancelled"){
+                                                          60.dp
+                                                      }else{
+                                                          160.dp
+                                                      })
+                                                      .background(Color.White)
                                               ) {
                                                   DropdownMenuItem(text = { Text(text = "View Details") } , leadingIcon = {
                                                       Box(modifier = Modifier
                                                           .size(30.dp)
-                                                          .background(Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                                                          .background(
+                                                              Color.Black,
+                                                              RoundedCornerShape(10.dp)
+                                                          ), contentAlignment = Alignment.Center
                                                       ){
                                                           Icon(Icons.Filled.List, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
                                                       }
@@ -317,28 +358,36 @@ object ViewBookingsCustomer  : Screen {
                                                       bookingdropdown.value = false
                                                       navigator.push(BookingDetails(booking))
                                                   })
-                                                  DropdownMenuItem(text = { Text(text = "Extend Booking") } , leadingIcon = {
-                                                      Box(modifier = Modifier
-                                                          .size(30.dp)
-                                                          .background(Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
-                                                      ){
-                                                          Icon(painterResource(id = R.drawable.extend), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
-                                                      }
-                                                  }, onClick = {
-                                                      bookingdropdown.value = false
-                                                      navigator.push(ExtendBookingCustomer(booking))
-                                                  })
+                                                  if(booking.status !="cancelled"){
+                                                      DropdownMenuItem(text = { Text(text = "Extend Booking") } , leadingIcon = {
+                                                          Box(modifier = Modifier
+                                                              .size(30.dp)
+                                                              .background(
+                                                                  Color.Black,
+                                                                  RoundedCornerShape(10.dp)
+                                                              ), contentAlignment = Alignment.Center
+                                                          ){
+                                                              Icon(painterResource(id = R.drawable.extend), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
+                                                          }
+                                                      }, onClick = {
+                                                          bookingdropdown.value = false
+                                                          navigator.push(ExtendBookingCustomer(booking))
+                                                      })
                                                       DropdownMenuItem(text = { Text(text = "Cancel Booking") } , leadingIcon = {
                                                           Box(modifier = Modifier
                                                               .size(30.dp)
-                                                              .background(Color.Red, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
-                                                              ){
+                                                              .background(
+                                                                  Color.Red,
+                                                                  RoundedCornerShape(10.dp)
+                                                              ), contentAlignment = Alignment.Center
+                                                          ){
                                                               Icon(painterResource(id = R.drawable.close), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
                                                           }
                                                       }, onClick = {
                                                           bookingdropdown.value = false
                                                           navigator.push(CancelBookingCustomer(booking))
                                                       })
+                                                  }
 
                                               }
                                           }
@@ -376,107 +425,147 @@ object ViewBookingsCustomer  : Screen {
                         for(i in 0 until 8){
                             Box(
                                 modifier = Modifier
-                                    .width(screenWidthDp)
+                                    .width(screenWidthDp).padding(10.dp)
                             ) {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Divider(
-                                        color = Color(0xFFF1F1F1),
-                                        thickness = 16.dp,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp),
-                                        horizontalAlignment = Alignment.End
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.Bottom,
-                                            horizontalArrangement = Arrangement.SpaceBetween
+                                Box(modifier = Modifier
+                                    .padding(5.dp)
+                                    .border(
+                                        0.8.dp, Color(0xD2E6E6E6),
+                                        RoundedCornerShape(10.dp)
+                                    )){
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(10.dp),
+                                            horizontalAlignment = Alignment.End
                                         ) {
-                                            Row {
-                                                Image(
-                                                    painter = rememberAsyncImagePainter("https://static.independent.co.uk/2023/03/24/09/Best%20New%20York%20boutique%20hotels.jpg?width=1200"),
-                                                    contentDescription = "image",
-                                                    modifier = Modifier
-                                                        .size(100.dp)
-                                                        .clip(
-                                                            RoundedCornerShape(
-                                                                (CornerSize(
-                                                                    15.dp
-                                                                ))
-                                                            )
-                                                        ),
-                                                    contentScale = ContentScale.FillBounds
-                                                )
-                                                Spacer(modifier = Modifier.size(15.dp))
-                                                Column {
-                                                    Text(
-                                                        text = "Royal Hotel",
-                                                        fontSize = 18.sp,
-                                                        fontWeight = FontWeight.W800,
-                                                        lineHeight = 17.sp
-                                                    )
-                                                    Box(modifier = Modifier
-                                                        .width(100.dp)
-                                                        .height(25.dp)
-                                                        .background(
-                                                            Color(
-                                                                0xFFEEECF1
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalAlignment = Alignment.Bottom,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Row {
+                                                    Image(
+                                                        painter = rememberAsyncImagePainter("https://static.independent.co.uk/2023/03/24/09/Best%20New%20York%20boutique%20hotels.jpg?width=1200"),
+                                                        contentDescription = "image",
+                                                        modifier = Modifier
+                                                            .size(70.dp)
+                                                            .clip(
+                                                                RoundedCornerShape(
+                                                                    (CornerSize(
+                                                                        15.dp
+                                                                    ))
+                                                                )
                                                             ),
-                                                            RoundedCornerShape(12.dp)
-                                                        ), contentAlignment = Alignment.Center) {
-                                                        Row {
-                                                            Text(
-                                                                text = "asd4dsg7w",
-                                                                textAlign = TextAlign.Center,
-                                                                fontSize = 12.sp,
-                                                                fontWeight = FontWeight.W300,
-                                                                color = Color.Black
-                                                            )
-                                                        }
-                                                    }
-                                                    Text(
-                                                        text = "Valid till 24-12-2023",
-                                                        fontSize = 11.sp,
-                                                        fontWeight = FontWeight.W800,
-                                                        lineHeight = 12.sp
+                                                        contentScale = ContentScale.FillBounds
                                                     )
-                                                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                    Spacer(modifier = Modifier.size(15.dp))
+                                                    Column {
+                                                        Text(
+                                                            text = "Royal Hotel",
+                                                            fontSize = 18.sp,
+                                                            fontWeight = FontWeight.W800,
+                                                            lineHeight = 17.sp
+                                                        )
                                                         Box(modifier = Modifier
-                                                            .width(120.dp)
-                                                            .height(40.dp)
-                                                            .padding(
-                                                                horizontal = 10.dp,
-                                                                vertical = 5.dp
-                                                            )
+                                                            .width(100.dp)
+                                                            .height(25.dp)
                                                             .background(
-                                                                GlobalStrings.CustomerColorMain,
+                                                                Color(
+                                                                    0xFFEEECF1
+                                                                ),
                                                                 RoundedCornerShape(12.dp)
                                                             ), contentAlignment = Alignment.Center) {
                                                             Row {
                                                                 Text(
-                                                                    text = "25% Discount",
+                                                                    text = "asd4dsg7w",
                                                                     textAlign = TextAlign.Center,
                                                                     fontSize = 12.sp,
                                                                     fontWeight = FontWeight.W300,
-                                                                    color = Color.White
+                                                                    color = Color.Black
                                                                 )
                                                             }
                                                         }
+                                                        Text(
+                                                            text = "Valid till 24-12-2023",
+                                                            fontSize = 11.sp,
+                                                            fontWeight = FontWeight.W400,
+                                                            lineHeight = 12.sp
+                                                        )
+                                                        Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                            Box(modifier = Modifier
+                                                                .width(120.dp)
+                                                                .height(40.dp)
+                                                                .padding(
+                                                                    horizontal = 10.dp,
+                                                                    vertical = 5.dp
+                                                                )
+                                                                .background(
+                                                                    GlobalStrings.CustomerColorMain,
+                                                                    RoundedCornerShape(12.dp)
+                                                                ), contentAlignment = Alignment.Center) {
+                                                                Row {
+                                                                    Text(
+                                                                        text = "25% Discount",
+                                                                        textAlign = TextAlign.Center,
+                                                                        fontSize = 12.sp,
+                                                                        fontWeight = FontWeight.W300,
+                                                                        color = Color.White
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
                                                     }
+
                                                 }
 
                                             }
 
                                         }
-
                                     }
                                 }
                             }
                         }
                     }
+                }
+                if(selectedTab.value == 3){
+                   item{
+                       Column {
+                           for(pay in payments){
+                               Box(modifier = Modifier.padding(5.dp)){
+                                   Box(modifier = Modifier
+                                       .padding(5.dp)
+                                       .border(
+                                           0.8.dp, Color(0xD2E6E6E6),
+                                           RoundedCornerShape(10.dp)
+                                       )){
+                                       Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top){
+                                           Box(modifier = Modifier
+                                               .size(45.dp)
+                                               .background(
+                                                   Color(0xFF58BE34),
+                                                   RoundedCornerShape(10.dp)
+                                               ), contentAlignment = Alignment.Center
+                                           ){
+                                               Icon(painterResource(id = R.drawable.money), contentDescription = null, modifier = Modifier.size(25.dp), tint = Color(
+                                                   0xFFFFFFFF
+                                               )
+                                               )
+                                           }
+                                           Column(modifier = Modifier.padding(5.dp)) {
+                                               Text(text = pay.type, fontWeight = FontWeight.Light, fontSize = 18.sp)
+                                               Text(text = pay._id, fontWeight = FontWeight.Light, fontSize = 12.sp)
+                                               Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                   Text(text = "Rs. "+pay.amount.toString(), fontWeight = FontWeight.Light, fontSize = 12.sp)
+                                               }
+                                           }
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
                 }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -503,7 +592,7 @@ object ViewBookingsCustomer  : Screen {
                         Icon(painter = rememberVectorPainter(Icons.Outlined.DateRange), contentDescription = "Booking", tint = GlobalStrings.CustomerColorMain)
                     }
                     IconButton(onClick = {navigator.replace(LandingPage)}, modifier = Modifier.padding(12.dp)) {
-                        Icon(painter = rememberVectorPainter(Icons.Filled.Home), contentDescription = "Landing", tint = Color.Black)
+                        Icon(painter = rememberVectorPainter(Icons.Outlined.Home), contentDescription = "Landing", tint = Color.Black)
                     }
                     IconButton(onClick = {
                         navigator.replace(WishList)
@@ -520,6 +609,7 @@ object ViewBookingsCustomer  : Screen {
         }
         try{
             getBookings(context)
+
 //            AuthorizationDABS(context){
 //
 //            }
@@ -529,84 +619,6 @@ object ViewBookingsCustomer  : Screen {
         }
     }
 
-    fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
-        if(UserDABS.isNotEmpty()){
-            return
-        }
-        val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
-        // Request parameters
-        val params = JSONObject()
-        params.put("token", getTokenFromLocalStorage(context))
-        Log.d("LOOOO",params.toString())
-        val progressDialog = ProgressDialog(context)
-        progressDialog.setTitle("Please Wait")
-        progressDialog.show()
-        if(!isInternetAvailable(context)){
-            Toast
-                .makeText(
-                    context,
-                    "Internet is not Available",
-                    Toast.LENGTH_SHORT
-                )
-                .show()
-            progressDialog.dismiss()
-        }
-        else{
-            val request = object : JsonObjectRequest(
-                Request.Method.POST, url, params,
-                { response ->
-                    UserDABS.clear()
-                    // Handle successful login response
-                    Log.d("LOOOO", response.toString())
-                    var user = response.getJSONObject("user")
-                    var _id = user.getString("_id")
-                    var firstname = user.getString("firstName")
-                    var lastname = user.getString("lastName")
-                    var email = user.getString("email")
-                    var contactNo = user.getString("contactNo")
-                    var cnic = user.getString("cnic")
-                    var profilePicture = user.getString("profilePicture")
-                    var role = user.getString("role")
-                    var userD = DabsUser(_id,  firstname, lastname,email, contactNo, cnic, profilePicture, role)
-                    UserDABS.add(userD)
-                    progressDialog.dismiss()
-                    // Assuming the API returns a JSON object with a field "valid" indicating user validity
-
-                    callback(true)
-                },
-                { error ->
-                    UserDABS.clear()
-                    // Handle error response
-                    Log.e("LOOOO Error", error.toString())
-                    Log.e("LOOOO Error", error.networkResponse.data.toString())
-                    Log.e("LOOOO Error", error.networkResponse.statusCode.toString())
-                    progressDialog.dismiss()
-                    Toast
-                        .makeText(
-                            context,
-                            "Connection Error or try with different Credentials",
-                            Toast.LENGTH_SHORT
-                        )
-                        .show()
-                    callback(false)
-                }) {
-
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-//                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
-                    headers["Authorization"] = ""
-                    return headers
-                }
-            }
-
-
-            // Add the request to the RequestQueue.
-            val requestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(request)
-        }
-    }
     // GET Bookings Function
     fun getBookings(context: Context) {
         val url = "${GlobalStrings.baseURL}customer/bookings/getBookings"
@@ -623,95 +635,96 @@ object ViewBookingsCustomer  : Screen {
                 .show()
         }
         else{
-            val request =
-            object : JsonObjectRequest(
-                Request.Method.GET, url, ViewBookings.params,
-                { response ->
-                    try{
-                        Log.d("HASHDASDAS",response.toString())
-                        var categories  = response.getJSONArray("bookings")
-                        bookings.clear()
-                        for(i in 0 until categories.length()){
+            try{
+                val request =
+                    object : JsonObjectRequest(
+                        Request.Method.GET, url, ViewBookings.params,
+                        { response ->
                             try{
-                                var category = categories.getJSONObject(i)
-                                var RefundList = mutableStateListOf<Refund>()
-                                var RoomList = mutableStateListOf<Room>()
-                                var _id = category.getString("_id")
-                                var bookingDetails = category.getString("bookingDetails")
-                                var checkIn = category.getString("checkIn")
-                                var checkInDate = category.getString("checkInDate")
-                                var checkOutDate = category.getString("checkOutDate")
-                                var checkOut = category.getString("checkOut")
-                                var hotell = category.getJSONObject("hotel")
-                                var hotelName = hotell.getString("name")
-                                var __v = category.getInt("__v")
-                                var adults = category.getInt("adults")
-                                var roomCharges = category.getInt("roomCharges")
-                                var childern = category.getInt("childern")
+                                Log.d("HASHDASDAS",response.toString())
+                                var categories  = response.getJSONArray("bookings")
+                                bookings.clear()
+                                for(i in 0 until categories.length()){
+                                    try{
+                                        var category = categories.getJSONObject(i)
+                                        var RefundList = mutableStateListOf<Refund>()
+                                        var RoomList = mutableStateListOf<Room>()
+                                        var _id = category.getString("_id")
+                                        var bookingDetails = category.getString("bookingDetails")
+                                        var checkIn = category.getString("checkIn")
+                                        var checkInDate = category.getString("checkInDate")
+                                        var checkOutDate = category.getString("checkOutDate")
+                                        var checkOut = category.getString("checkOut")
+                                        var hotell = category.getJSONObject("hotel")
+                                        var hotelName = hotell.getString("name")
+                                        var __v = category.getInt("__v")
+                                        var adults = category.getInt("adults")
+                                        var roomCharges = category.getInt("roomCharges")
+                                        var childern = category.getInt("childern")
 //                            var customerName = category.getString("customerName")
-                                var serviceCharges = category.getInt("serviceCharges") /// Issue beacuse of Customer Diferent
-                                var status = category.getString("status")
-                                var rooms = category.getJSONArray("rooms")
-                                for(i in 0 until rooms.length()){
-                                    var tyu = rooms.getJSONObject(i)
-                                    var description = tyu.getString("description")
-                                    var roomNumber = tyu.getString("roomNumber")
-                                    var price = tyu.getInt("price")
-                                    var images = tyu.getJSONArray("images")
-                                    var imagesList = mutableStateListOf<String>()
-                                    for(i in 0 until images.length()){
-                                        var img = images.getString(i)
-                                        imagesList.add(img)
-                                    }
-                                    var type = tyu.getString("type")
-                                    RoomList.add(Room(description = description, images = imagesList,roomNumber=roomNumber, type = type,price=price))
-                                }
-                                var hotel = category.getJSONObject("hotel")
-                                var hotel__v = hotel.getDouble("lng")
-                                var hotel_id = hotel.getDouble("lat")
-                                var hotelcity= hotel.getString("city")
-                                var hoteldescription= hotel.getString("description")
-                                var hotelname= hotel.getDouble("lng")
-                                var hotelrefundPolicy= hotel.getJSONObject("refundPolicy")
-                                var hotelrefundPolicy_id= hotelrefundPolicy.getString("_id")
-                                var hotelrefundPolicydescription= hotelrefundPolicy.getString("description")
-                                var hotelrefundPolicyrefunds= hotelrefundPolicy.getJSONArray("refunds")
-                                for (i in 0 until hotelrefundPolicyrefunds.length()){
-                                    var rr = hotelrefundPolicyrefunds.getJSONObject(i)
-                                    var refunddays= rr.getInt("days")
-                                    var refundpercentage= rr.getInt("percentage")
-                                    var refund_id= rr.getString("_id")
-                                    var refund = Refund(_id = refund_id, days = refunddays, percentage = refundpercentage)
-                                    RefundList.add(refund)
-                                }
-                                var refundPolicy = RefundPolicy(_id = hotelrefundPolicy_id, description =hotelrefundPolicydescription,
-                                    refunds = RefundList)
-                                var customerName = "Customer could not be loaded"
-                                var customeremail = "Customer could not be loaded"
-                                var customernumber = "Customer could not be loaded"
-                                var customerprofilePicture = ""
-                                if(category.has("customer")){
-                                    var customer = category.getJSONObject("customer")
+                                        var serviceCharges = category.getInt("serviceCharges") /// Issue beacuse of Customer Diferent
+                                        var status = category.getString("status")
+                                        var rooms = category.getJSONArray("rooms")
+                                        for(i in 0 until rooms.length()){
+                                            var tyu = rooms.getJSONObject(i)
+                                            var description = tyu.getString("description")
+                                            var roomNumber = tyu.getString("roomNumber")
+                                            var price = tyu.getInt("price")
+                                            var images = tyu.getJSONArray("images")
+                                            var imagesList = mutableStateListOf<String>()
+                                            for(i in 0 until images.length()){
+                                                var img = images.getString(i)
+                                                imagesList.add(img)
+                                            }
+                                            var type = tyu.getString("type")
+                                            RoomList.add(Room(description = description, images = imagesList,roomNumber=roomNumber, type = type,price=price))
+                                        }
+                                        var hotel = category.getJSONObject("hotel")
+                                        var hotel__v = hotel.getDouble("lng")
+                                        var hotel_id = hotel.getDouble("lat")
+                                        var hotelcity= hotel.getString("city")
+                                        var hoteldescription= hotel.getString("_id")
+                                        var hotelname= hotel.getDouble("lng")
+                                        var hotelrefundPolicy= hotel.getJSONObject("refundPolicy")
+                                        var hotelrefundPolicy_id= hotelrefundPolicy.getString("_id")
+                                        var hotelrefundPolicydescription= hotelrefundPolicy.getString("description")
+                                        var hotelrefundPolicyrefunds= hotelrefundPolicy.getJSONArray("refunds")
+                                        for (i in 0 until hotelrefundPolicyrefunds.length()){
+                                            var rr = hotelrefundPolicyrefunds.getJSONObject(i)
+                                            var refunddays= rr.getInt("days")
+                                            var refundpercentage= rr.getInt("percentage")
+                                            var refund_id= rr.getString("_id")
+                                            var refund = Refund(_id = refund_id, days = refunddays, percentage = refundpercentage)
+                                            RefundList.add(refund)
+                                        }
+                                        var refundPolicy = RefundPolicy(_id = hotelrefundPolicy_id, description =hotelrefundPolicydescription,
+                                            refunds = RefundList)
+                                        var customerName = "Customer could not be loaded"
+                                        var customeremail = "Customer could not be loaded"
+                                        var customernumber = "Customer could not be loaded"
+                                        var customerprofilePicture = ""
+                                        if(category.has("customer")){
+                                            var customer = category.getJSONObject("customer")
 //                                   var customeruseridcnic = customer.getString("cnic")
 //                                   var customeruseridcontactNo = customer.getString("contactNo")
 //                                   var customeruseridemail = customer.getString("email")
-                                    var customeruseridfirstName = customer.getString("firstName")
-                                    var customeruseridlastName = customer.getString("lastName")
-                                    customeremail = customer.getString("email")
-                                    customernumber = customer.getString("contactNo")
-                                    customerprofilePicture = customer.getString("profilePicture")
+                                            var customeruseridfirstName = customer.getString("firstName")
+                                            var customeruseridlastName = customer.getString("lastName")
+                                            customeremail = customer.getString("email")
+                                            customernumber = customer.getString("contactNo")
+                                            customerprofilePicture = customer.getString("profilePicture")
 //                                   var customeruseridprofilePicture = customer.getString("profilePicture")
 //                                   var customeruseridrole = customer.getString("role")
 //                                   var customeruseridstatus = customer.getString("status")
 //                                   var customer_id = category.getString("_id")
-                                    customerName=customeruseridfirstName+" "+customeruseridlastName
-                                }
-                                else{
-                                    var name = category.getString("name")
-                                    customeremail = category.getString("email")
-                                    customernumber = category.getString("contactNo")
-                                    customerName=name
-                                }
+                                            customerName=customeruseridfirstName+" "+customeruseridlastName
+                                        }
+                                        else{
+                                            var name = category.getString("name")
+                                            customeremail = category.getString("email")
+                                            customernumber = category.getString("contactNo")
+                                            customerName=name
+                                        }
 //                               try{
 //                                   var customer = category.getJSONObject("customer")
 ////                                   var customeruseridcnic = customer.getString("cnic")
@@ -735,38 +748,185 @@ object ViewBookingsCustomer  : Screen {
 
 
 
-                                var userid= Userid(_id ="Customer could not be loaded", cnic =  "Customer could not be loaded", contactNo =customernumber,
-                                    email = customeremail, firstName =customerName, lastName = "",
-                                    profilePicture = customerprofilePicture, role = "Customer could not be loaded", status = "Customer could not be loaded")
-                                var customerOBJ = Customer(_id="customer_id", userid = userid)
+                                        var userid= Userid(_id ="Customer could not be loaded", cnic =  "Customer could not be loaded", contactNo =customernumber,
+                                            email = customeremail, firstName =customerName, lastName = "",
+                                            profilePicture = customerprofilePicture, role = "Customer could not be loaded", status = "Customer could not be loaded")
+                                        var customerOBJ = Customer(_id="customer_id", userid = userid)
 
 
-                                var hotelOBJ = Hotel(__v =hotel__v.toInt(), _id =  hotel_id.toString(), city =hotelcity, description = hoteldescription,
-                                    name = hotelname.toString(), refundPolicy = refundPolicy)
-                                Log.d("HAPP",customerprofilePicture)
-                                bookings.add(
-                                    Booking(__v = __v,_id=_id, adults =adults, bookingDetails =bookingDetails,
-                                        checkIn = checkIn, checkInDate = checkInDate, checkOut = checkOut, checkOutDate =checkOutDate,
-                                        childern =childern, customer = customerOBJ, customerName = customerName,
-                                        hotel = hotelOBJ, hotelName = hotelName, roomCharges =roomCharges, rooms =RoomList ,
-                                        serviceCharges = serviceCharges, status =status )
-                                )
+                                        var hotelOBJ = Hotel(__v =hotel__v.toInt(), _id =  hotel_id.toString(), city =hotelcity, description = hoteldescription,
+                                            name = hotelname.toString(), refundPolicy = refundPolicy)
+                                        Log.d("HAPP",customerprofilePicture)
+                                        bookings.add(
+                                            Booking(__v = __v,_id=_id, adults =adults, bookingDetails =bookingDetails,
+                                                checkIn = checkIn, checkInDate = checkInDate, checkOut = checkOut, checkOutDate =checkOutDate,
+                                                childern =childern, customer = customerOBJ, customerName = customerName,
+                                                hotel = hotelOBJ, hotelName = hotelName, roomCharges =roomCharges, rooms =RoomList ,
+                                                serviceCharges = serviceCharges, status =status )
+                                        )
 
+                                    }
+                                    catch(e:Exception){
+                                        e.printStackTrace()
+                                    }
+                                }
+                                getPayments(context)
                             }
-                            catch(e:Exception){
+                            catch (e:Exception){
                                 e.printStackTrace()
+                                bookings.clear()
                             }
+                            progressDialog.dismiss()
+                        },
+                        { error ->
+                            bookings.clear()
+                            Log.d("HAPP",error.toString())
+                            Log.d("HAPP",error.networkResponse.statusCode.toString())
+                            progressDialog.dismiss()
+                        }) {
+
+                        @Throws(AuthFailureError::class)
+                        override fun getHeaders(): MutableMap<String, String> {
+                            val headers = HashMap<String, String>()
+                            headers["Content-Type"] = "application/json"
+                            headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                            return headers
                         }
                     }
-                    catch (e:Exception){
-                        e.printStackTrace()
+
+                // Add the request to the RequestQueue.
+                val requestQueue = Volley.newRequestQueue(context)
+                requestQueue.add(request)
+            }
+            catch (e:Exception){
+                e.printStackTrace()
+            }
+        }
+
+    }
+
+    fun getPayments(context: Context) {
+        val url = "${GlobalStrings.baseURL}customer/payments/getPayments"
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Loading Payments...")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet not available.",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.GET, url, ViewPayments.params,
+                { response ->
+                    Log.d("HASHDASDAS",response.toString())
+                    var categories  = response.getJSONArray("payments")
+                    payments.clear()
+                    for(i in 0 until categories.length()){
+                        var category = categories.getJSONObject(i)
+
+                      //  var id = category.getInt("id")
+                        var _id = category.getString("_id")
+                        var amount = category.getInt("amount")
+                        var type = category.getString("type")
+                        var booking = category.getJSONObject("booking")
+                        var booking_id = booking.getString("_id")
+
+                        payments.add(Payment(_id=_id, amount = amount, id = 0, type =type , bookingID = booking_id))
                     }
                     progressDialog.dismiss()
                 },
                 { error ->
-                    bookings.clear()
-                    Log.d("HAPP",error.toString())
-                    Log.d("HAPP",error.networkResponse.statusCode.toString())
+                    payments.clear()
+                    Log.d("HASHDASDAS",error.toString())
+                    Log.d("HASHDASDAS",error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
+
+    fun getCoupons(context: Context) {
+        val url = "${GlobalStrings.baseURL}/coupons/getClaimedCoupons"
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Loading Coupons...")
+        var responseAsli = JSONObject()
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet not available.",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.GET, url, ViewPayments.params,
+                { response ->
+                    Log.d("HASHDASDAS",response.toString())
+                    var abc  = responseAsli.getJSONArray("coupons")
+                    for (i in 0 until abc.length()) {
+                        var jsonObject2222 = abc.getJSONObject(i)
+                        var iii = jsonObject2222
+                        try {
+                            val jsonObject = iii
+                            if (jsonObject.has("hotel")) {
+                                val hotelObject = jsonObject.getJSONObject("hotel")
+                                var hotelname = hotelObject.optString("name")
+                                var discount = jsonObject.getString("percentage")
+                                var images = jsonObject.getJSONArray("images")
+                                var image = images.get(0)
+                                var abc = jsonObject.getJSONObject("coinModel")
+                                var ik = abc.getJSONObject("modelUrl")
+//                                var coinModel = ik.getString("androidSrc")
+//                                val idobject = jsonObject.getString("_id")
+//                                var model = ik.getString("image")
+
+
+//                                if (jsonObject.has("locationsList")) {
+//                                    var locationObject = jsonObject.getJSONArray("locationsList")
+//                                    for (i in 0 until locationObject.length()) {
+//                                        val jsonObject22 = locationObject.getJSONObject(i)
+//                                        var latii = jsonObject22.getDouble("lat")
+//                                        var longii = jsonObject22.getDouble("lng")
+//
+//
+//                                        }
+//
+//                                    }
+
+                                }
+                            }
+
+                        catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    progressDialog.dismiss()
+                },
+                { error ->
+                    payments.clear()
+                    Log.d("HASHDASDAS",error.toString())
+                    Log.d("HASHDASDAS",error.networkResponse.statusCode.toString())
                     progressDialog.dismiss()
                 }) {
 

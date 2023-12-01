@@ -26,6 +26,7 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.google.ar.core.Config
 import io.github.sceneview.ar.ARScene
@@ -131,7 +132,7 @@ data class ARCoupon(
     }
     // claim Coupon Function
     fun claimMarker(context: Context, callback: (Boolean) -> Unit) {
-        val url = "https://scs-backend-code.herokuapp.com/customer/coupons/claimCoupon/$couponid"
+        val url = "${GlobalStrings.baseURL}customer/coupons/claimCoupon/$couponid"
 
         // Request parameters
         val params = JSONObject()
@@ -150,6 +151,8 @@ data class ARCoupon(
             { error ->
                 // Handle error response
                 Log.d("rerrtr", error.toString())
+                Log.d("rerrtr", error.networkResponse.statusCode.toString())
+
                 callback(false)
             }) {
 

@@ -144,6 +144,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
+import com.example.adminoffice.ui.theme.Utils.saveUsertoLocal
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.CoroutineScope
@@ -405,43 +406,43 @@ data class ManageProfile(
                                 fontSize = 11.sp
                             )
                         }
-                        OutlinedTextField(
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = email.value,
-                            onValueChange = {
-                                if (it.length <= 30)  email.value=it
-//                    isErrorEmail = isValidEmail(email.value)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Email, contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "Email", color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter Email")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email
-                            ),
-                            singleLine = true
-                        )
-                        if (isErrorEmail) {
-                            Text(
-                                text = "Please provide a valid Email",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
-                            )
-                        }
+//                        OutlinedTextField(
+//                            shape = RoundedCornerShape(5.dp),
+//                            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                focusedBorderColor = Color.Black,
+//                                unfocusedBorderColor = Color.Gray,
+//                                errorBorderColor = Color.Red,
+//                                placeholderColor = Color.Gray,
+//                                disabledPlaceholderColor = Color.Gray
+//                            ),
+//                            value = email.value,
+//                            onValueChange = {
+//                                if (it.length <= 30)  email.value=it
+////                    isErrorEmail = isValidEmail(email.value)
+//                            },
+//                            leadingIcon = {
+//                                Icon(Icons.Default.Email, contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+//                            },
+//                            label = {
+//                                Text(text = "Email", color = Color.Gray)
+//                            },
+//                            placeholder = {
+//                                Text(text = "Enter Email")
+//                            },
+//                            modifier = Modifier.fillMaxWidth(),
+//                            keyboardOptions = KeyboardOptions(
+//                                keyboardType = KeyboardType.Email
+//                            ),
+//                            singleLine = true
+//                        )
+//                        if (isErrorEmail) {
+//                            Text(
+//                                text = "Please provide a valid Email",
+//                                color = Color.Red,
+//                                modifier = Modifier.align(Alignment.Start),
+//                                fontSize = 11.sp
+//                            )
+//                        }
                         OutlinedTextField(
                             shape = RoundedCornerShape(5.dp),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -505,27 +506,9 @@ data class ManageProfile(
                                         imageURL,
                                         role, userID = user._id
                                     ) { isSuccess ->
-                                        if (message.isNotEmpty()) {
-                                            Log.d("Logg", "heheheheh token")
-                                            CNIC.value = ""
-                                            email.value = ""
-                                            password.value = ""
-                                            firstName.value = ""
-                                            lastName.value = ""
-                                            PhoneNumber.value = ""
-                                            role = ""
-                                            confirmPassword.value = ""
-                                            imageuri = null
+                                        if(isSuccess){
+                                            saveUsertoLocal(context,DabsUser(_id = user._id, firstname = firstName.value,lastName=lastName.value, email = user.email, contactNo = PhoneNumber.value, cnic = CNIC.value, profilePicture = imageURL, role = "customer"))
                                             navigator.pop()
-                                            navigator.push(ViewUsers)
-                                        } else {
-                                            Toast
-                                                .makeText(
-                                                    context,
-                                                    "User already exists.",
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                .show()
                                         }
 
                                     }
@@ -579,13 +562,18 @@ data class ManageProfile(
 //        else{
 //
 //        }
-        params.put("email", email)
-        // params.put("password", null)
+        params.put("email", "")
+         params.put("password", "")
+         params.put("category", "customer")
         params.put("contactNo", contactNo)
         params.put("cnic", cnic)
         params.put("role", category)
         params.put("firstName", firstName)
         params.put("lastName", lastName)
+//        params.put("salary", null)
+//        params.put("hotelid", null)
+        params.put("dateJoined", "2023-07-20T00:00:00.000Z")
+
         params.put("profilePicture", profilePicture)
         Log.e("Register1233", params.toString())
         Log.e("Register1233", userID)
@@ -615,10 +603,7 @@ data class ManageProfile(
                             Toast.LENGTH_SHORT
                         )
                         .show()
-
-                    // Assuming the API returns a JSON object with a field "valid" indicating user validity
-                    val isValidUser = response.optBoolean("valid", false)
-                    callback(isValidUser)
+                    callback(true)
                 },
                 { error ->
                     // Handle error response

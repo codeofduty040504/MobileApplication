@@ -18,13 +18,16 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Room
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Service
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
+import com.example.adminoffice.ui.theme.Utils.GlobalStrings
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import org.json.JSONObject
 
 // GET Hotels Function
 fun getHotels(context: Context) {
-    val url = "https://scs-backend-code.herokuapp.com/admin/hotels/getHotels"
+    var role = getRoleFromLocalStorage(context)
+    val url = "${GlobalStrings.baseURL}${role}/hotels/getHotels"
     val progressDialog = ProgressDialog(context)
     val params = JSONObject()
     progressDialog.setTitle("Loading Hotels...")

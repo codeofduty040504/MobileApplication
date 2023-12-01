@@ -93,12 +93,14 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
+import com.example.adminoffice.ui.theme.DabsUser
 import com.example.adminoffice.ui.theme.Utils.CustomTopAppBar
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Hotel
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Refund
 import com.example.adminoffice.ui.theme.Utils.DataClasses.RefundPolicy
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Service
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Header
 import com.example.adminoffice.ui.theme.Utils.Logo
@@ -140,6 +142,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.example.adminoffice.ui.theme.Utils.isValidDescription
@@ -177,6 +180,7 @@ data class EditHotel(
     var imageURL =mutableStateListOf<String>()
     var message = ""
     var refundList = listOf<Refund>()
+    var UserDABS = mutableStateListOf<DabsUser>()
     var refundPolicy = RefundPolicy(description = "", refunds = refundList)
     var modalopenService = mutableStateOf(false)
     var serviceCategoryObject = ServiceCategory(_id="", title = "", image = "", isDeleted = false, deletedAt = "", createdAt = "", updatedAt = "", __v = 0)
@@ -431,179 +435,7 @@ data class EditHotel(
         )
         ModalNavigationDrawer(
             drawerContent = {
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                navigator.pop()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState= drawerState,
         )
@@ -622,7 +454,7 @@ data class EditHotel(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "Update Hotel",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = GlobalStrings.AdminColorMain,
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -641,7 +473,7 @@ data class EditHotel(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.house ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -652,72 +484,77 @@ data class EditHotel(
                                         }
                                     }
                                 }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
-                                        .padding(16.dp)
-                                        .clickable { isExpandedOwner.value = true }
-                                ) {
-                                    Row {
-                                        Icon(painterResource(id = R.drawable.role), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
-                                        Text(text = if(onwer==""){
-                                            "Select Hotel Owner"
-                                        }
-                                        else{
-                                            onwer
-                                        },
-                                            color =  if(onwer==""){
-                                                Color.Gray
+                                if(getRoleFromLocalStorage(context) =="admin"){
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
+                                            .padding(16.dp)
+                                            .clickable { isExpandedOwner.value = true }
+                                    ) {
+                                        Row {
+                                            Icon(painterResource(id = R.drawable.role), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
+                                            Text(text = if(onwer==""){
+                                                "Select Hotel Owner"
                                             }
                                             else{
-                                                Color.Black
-                                            }
-                                        )
-                                    }
-
-                                    DropdownMenu(
-                                        expanded = isExpandedOwner.value,
-                                        onDismissRequest = {isExpandedOwner.value=false },
-                                        modifier = Modifier
-                                            .size(300.dp, 120.dp)
-                                            .fillMaxWidth()
-                                    ) {
-                                        OwnersAvailable.forEach { option ->
-                                            DropdownMenuItem(text = { Column {
-                                                Text(text = option.fullName)
-                                                Text(text = option.email, fontSize = 10.sp)
-                                            } } , leadingIcon = {
-                                                Box(){
-                                                    Image(
-                                                        painter = rememberAsyncImagePainter(option.profilePicture, contentScale = ContentScale.FillBounds),
-                                                        contentDescription = "image",
-                                                        modifier = Modifier
-                                                            .size(50.dp)
-                                                            .clip(
-                                                                RoundedCornerShape(
-                                                                    (CornerSize(
-                                                                        20.dp
-                                                                    ))
-                                                                )
-                                                            )
-                                                    )
+                                                onwer
+                                            },
+                                                color =  if(onwer==""){
+                                                    Color.Gray
                                                 }
-                                            }, onClick = {
-                                                onwer = option.fullName
-                                                onwerID = option
-                                                isExpandedOwner.value = false
-                                            }, modifier = Modifier.padding(5.dp))
+                                                else{
+                                                    Color.Black
+                                                }
+                                            )
+                                        }
+
+                                        DropdownMenu(
+                                            expanded = isExpandedOwner.value,
+                                            onDismissRequest = {isExpandedOwner.value=false },
+                                            modifier = Modifier
+                                                .size(300.dp, 120.dp)
+                                                .fillMaxWidth()
+                                        ) {
+                                            AddHotel.OwnersAvailable.forEach { option ->
+                                                DropdownMenuItem(text = { Column {
+                                                    Text(text = option.fullName)
+                                                    Text(text = option.email, fontSize = 10.sp)
+                                                } } , leadingIcon = {
+                                                    Box(){
+                                                        Image(
+                                                            painter = rememberAsyncImagePainter(option.profilePicture, contentScale = ContentScale.FillBounds),
+                                                            contentDescription = "image",
+                                                            modifier = Modifier
+                                                                .size(50.dp)
+                                                                .clip(
+                                                                    RoundedCornerShape(
+                                                                        (CornerSize(
+                                                                            20.dp
+                                                                        ))
+                                                                    )
+                                                                )
+                                                        )
+                                                    }
+                                                }, onClick = {
+                                                    onwer = option.fullName
+                                                    AddHotel.onwerID = option
+                                                    isExpandedOwner.value = false
+                                                }, modifier = Modifier.padding(5.dp))
+                                            }
                                         }
                                     }
+                                    if (isErrorOwner) {
+                                        Text(
+                                            text = "Please select a Hotel Owner",
+                                            color = Color.Red,
+                                            modifier = Modifier.align(Alignment.Start),
+                                            fontSize = 11.sp
+                                        )
+                                    }
                                 }
-                                if (isErrorOwner) {
-                                    Text(
-                                        text = "Please select a Hotel Owner",
-                                        color = Color.Red,
-                                        modifier = Modifier.align(Alignment.Start),
-                                        fontSize = 11.sp
-                                    )
+                                else{
+                                    onwer="asdasd"
                                 }
                                 OutlinedTextField(
                                     shape = RoundedCornerShape(5.dp),
@@ -734,7 +571,7 @@ data class EditHotel(
                                             hotelName.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.house), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.house), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Hotel Name",color = Color.Gray)
@@ -763,7 +600,7 @@ data class EditHotel(
                                         .clickable { isExpandedCity.value = true }
                                 ) {
                                     Row {
-                                        Icon(painterResource(id = R.drawable.role), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.role), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                         Text(text = if(city==""){
                                             "Select Hotel City"
                                         }
@@ -829,7 +666,7 @@ data class EditHotel(
                                             hotelDescription.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Hotel Description",color = Color.Gray)
@@ -864,7 +701,7 @@ data class EditHotel(
                                             location.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.location), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.location), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Hotel Location",color = Color.Gray)
@@ -936,10 +773,10 @@ data class EditHotel(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -955,7 +792,7 @@ data class EditHotel(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.sms ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -980,7 +817,7 @@ data class EditHotel(
                                         if (it.length <= 11) PhoneNumber.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.mobile), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.mobile), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Phone Number", color = Color.Gray)
@@ -1017,7 +854,7 @@ data class EditHotel(
                                         if (it.length <= 11) telephone.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(Icons.Default.Phone, contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(Icons.Default.Phone, contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Telephone Number", color = Color.Gray)
@@ -1054,7 +891,7 @@ data class EditHotel(
                                         if (it.length <= 45)  facebook.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Facebook Account",color = Color.Gray)
@@ -1081,7 +918,7 @@ data class EditHotel(
                                         if (it.length <= 45)  instagram.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Instagram Account",color = Color.Gray)
@@ -1108,7 +945,7 @@ data class EditHotel(
                                         if (it.length <= 45)  website.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.baseline_web_24), contentDescription = "password", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Website",color = Color.Gray)
@@ -1146,10 +983,10 @@ data class EditHotel(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -1164,7 +1001,7 @@ data class EditHotel(
                                         .padding(10.dp)
                                         .border(
                                             2.dp,
-                                            MaterialTheme.colorScheme.primary,
+                                            GlobalStrings.AdminColorMain,
                                             shape = RoundedCornerShape(45.dp)
                                         )){
                                         Icon(painterResource(id= R.drawable.sms ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1208,10 +1045,10 @@ data class EditHotel(
                                 },
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         contentColor = Color.White, // Text color
-                                        containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                        containerColor = GlobalStrings.AdminColorMain, // Border color
                                         // You can customize other colors here
                                     ),
-                                    border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                    border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                     shape = RoundedCornerShape(CornerSize(3.dp))) {
                                     Text(text = "Next")
                                 }
@@ -1225,7 +1062,7 @@ data class EditHotel(
                                         .padding(10.dp)
                                         .border(
                                             2.dp,
-                                            MaterialTheme.colorScheme.primary,
+                                            GlobalStrings.AdminColorMain,
                                             shape = RoundedCornerShape(45.dp)
                                         )){
                                         Icon(painterResource(id= R.drawable.video ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1352,10 +1189,10 @@ data class EditHotel(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -1374,7 +1211,7 @@ data class EditHotel(
                                         .padding(10.dp)
                                         .border(
                                             2.dp,
-                                            MaterialTheme.colorScheme.primary,
+                                            GlobalStrings.AdminColorMain,
                                             shape = RoundedCornerShape(45.dp)
                                         )){
                                         Icon(painterResource(id= R.drawable.money ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1397,7 +1234,7 @@ data class EditHotel(
                                         selected = selectedTabIndex == 0,
                                         onClick = { selectedTabIndex = 0 },
                                         text = { Text("Full Refund") },
-                                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                                        selectedContentColor = GlobalStrings.AdminColorMain,
                                         unselectedContentColor = Color.Black,
                                     )
                                     Tab(
@@ -1408,7 +1245,7 @@ data class EditHotel(
                                             seventyfivepercent.value = 2.toString()
                                         },
                                         text = { Text("Partial Refund") },
-                                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                                        selectedContentColor = GlobalStrings.AdminColorMain,
                                         unselectedContentColor = Color.Black,
                                     )
                                     Tab(
@@ -1421,7 +1258,7 @@ data class EditHotel(
                                             twentyfivepercent.value = 4.toString()
                                         },
                                         text = { Text("No Refund") },
-                                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                                        selectedContentColor = GlobalStrings.AdminColorMain,
                                         unselectedContentColor = Color.Black,
                                     )
                                 }
@@ -1442,7 +1279,7 @@ data class EditHotel(
                                                 hundredpercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "100% Booking Refund Till (Days)",color = Color.Gray)
@@ -1476,7 +1313,7 @@ data class EditHotel(
                                                 seventyfivepercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "75% Booking Refund Till (Days)",color = Color.Gray)
@@ -1510,7 +1347,7 @@ data class EditHotel(
                                                 fiftypercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "50% Booking Refund Till (Days)",color = Color.Gray)
@@ -1544,7 +1381,7 @@ data class EditHotel(
                                                 twentyfivepercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "25% Booking Refund Till (Days)",color = Color.Gray)
@@ -1578,7 +1415,7 @@ data class EditHotel(
                                                 refundPolicyDescription.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "Refund Policy Description",color = Color.Gray)
@@ -1614,7 +1451,7 @@ data class EditHotel(
                                                 fiftypercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "50% Booking Refund Till (Days)",color = Color.Gray)
@@ -1648,7 +1485,7 @@ data class EditHotel(
                                                 twentyfivepercent.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.money), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "25% Booking Refund Till (Days)",color = Color.Gray)
@@ -1682,7 +1519,7 @@ data class EditHotel(
                                                 refundPolicyDescription.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "Refund Policy Description",color = Color.Gray)
@@ -1718,7 +1555,7 @@ data class EditHotel(
                                                 refundPolicyDescription.value=it
                                             },
                                             leadingIcon = {
-                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                             },
                                             label = {
                                                 Text(text = "Refund Policy Description",color = Color.Gray)
@@ -1778,10 +1615,10 @@ data class EditHotel(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -1799,7 +1636,7 @@ data class EditHotel(
                                         .padding(10.dp)
                                         .border(
                                             2.dp,
-                                            MaterialTheme.colorScheme.primary,
+                                            GlobalStrings.AdminColorMain,
                                             shape = RoundedCornerShape(45.dp)
                                         )){
                                         Icon(painterResource(id= R.drawable.elevator ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1918,6 +1755,10 @@ data class EditHotel(
                                                 floorsSent.add(obj.label)
 
                                             }
+                                            var onwer = onwerID._id
+                                            if(getRoleFromLocalStorage(context)=="owner"){
+                                                onwer = UserDABS[0]._id
+                                            }
                                             addHotelToSystem(context = context,city=city, description = hotelDescription.value, facebookURL = facebook.value,
                                                 floors = floorsSent, images = imageURL, lat = latitude.value,lng=longitude.value, location = location.value,
                                                 instagramURL = instagram.value, name = hotelName.value, ownerid = onwerID._id, phoneNo = PhoneNumber.value,
@@ -1931,10 +1772,10 @@ data class EditHotel(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Update Hotel")
                                     }
@@ -1965,6 +1806,84 @@ data class EditHotel(
         getServices(context)
 
     }
+
+    fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
+        if(UserDABS.isNotEmpty()){
+            return
+        }
+        val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
+        // Request parameters
+        val params = JSONObject()
+        params.put("token", getTokenFromLocalStorage(context))
+        Log.d("LOOOO",params.toString())
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Please Wait")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet is not Available",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+            progressDialog.dismiss()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.POST, url, params,
+                { response ->
+                    UserDABS.clear()
+                    // Handle successful login response
+                    Log.d("LOOOO", response.toString())
+                    var user = response.getJSONObject("user")
+                    var _id = user.getString("_id")
+                    var firstname = user.getString("firstName")
+                    var lastname = user.getString("lastName")
+                    var email = user.getString("email")
+                    var contactNo = user.getString("contactNo")
+                    var cnic = user.getString("cnic")
+                    var profilePicture = user.getString("profilePicture")
+                    var role = user.getString("role")
+                    var userD = DabsUser(_id,  firstname, lastname,email, contactNo, cnic, profilePicture, role)
+                    AddHotel.UserDABS.add(userD)
+                    progressDialog.dismiss()
+                    callback(true)
+                },
+                { error ->
+                    UserDABS.clear()
+                    // Handle error response
+                    Log.e("LOOOO Error", error.toString())
+                    Log.e("LOOOO Error", error.networkResponse.data.toString())
+                    Log.e("LOOOO Error", error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "Connection Error or try with different Credentials",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    callback(false)
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+//                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    headers["Authorization"] = ""
+                    return headers
+                }
+            }
+
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+    }
+
     // Add Hotel Function
     fun addHotelToSystem(context: Context,id: String,
                          city: String,
@@ -1985,7 +1904,8 @@ data class EditHotel(
                          refundPolicy:RefundPolicy,
                          callback: (Boolean) -> Unit){
         Log.d("HAPP","AAASDASDASDASDAS")
-        val url = "${GlobalStrings.baseURL}admin/hotels/updateHotel/${id}"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/hotels/updateHotel/${id}"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Please Wait")
         progressDialog.show()
@@ -2168,7 +2088,7 @@ data class EditHotel(
                 // Table header
                 Row (modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(GlobalStrings.AdminColorMain)
                 ){
                     Box(modifier = Modifier.width(60.dp), contentAlignment = Alignment.Center){
                         Text(text = "", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(vertical = 10.dp))
@@ -2761,7 +2681,8 @@ data class EditHotel(
     }
     // GET Categories Function
     fun getServices(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/services/getHotelServices"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/services/getHotelServices"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Services...")
         progressDialog.show()

@@ -1,6 +1,8 @@
 package com.example.adminoffice.ui.theme.Customer.Profile
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,8 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
@@ -45,11 +50,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -65,16 +72,35 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Dashboard
 import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.saveTokenToLocalStorage
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapEffect
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.rememberCameraPositionState
 
 object ContactUs  : Screen {
     @OptIn(ExperimentalComposeUiApi::class)
     val keyboardController = LocalSoftwareKeyboardController
-
+    private var userLocation = LatLng(0.0, 0.0)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(){
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
+        val configuration = LocalConfiguration.current
+        val screenWidthDp: Dp = configuration.screenWidthDp.dp
+        val screenHeightDp: Dp = configuration.screenHeightDp.dp
+        val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(LatLng(33.6844, 73.0479), 10f)
+
+        }
+        val mapProperties = MapProperties(
+            isMyLocationEnabled = userLocation != null,
+        )
+
         var isErrorFirstName by remember { mutableStateOf(false) }
         var isErrorPhoneNumber by remember { mutableStateOf(false) }
         var isErrorEmail by remember { mutableStateOf(false) }
@@ -92,9 +118,13 @@ object ContactUs  : Screen {
             mutableStateOf("")
         }
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
         ) {
-            Column (modifier = Modifier.padding(10.dp)){
+            Column (modifier = Modifier
+                .padding(10.dp)
+                .verticalScroll(rememberScrollState())){
                 Text(text = "Contact Us", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text(text = "Leave your email and we will get back to you within 24 hours", fontSize = 14.sp, fontWeight = FontWeight.Light)
                 Box(
@@ -233,6 +263,45 @@ object ContactUs  : Screen {
                     }
 
                 }
+                Spacer(modifier = Modifier.size(10.dp))
+                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().border(0.2.dp, Color.White, RoundedCornerShape(15.dp))){
+                    GoogleMap(
+                        modifier = Modifier
+                            .width(screenWidthDp - 20.dp)
+                            .border(0.2.dp, Color.White, RoundedCornerShape(15.dp))
+                            .height(200.dp),
+//                                        .layout { measurable, constraints ->
+//                                            val placeable = measurable.measure(constraints)
+//                                            layout(placeable.width, (placeable.height * 0.9).toInt()) {
+//                                                placeable.placeRelative(0, 0)
+//                                            }
+//                                        },
+                        cameraPositionState = cameraPositionState,
+                        properties = mapProperties,
+                    ){
+
+                        MapEffect() { map ->
+                            map.setOnMapLoadedCallback {
+                                val icon12 = MapsCoupon.bitmapDescriptorFromVector(
+                                    context, R.mipmap.houseicon,80
+                                )
+                                val markerOptions = MarkerOptions()
+                                    .position(LatLng(33.6665804120644, 73.07360489245012)).icon(icon12)
+                                map.addMarker(markerOptions)
+                                map.addCircle(
+                                    CircleOptions()
+                                        .fillColor(0x51FF3D3D)
+                                        .strokeColor(0x51FF3D3D)
+                                        .center(LatLng(33.333333, 73.333333))
+                                        .radius(300.0)
+                                )
+                                Log.d("HHHHHASDASdasdas","enter")
+                            }
+
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.size(10.dp))
                 OutlinedTextField(
 
                     shape = RoundedCornerShape(5.dp),
@@ -245,7 +314,7 @@ object ContactUs  : Screen {
                     ),
                     value = firstName.value,
                     onValueChange = {
-                        if (it.length <= 10)
+                        if (it.length <= 20)
                             firstName.value=it
                     },
                     leadingIcon = {
@@ -386,7 +455,7 @@ object ContactUs  : Screen {
                     .clickable {
                         isErrorEmail = !Home.isValidEmail(email.value)
                         isErrorPhoneNumber = !Home.isValidPhoneNumber(phone.value)
-                        isErrorFirstName = !Home.isValidFirstName(firstName.value)
+                        isErrorFirstName = firstName.value.length < 3
                         isErrorMessage = message.value.isEmpty()
                     }
                     .fillMaxWidth()

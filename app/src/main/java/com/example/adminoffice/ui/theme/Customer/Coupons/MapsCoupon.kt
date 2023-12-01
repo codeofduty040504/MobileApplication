@@ -15,9 +15,11 @@ import android.view.Display
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -261,29 +263,19 @@ object MapsCoupon  : Screen {
                         ) {
                             Column(modifier = Modifier.padding(10.dp)){
                                 Text(text = "You have reached the Discount Coupon please collect the Discount.")
-                                Button(
-                                    onClick = {
+                                Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                                    Box(modifier = Modifier.background(GlobalStrings.CustomerColorMain,
+                                        RoundedCornerShape(15.dp)
+                                    ).height(20.dp).width(200.dp).clickable {
                                         reload.value= false
                                         navigator.push(ARCoupon(hotelname= hotelToBeSent, couponid = selectedMarkerID,
                                             discount= discountToBeSent, latitude = LatSend.toString(), longitude = LonSend.toString(),
                                             coinModel= coinModelToBeSent))
-                                    },
-                                    modifier = Modifier
-//                            .layout { measurable, constraints ->
-//                                val placeable = measurable.measure(constraints)
-//                                layout(placeable.width, placeable.height) {
-//                                    placeable.placeRelative(
-//                                        x = 350,
-//                                        y = 50
-//                                    )
-//                                }
-//                            }
-                                        .height(50.dp)
-                                        .width(150.dp),
-                                ) {
-                                    Text(text = "Collect Coupon", color = Color.White)
+                                    }, contentAlignment = Alignment.Center){
+                                        Text(text = "Collect Coupon", color = Color.White)
+                                    }
+                                    }
                                 }
-                            }
                         }
                     }
 //                    FloatingActionButton(
@@ -326,40 +318,9 @@ object MapsCoupon  : Screen {
                 ){
 
                     MapEffect(userLocation) { map ->
-//                        map.setOnMapLoadedCallback {
-//                            scope.launch {
-//                                getCoupons(context)
-//                                    var Bitt: Bitmap
-//                                    val imageRequest = ImageRequest.Builder(context)
-//                                        .data("https://www.simplilearn.com/ice9/free_resources_article_thumb/what_is_image_Processing.jpg")
-//                                        .target { drawable ->
-//                                            var bitmap = drawable.toBitmap() // This is the bitmap 🚨
-//                                            for(coupon in coupons){
-//                                                map.addMarker(
-//                                                    MarkerOptions()
-//                                                        .position(LatLng(coupon.latitude, coupon.longitude))       //33.64926760963938, 73.15453232632127
-//                                                        .title(coupon.hotel).icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-//                                                        .snippet(coupon.discount+"% discount")
-//                                                )?.tag = coupon._id+","+coupon.discount+","+coupon.hotel+","+ coupon.modelImage
-//                                            }
-//
-//                                        }
-//                                        .build()
-//                                    ImageLoader(context).enqueue(imageRequest)
-//
-////                               for(coupon in coupons){
-////                                   map.addMarker(
-////                                       MarkerOptions()
-////                                           .position(LatLng(coupon.latitude, coupon.longitude))       //33.64926760963938, 73.15453232632127
-////                                           .title(coupon.hotel).icon(BitmapDescriptorFactory.fromBitmap(coupon.model))
-////                                           .snippet(coupon.discount+"% discount")
-////                                   )?.tag = coupon._id+","+coupon.discount+","+coupon.hotel+","+ coupon.model
-////                               }
-//                            }
-//                        }
                         map.setOnMapLoadedCallback {
                             //  To get All Coupons
-                            val url = "https://scs-backend-code.herokuapp.com/customer/coupons/getCoupons"
+                            val url = "${GlobalStrings.baseURL}customer/coupons/getCoupons"
 
                             // Request parameters
                             val params = JSONObject()

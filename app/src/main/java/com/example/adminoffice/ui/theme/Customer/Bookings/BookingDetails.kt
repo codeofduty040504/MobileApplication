@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -251,6 +256,32 @@ data class BookingDetails(
                 }
                 Text(text = "Booking Details", fontSize = 18.sp, fontWeight = FontWeight.Black)
                 Text(text = booking.bookingDetails, fontSize = 12.sp, fontWeight = FontWeight.Light)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly){
+                    Box(modifier = Modifier
+                        .background(Color(0xFF1D9196), RoundedCornerShape(15.dp))
+                        .clickable { navigator.push(AddReview(booking)) }
+                        .padding(0.dp, 10.dp)
+                        .size(screenWidthDp / 3, 15.dp), contentAlignment = Alignment.Center){
+                            Row{
+                                Icon(Icons.Filled.Star,null, tint = Color.White)
+                                Text(text = "Give Us a Review", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                            }
+                            }
+                    Box(modifier = Modifier
+                        .background(Color(0xFFD59C2B), RoundedCornerShape(15.dp))
+                        .clickable {
+                            navigator.push(AddComplaint(booking))
+                        }
+
+                        .padding(0.dp, 10.dp)
+                        .size(screenWidthDp / 3, 15.dp), contentAlignment = Alignment.Center){
+                        Row{
+                            Icon(Icons.Outlined.Warning,null, tint = Color.White)
+                            Text(text = "Report a Complaint", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black, fontSize = 12.sp)
+
+                        }
+                    }
+                }
 
             }
         }

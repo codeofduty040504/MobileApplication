@@ -23,7 +23,7 @@ data class Hotel(
     val ownerName: String,
     val phoneNo: String,
     val refundPolicy: RefundPolicy,
-    val reviews: List<Any>,
+    val reviews: List<Review>,
     val rules: List<Any>,
     val services: List<Service>,
     val status: String,

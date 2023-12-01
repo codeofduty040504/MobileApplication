@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
@@ -81,13 +83,17 @@ import com.example.adminoffice.ui.theme.Customer.CartFunctions.addRoomToCart
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.getHotelID
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.getRoomsInCart
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.saveHotelIDInToken
+import com.example.adminoffice.ui.theme.Customer.Functions.CompareHotel
 import com.example.adminoffice.ui.theme.Customer.LandingPage
+import com.example.adminoffice.ui.theme.DabsUser
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Dashboard
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
+import com.example.adminoffice.ui.theme.Utils.saveRoleToLocalStorage
 import com.example.adminoffice.ui.theme.Utils.saveTokenToLocalStorage
+import com.example.adminoffice.ui.theme.Utils.saveUsertoLocal
 import org.json.JSONObject
 
 object Login  : Screen {
@@ -109,9 +115,12 @@ object Login  : Screen {
         author(context){
             if(it){
                 if(role=="customer"){
-                    navigator.push(LandingPage)
+                    navigator.replace(LandingPage)
                 }
-                else if(role=="Admin"){
+                else if(role=="admin"){
+                    navigator.push(Dashboard)
+                }
+                else if(role == "owner"){
                     navigator.push(Dashboard)
                 }
             }
@@ -135,6 +144,7 @@ object Login  : Screen {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Spacer(modifier = Modifier.size(100.dp))
                 Image(
                     painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logo%2FAsset%201.png?alt=media&token=f9d050ca-ee90-4fe3-a44d-fe9d896ff3f4&_gl=1*khoe9m*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5NzcyMzYxOS4zMC4xLjE2OTc3MjM4OTguNjAuMC4w"),
@@ -237,6 +247,7 @@ object Login  : Screen {
                         lineHeight = 11.sp
                     )
                 }
+
                 Spacer(modifier = Modifier.size(10.dp))
                 Box(modifier = Modifier
                     .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(15.dp))
@@ -252,7 +263,14 @@ object Login  : Screen {
                                             navigator.push(Dashboard)
                                         } else if (role == "customer") {
                                             saveTokenToLocalStorage(context, toke)
-                                            navigator.push(LandingPage)
+                                            author(context){
+
+                                            }
+                                            navigator.replace(LandingPage)
+                                        }
+                                        else if (role == "owner") {
+                                            saveTokenToLocalStorage(context, toke)
+                                            navigator.push(Dashboard)
                                         }
                                     }
                                 }
@@ -324,6 +342,22 @@ object Login  : Screen {
             }
         }
     }
+    @Composable
+    fun BoldTextExample() {
+        val text = "This is a <b>bold</b> text and this is <b>another bold</b> part."
+
+        val annotatedString = buildAnnotatedString {
+            appendInlineContent("bold", "bold")
+            append(" text and this is ")
+            appendInlineContent("bold", "another bold")
+            append(" part.")
+        }
+
+        Text(
+            text = annotatedString,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
     // Login Function
     fun loginUser(context: Context, email: String, password: String, callback: (Boolean) -> Unit){
         val url = "${GlobalStrings.baseURL}auth/login"
@@ -356,7 +390,8 @@ object Login  : Screen {
                      // You can check the response here to verify if the user is valid
                      toke = response.getString("token")
                      Log.d("LoginTOKEN", toke)
-                     role = response.getString("role")
+                     role = response.getString("role").toLowerCase()
+                     saveRoleToLocalStorage(context, role.toLowerCase())
                      progressDialog.dismiss()
 
                      // Assuming the API returns a JSON object with a field "valid" indicating user validity
@@ -426,8 +461,16 @@ object Login  : Screen {
                     // Handle successful login response
                     Log.d("Auth", response.toString())
                     role = response.getJSONObject("user").getString("role")
-
-
+                    var firstName = response.getJSONObject("user").getString("firstName")
+                    var lastName = response.getJSONObject("user").getString("lastName")
+                    var _id = response.getJSONObject("user").getString("_id")
+                    var email = response.getJSONObject("user").getString("email")
+                    var contactNo = response.getJSONObject("user").getString("contactNo")
+                    var cnic = response.getJSONObject("user").getString("cnic")
+                    var profilePicture = response.getJSONObject("user").getString("profilePicture")
+                    var DabsUser = DabsUser(_id,firstName,lastName,email,contactNo,cnic,profilePicture,
+                        role)
+                    saveUsertoLocal(context,DabsUser)
                     // Assuming the API returns a JSON object with a field "valid" indicating user validity
 
                     callback(true)

@@ -31,6 +31,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.rememberAsyncImagePainter
+import com.example.adminoffice.ui.theme.Customer.Bookings.ViewBookingsCustomer
 import com.example.adminoffice.ui.theme.Customer.LandingPage
 
 
@@ -102,7 +103,7 @@ data class ConfirmCoupon(
                             navigator.pop()
                             navigator.pop()
                             navigator.pop()
-                            navigator.push(LandingPage)
+                            navigator.replace(ViewBookingsCustomer)
                         },
                         shape = RoundedCornerShape(15.dp),
                         border = BorderStroke(0.dp, Color.Black)

@@ -77,6 +77,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
 import com.example.adminoffice.ui.theme.Utils.CustomTopAppBar
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
+import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Header
 import com.example.adminoffice.ui.theme.Utils.Logo
 import com.example.adminoffice.ui.theme.Utils.Menu
@@ -150,174 +152,7 @@ object AboutUs  : Screen {
         var selectedSubItem by remember { mutableStateOf(-1) }
         ModalNavigationDrawer(
             drawerContent = {
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed { index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem == index,
-                            onClick = {
-                                selectedItem = index
-                                selectedSubItem = -1
-                                if (selectedItem == 0) {
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                } else if (selectedItem == 10) {
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem = subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                } else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                } else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                } else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState = drawerState,
         ) {
@@ -338,16 +173,16 @@ object AboutUs  : Screen {
                         .padding(vertical = 60.dp, horizontal = 10.dp)
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Text(text = "About Us", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
+                        Text(text = "About Us", color = GlobalStrings.AdminColorMain, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Icon(painterResource(id = R.drawable.quote),contentDescription = "quote", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                        Icon(painterResource(id = R.drawable.quote),contentDescription = "quote", modifier = Modifier.size(20.dp), tint = GlobalStrings.AdminColorMain)
                         Text(text = "Introducing DABS (Digital Albergo Booking System), your gateway to a seamless hotel booking experience. Imagine a platform that not only simplifies reservations but also enhances your comfort while ensuring the best possible rates. With DABS, we've reimagined hotel booking, offering a centralized hub where you can effortlessly find and secure accommodations that suit your preferences.", fontSize = 12.sp, lineHeight = 14.sp)
 
                     }
                     Spacer(modifier = Modifier.size(20.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Text(text = "Meet Our Team", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
+                        Text(text = "Meet Our Team", color = GlobalStrings.AdminColorMain, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
                     }
                     Row(
                         Modifier
@@ -379,7 +214,7 @@ object AboutUs  : Screen {
                                contentScale = ContentScale.FillBounds
                            )
                            Text(text = "Dr. Tehseen Riaz Abbasi", fontSize = 16.sp, fontWeight = FontWeight.W800)
-                           Text(text = "Product Manager", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                           Text(text = "Product Manager", color = GlobalStrings.AdminColorMain, fontSize = 12.sp)
                            Spacer(modifier = Modifier.size(5.dp))
                            Text(text = "As the Product Manager, I oversaw the quality assurance for the Dabs, harmonizing its development and ensuring impeccable standards in every aspect", fontSize = 12.sp, lineHeight = 13.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
@@ -455,7 +290,7 @@ object AboutUs  : Screen {
                                 contentScale = ContentScale.FillBounds
                             )
                             Text(text = "Danyal Arif", fontSize = 16.sp, fontWeight = FontWeight.W800)
-                            Text(text = "Full Stack Developer", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                            Text(text = "Full Stack Developer", color = GlobalStrings.AdminColorMain, fontSize = 12.sp)
                             Spacer(modifier = Modifier.size(5.dp))
                             Text(text = "In this project, I assumed the role of a Full Stack Developer, actively contributing to its development process and ensuring a smooth progression forward.", fontSize = 12.sp, lineHeight = 13.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
@@ -531,7 +366,7 @@ object AboutUs  : Screen {
                                 contentScale = ContentScale.FillBounds
                             )
                             Text(text = "Ghulam Mohiuddin", fontSize = 16.sp, fontWeight = FontWeight.W800)
-                            Text(text = "Front End Developer", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                            Text(text = "Front End Developer", color = GlobalStrings.AdminColorMain, fontSize = 12.sp)
                             Spacer(modifier = Modifier.size(5.dp))
                             Text(text = "As a Front End Developer, I contributed significantly to the Dabs project, utilizing my skills to shape its user interface and elevate the overall user experience.", fontSize = 12.sp, lineHeight = 13.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
@@ -607,7 +442,7 @@ object AboutUs  : Screen {
                                 contentScale = ContentScale.FillBounds
                             )
                             Text(text = "Kumail Raza", fontSize = 16.sp, fontWeight = FontWeight.W800)
-                            Text(text = "Mobile Developer & AR", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                            Text(text = "Mobile Developer & AR", color = GlobalStrings.AdminColorMain, fontSize = 12.sp)
                             Spacer(modifier = Modifier.size(5.dp))
                             Text(text = "For App Development, I refined user experiences while in the domain of AR, I integrated cutting-edge technologies to amplify the project's impact.", fontSize = 12.sp, lineHeight = 13.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){

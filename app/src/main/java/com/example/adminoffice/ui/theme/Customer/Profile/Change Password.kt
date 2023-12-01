@@ -237,6 +237,11 @@ object ChangePassword  : Screen {
                             .verticalScroll(rememberScrollState())
                             .padding(vertical = 60.dp, horizontal = 30.dp),
                     ) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                            Text(text = "Change your Password", color = GlobalStrings.CustomerColorMain,
+                                fontSize = 24.sp
+                            )
+                        }
                         OutlinedTextField(
                             shape = RoundedCornerShape(5.dp),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -380,48 +385,14 @@ object ChangePassword  : Screen {
                                 password.value,
                                 confirmPassword.value
                             )
-                            isErrorCNIC = !Home.isValidCNIC(CNIC.value)
-                            isErrorRole = role==""
+                            isErrorCNIC = !Home.isValidPassword(CNIC.value)
                             if(!isErrorPassword &&  !isErrorCNIC
                                 && !isErrorConfirmPassword){
                                 scope.launch {
-                                    if(imageuri!=null){
-                                        uploadImageToFireBase(context=context, filePath = imageuri)
-                                    }
-                                    Home.registerUser(
-                                        context,
-                                        email.value,
-                                        password.value,
-                                        PhoneNumber.value,
-                                        CNIC.value,
-                                        firstName.value,
-                                        lastName.value,
-                                        imageURL,
-                                        role
-                                    ) { isSuccess ->
-                                        if (message.isNotEmpty()) {
-                                            Log.d("Logg", "heheheheh token")
-                                            CNIC.value = ""
-                                            email.value = ""
-                                            password.value = ""
-                                            firstName.value = ""
-                                            lastName.value = ""
-                                            PhoneNumber.value = ""
-                                            role = ""
-                                            confirmPassword.value = ""
-                                            imageuri = null
+                                    ChangePassword(context = context, oldPassword = CNIC.value, newPassword = password.value){
+                                        if(it){
                                             navigator.pop()
-                                            navigator.push(ViewUsers)
-                                        } else {
-                                            Toast
-                                                .makeText(
-                                                    context,
-                                                    "User already exists.",
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                .show()
                                         }
-
                                     }
                                 }
                             }
@@ -438,40 +409,74 @@ object ChangePassword  : Screen {
 
     }
 
-    // UploadImage method
-    suspend fun uploadImageToFireBase(context : Context, filePath: Uri?) {
-        // get the Firebase  storage reference
-        var storage = FirebaseStorage.getInstance();
-        var storageReference = storage.getReference();
-        var message = ""
-        val jobs = mutableListOf<Job>()
-        if (filePath != null) {
-            val progressDialog = ProgressDialog(context)
-            progressDialog.setTitle("Uploading...")
-            progressDialog.show()
+    fun ChangePassword(context: Context,
+                     oldPassword: String,
+                       newPassword: String,
+                     callback: (Boolean) -> Unit){
+        val url = "${GlobalStrings.baseURL}customer/users/changePassword"
+        val progressDialog = ProgressDialog(context)
+        progressDialog.setTitle("Please Wait")
+        progressDialog.show()
 
-            // Defining the child of storageReference
-            val ref: StorageReference = storageReference
-                .child(
-                    "images/"
-                            + UUID.randomUUID().toString()
+        // Request parameters
+        val params = JSONObject()
+        params.put("newPassword", newPassword)
+        params.put("oldPassword", oldPassword)
+        Log.e("Register", params.toString())
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet is not Available",
+                    Toast.LENGTH_SHORT
                 )
+                .show()
+            progressDialog.dismiss()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.PUT, url, params,
+                { response ->
+                    // Handle successful login response
+                    Log.d("Register", response.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "Password Updated",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
 
-            val job = CoroutineScope(Dispatchers.IO).async {
-                try {
-                    var imageOne = filePath
-                    ref.putFile(imageOne!!).await()
-                    val downloadUrl = ref.downloadUrl.await()
-                    imageURL= (downloadUrl.toString())
-                    Log.e("HAPP", downloadUrl.toString())
-                } catch (e: Exception) {
-                    Log.e("HAPP", "Error uploading image: ${e.message}")
+                    callback(true)
+                },
+                { error ->
+                    // Handle error response
+                    Log.e("Register", error.toString())
+                    progressDialog.dismiss()
+                    Toast
+                        .makeText(
+                            context,
+                            "An Error Occurred while updating Password. Please check your Parameters.",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    callback(false)
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
                 }
             }
-            jobs.add(job)
-            jobs.joinAll()
-            progressDialog.dismiss()
-            Log.d("HAPP","HERE WE GO")
+
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
         }
     }
 }

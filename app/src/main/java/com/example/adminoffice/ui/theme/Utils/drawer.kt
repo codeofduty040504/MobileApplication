@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,21 +89,41 @@ fun Logo(scope:CoroutineScope,drawerState:DrawerState){
 
 @Composable
 fun Menu(): List<Triple<Painter, String, List<String>>> {
-    val menuList = listOf(
+    var context = LocalContext.current
+    var role = getRoleFromLocalStorage(context)
+    var menuList = listOf(
         Triple(painterResource(id = R.drawable.home), "1-Dashboard", listOf()),
         Triple(painterResource(id = R.drawable.user), "2-Users", listOf("2.1-Add User", "2.2-View Users")),
-        Triple(painterResource(id = R.drawable.tv), "3-Services", listOf("3.1-Add Category", "3.2-View Category","3.3-Add Service", "3.4-View Services")),
+        Triple(painterResource(id = R.drawable.tv), "3-Services", listOf( "3.1-View Category","3.2-Add Service", "3.3-View Services")),
         Triple(painterResource(id = R.drawable.hotel), "4-Hotels", listOf("4.1-Add Hotel", "4.2-View Hotels", "4.3-Add Room","4.4-View Rooms")),
-        Triple(painterResource(id = R.drawable.inventory), "5-Inventory", listOf("5.1-Add Category", "5.2-View Category", "5.3-Add Inventory","5.4-View Inventory")),
+        Triple(painterResource(id = R.drawable.inventory), "5-Inventory", listOf( "5.1-View Category", "5.2-Add Inventory","5.3-View Inventory")),
         Triple(painterResource(id = R.drawable.discount) , "6-Coupons", listOf("6.1-Add Coupon","6.2-View Coupon")),
         Triple(painterResource(id = R.drawable.bookmark), "7-Bookings", listOf("7.1-Add Booking", "7.2-View Booking")),
         Triple(painterResource(id = R.drawable.money), "8-Payments", listOf("8.1-View Payments", "8.2-View Refunds")),
-        Triple(painterResource(id = R.drawable.menu), "9-Menu", listOf("9.1-Add Category", "9.2-View Category", "9.3-Add Dish","9.4-View Dish","9.5-Add Menu","9.6-View Menu")),
-        Triple(painterResource(id = R.drawable.feedback), "10-Feedback", listOf("10.1-Add Review", "10.2-View Review")),
+        Triple(painterResource(id = R.drawable.menu), "9-Menu", listOf("9.1-View Category", "9.2-Add Dish","9.3-View Dish","9.4-Add Menu","9.5-View Menu")),
+        Triple(painterResource(id = R.drawable.feedback), "10-Feedback", listOf("10.1-View Review")),
         Triple(painterResource(id = R.drawable.chat), "11-Chats", listOf()),
         Triple(painterResource(id = R.drawable.account), "12-Accounting", listOf("12.1-Add Revenue", "12.2-View Revenue", "12.3-Add Expense","12.4-View Expense","12.5-View Profit")),
        // Triple(painterResource(id = R.drawable.staff), "13-Staffs", listOf("13.1-Add Category", "13.2-View Category", "13.3-Add Staff","13.4-View Staff")),
-        Triple(painterResource(id = R.drawable.settings), "13-Settings", listOf("13.1-About Us", "13.2-FAQ", "13.3-Policies")),
+      //  Triple(painterResource(id = R.drawable.settings), "13-Settings", listOf("13.1-About Us", "13.2-FAQ", "13.3-Policies")),
     )
+    if(role=="admin"){
+        menuList = listOf(
+            Triple(painterResource(id = R.drawable.home), "1-Dashboard", listOf()),
+            Triple(painterResource(id = R.drawable.user), "2-Users", listOf("2.1-Add User", "2.2-View Users")),
+            Triple(painterResource(id = R.drawable.tv), "3-Services", listOf("3.1-Add Category", "3.2-View Category","3.3-Add Service", "3.4-View Services")),
+            Triple(painterResource(id = R.drawable.hotel), "4-Hotels", listOf("4.1-Add Hotel", "4.2-View Hotels", "4.3-Add Room","4.4-View Rooms")),
+            Triple(painterResource(id = R.drawable.inventory), "5-Inventory", listOf("5.1-Add Category", "5.2-View Category", "5.3-Add Inventory","5.4-View Inventory")),
+            Triple(painterResource(id = R.drawable.discount) , "6-Coupons", listOf("6.1-Add Coupon","6.2-View Coupon")),
+            Triple(painterResource(id = R.drawable.bookmark), "7-Bookings", listOf("7.1-Add Booking", "7.2-View Booking")),
+            Triple(painterResource(id = R.drawable.money), "8-Payments", listOf("8.1-View Payments", "8.2-View Refunds")),
+            Triple(painterResource(id = R.drawable.menu), "9-Menu", listOf("9.1-Add Category", "9.2-View Category", "9.3-Add Dish","9.4-View Dish","9.5-Add Menu","9.6-View Menu")),
+            Triple(painterResource(id = R.drawable.feedback), "10-Feedback", listOf("10.1-Add Review", "10.2-View Review")),
+            Triple(painterResource(id = R.drawable.chat), "11-Chats", listOf()),
+            Triple(painterResource(id = R.drawable.account), "12-Accounting", listOf("12.1-Add Revenue", "12.2-View Revenue", "12.3-Add Expense","12.4-View Expense","12.5-View Profit")),
+            // Triple(painterResource(id = R.drawable.staff), "13-Staffs", listOf("13.1-Add Category", "13.2-View Category", "13.3-Add Staff","13.4-View Staff")),
+            Triple(painterResource(id = R.drawable.settings), "13-Settings", listOf("13.1-About Us", "13.2-FAQ", "13.3-Policies")),
+        )
+    }
     return menuList
 }

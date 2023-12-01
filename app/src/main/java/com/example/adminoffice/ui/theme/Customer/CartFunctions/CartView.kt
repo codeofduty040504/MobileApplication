@@ -174,7 +174,7 @@ object CartView  : Screen {
                                 .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
                                 .padding(10.dp)
                                 .clickable {
-                                    navigator.replace(LandingPage)
+                                    navigator.pop()
                                 }){
                                 Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
                             }
@@ -306,7 +306,8 @@ object CartView  : Screen {
 //            return
 //        }
         val url = "${GlobalStrings.baseURL}customer/rooms/getHotelRooms/${hotelid}"
-        Log.d("ASDD",hotelid)
+        Log.d("HASHDASDAS555",hotelid)
+        Log.d("HASHDASDAS555",url)
         var roomservices= mutableStateListOf<String>()
         var roomsfromLocalStorage= getRoomsIdinCart(context)
         val progressDialog = ProgressDialog(context)
@@ -334,7 +335,7 @@ object CartView  : Screen {
 
                         var _id = dd.getString("_id")
                         var roomNumber = dd.getString("roomNumber")
-                        var description = dd.getString("description")
+                    //    var description = dd.getString("description")
                         var floor = dd.getString("floor")
                         var images = dd.getJSONArray("images")
                         var imagesroom = mutableStateListOf<String>()
@@ -344,7 +345,8 @@ object CartView  : Screen {
                         var inventory = dd.getJSONArray("inventories")
                         var inventories = mutableStateListOf<String>()
                         for(i in 0 until inventory.length()){
-                            inventories.add(images.get(i).toString())
+                            var inventoryyy = inventory.get(i)
+                            inventories.add(inventoryyy.toString())
                         }
                         var adults = dd.getInt("adults")
                         var children = dd.getInt("children")

@@ -163,7 +163,7 @@ data class CancelBookingCustomer(
     var storageReference = storage.getReference();
     var imageURL = ""
     var message = ""
-
+    var successrefund = false
     var refundAmount = mutableStateOf(0)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -347,7 +347,7 @@ data class CancelBookingCustomer(
                         modifier = Modifier.padding(10.dp)
                     ) {
                         Column {
-                            Text(text = "Refund Policy Description", fontSize = 16.sp, color = Color.Gray,fontWeight = FontWeight.Medium)
+                            Text(text = "Refund Policy Description", fontSize = 16.sp, color = Color.Black,fontWeight = FontWeight.Medium)
                             Text(
                                 text = booking.hotel.refundPolicy.description,
                                 fontSize = 10.sp
@@ -475,9 +475,11 @@ data class CancelBookingCustomer(
                     }
 
                 }
-        getRefund(context,booking._id,{
+        if(successrefund==false){
+            getRefund(context,booking._id,{
 
-        })
+            })
+        }
     }
     fun convertion(date:String): String {
         val inputDateStr = date
@@ -506,6 +508,9 @@ data class CancelBookingCustomer(
         params.put("cancellationReason", cancellationReason)
         params.put("iban", iban)
         params.put("amount", amount.toInt())
+        Log.d("ASDWFVSA",params.toString())
+        Log.d("ASDWFVSA",url.toString())
+        Log.d("ASDWFVSA", getTokenFromLocalStorage(context))
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Please Wait")
         progressDialog.show()
@@ -541,6 +546,7 @@ data class CancelBookingCustomer(
                 { error ->
                     // Handle error response
                     Log.e("ASDWFVSA", error.toString())
+                    Log.e("ASDWFVSA", error.networkResponse.statusCode.toString())
                     progressDialog.dismiss()
                     Toast
                         .makeText(
@@ -571,6 +577,9 @@ data class CancelBookingCustomer(
 
     // Add Category Function
     fun getRefund(context: Context,id:String, callback: (Boolean) -> Unit){
+        if(successrefund==true){
+            return
+        }
         val url = "${GlobalStrings.baseURL}customer/bookings/refundBooking/${id}"
         // Request parameters
         val params = JSONObject()
@@ -598,6 +607,7 @@ data class CancelBookingCustomer(
 
                     // Assuming the API returns a JSON object with a field "valid" indicating user validity
                     callback(true)
+                    successrefund=true
                 },
                 { error ->
                     // Handle error response
@@ -611,6 +621,7 @@ data class CancelBookingCustomer(
                         )
                         .show()
                     callback(false)
+                    successrefund=false
                 }) {
 
                 @Throws(AuthFailureError::class)

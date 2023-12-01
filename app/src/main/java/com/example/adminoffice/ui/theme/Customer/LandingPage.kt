@@ -3,12 +3,9 @@ package com.example.adminoffice.ui.theme.Customer
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Context
-import android.graphics.ImageDecoder
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,10 +14,9 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,21 +24,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
@@ -54,12 +51,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.SliderColors
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
@@ -73,15 +67,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -94,58 +85,119 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.bottomSheet.BottomSheetNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.rememberAsyncImagePainter
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.beust.klaxon.Klaxon
 import com.example.adminoffice.R
 import com.example.adminoffice.ui.theme.Customer.Bookings.ViewBookingsCustomer
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.CartView
-import com.example.adminoffice.ui.theme.Customer.Coupons.CouponsList
 import com.example.adminoffice.ui.theme.Customer.Coupons.MapsCoupon
-import com.example.adminoffice.ui.theme.Customer.Functions.CustomSlider
+import com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Customer
+import com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Refund
+import com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.RefundPolicy
 import com.example.adminoffice.ui.theme.Customer.Functions.HotelScreen
-import com.example.adminoffice.ui.theme.Customer.Profile.ManageProfile
 import com.example.adminoffice.ui.theme.Customer.Profile.ViewProfile
 import com.example.adminoffice.ui.theme.Customer.Wishlist.WishList
 import com.example.adminoffice.ui.theme.DabsUser
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Hotel
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.HotelOwner
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Refund
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.RefundPolicy
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Room
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Service
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
-import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
-import com.example.adminoffice.ui.theme.Utils.DataClasses.RoomBook
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
-import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddBooking
 import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.AddHotel
-import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.ViewHotel
-import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.ViewHotel.HotelJsonArrayError
 import com.example.adminoffice.ui.theme.Utils.Screens.Inventory.ViewInventory
-import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
-import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Register
-import com.example.adminoffice.ui.theme.Utils.Screens.Reviews.ViewReview
 import com.example.adminoffice.ui.theme.Utils.Screens.Services.ViewService
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.absoluteValue
 
 object LandingPage  : Screen {
-
+    var called = false
     data class CitySchema(
         val city:String,
         val hotels:String,
         val image: String
     )
+    data class Review(
+        val name: String,
+        val date: String,
+        val review: String,
+        val rating: Int,
+        val profilePicture: String,
+        val position: String
+    )
 
+    val reviews = mutableStateListOf(
+        Review(
+            name = "Michael Brown",
+            date = "25-10-2024",
+            review = "The Grand Hotel provided me with an exceptional stay. The staff's warmth and willingness to help made my trip even better. The rooms were spacious and well-kept. I recommend this hotel.",
+            rating = 5,
+            profilePicture = "https://images.pexels.com/photos/846741/pexels-photo-846741.jpeg?cs=srgb&dl=pexels-andrea-piacquadio-846741.jpg&fm=jpg",
+            position = "CEO at Microsoft"
+        ),
+        Review(
+            name = "Alex Turner",
+            date = "17-10-2024",
+            review = "I had a wonderful stay at the Grand Hotel. The staff was friendly and helpful, the rooms were spacious and clean, and the location was perfect. I would recommend this hotel.",
+            rating = 4,
+            profilePicture = "https://t4.ftcdn.net/jpg/02/14/74/61/360_F_214746128_31JkeaP6rU0NzzzdFC4khGkmqc8noe6h.jpg",
+            position = "Software Engineer"
+        ),
+        Review(
+            name = "Ghulam Mohiuddin",
+            date = "20-10-2024",
+            review = "I enjoyed my stay at the Grand Hotel. The staff was friendly and helpful, rooms were clean, and the location was perfect. I recommend this hotel to anyone who loves eating.",
+            rating = 4,
+            profilePicture = "https://img.freepik.com/premium-photo/young-handsome-caucasian-man-isolated-blue-background-looking-side_1368-264985.jpg",
+            position = "Head At Daraz"
+        ),
+        Review(
+            name = "Emily Johnson",
+            date = "15-09-2024",
+            review = "I had a wonderful stay at the Grand Hotel. The staff was friendly and helpful, rooms were spacious and clean, and the location was perfect. I would definitely recommend this hotel.",
+            rating = 5,
+            profilePicture = "https://media.istockphoto.com/id/1167775238/photo/portrait-of-charming-college-person-putting-hands-palms-pockets-look-isolated-over-purple.jpg?s=612x612&w=0&k=20&c=SxRXuFWeBhmATaKEqjwW6LAVwALzuM6lRHRcNXvKKps=",
+            position = "CEO at Google"
+        ),
+        Review(
+            name = "David Smith",
+            date = "03-11-2024",
+            review = "I had an amazing time at the Grand Hotel. The staff's friendliness and attentiveness made my stay truly memorable. The rooms were spacious and well-maintained. I'm delighted to recommend this hotel.",
+            rating = 4,
+            profilePicture = "https://img.freepik.com/premium-photo/handsome-young-businessman-shirt-eyeglasses_85574-6228.jpg",
+            position = "Governor Punjab"
+        ),
+        Review(
+            name = "Sophia Lee",
+            date = "08-12-2024",
+            review = "I had a wonderful stay at the Grand Hotel. The staff was friendly and helpful, the rooms were spacious and clean, and the location was perfect. I would recommend this hotel.",
+            rating = 5,
+            profilePicture = "https://media.istockphoto.com/id/1152822574/video/happy-carefree-woman-dancing-on-blue-background.jpg?s=640x640&k=20&c=mpwnDKnpo-9Q52wRyKAGjNymsG0rj0acmAtBmi8DZR4=",
+            position = "World Explorer"
+        ),
+        Review(
+            name = "Jennifer Martinez",
+            date = "12-11-2024",
+            review = "I had a wonderful stay. I would definitely recommend this hotel to anyone looking for a great place to stay in the city.",
+            rating = 4,
+            profilePicture = "https://media.istockphoto.com/id/1281083606/photo/photo-of-attractive-charming-lady-cute-bobbed-hairdo-arms-crossed-self-confident-person.jpg?s=612x612&w=0&k=20&c=Pr3c_KCEQYE7jSDweq-mLbd-WVD-NdNSwzxG82BFwlw=",
+            position = "Military Officer"
+        ),
+        Review(
+            name = "Emma Davis",
+            date = "30-09-2024",
+            review = "I had a wonderful stay at the Grand Hotel. The staff was friendly and helpful, the rooms were spacious and clean, and the location was perfect. I would recommend this hotel.",
+            rating = 5,
+            profilePicture = "https://www.ukbusinessblog.co.uk/wp-content/uploads/2020/06/photo-of-woman-using-her-laptop-935756-1-scaled.jpg",
+            position = "CTO at Doerz"
+        )
+    )
     var Cities = mutableStateListOf<CitySchema>()
     var UserDABS = mutableStateListOf<DabsUser>()
     var serviceCategories = mutableStateListOf<ViewInventory.TableRow>()
@@ -161,7 +213,9 @@ object LandingPage  : Screen {
     val keyboardController = LocalSoftwareKeyboardController
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SuspiciousIndentation")
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+        ExperimentalFoundationApi::class
+    )
     @Composable
     override fun Content(){
         val navigator = LocalNavigator.currentOrThrow
@@ -173,6 +227,10 @@ object LandingPage  : Screen {
         val searchHotel = remember {
             mutableStateOf("")
         }
+        var user = getUserFromLocal(context)
+        val pagerState = rememberPagerState()
+        val pagerStatePopular = rememberPagerState()
+        val pagerStateTestimonial = rememberPagerState()
         var sortOrder by remember { mutableStateOf(SortOrder.Ascending) }
         val minPrice = remember {
             mutableStateOf("300")
@@ -629,7 +687,14 @@ object LandingPage  : Screen {
                                 .clickable {
                                     scope.launch {
                                         filters = false
+                                        servicesRoomselected.clear()
+                                        serviceshotelSelected.clear()
+                                        inventoryselected.clear()
+                                        minPrice.value="300"
+                                        maxPrice.value="100000"
+                                        rating=""
                                         drawerState.close()
+
                                     }
                                 }
                                 .padding(0.dp, 5.dp)
@@ -721,7 +786,7 @@ object LandingPage  : Screen {
                                         }
                                     }
                                 }
-                                Box(modifier = Modifier.clickable { navigator.replace(CartView) }){
+                                Box(modifier = Modifier.clickable { navigator.push(CartView) }){
                                     Image(
                                         painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logoog%2Fcart.png?alt=media&token=b086cbd2-0385-414d-9329-0bc6a796fe66&_gl=1*1tavxm5*_ga*MTgxOTgxNjI0NS4xNjg5MTczMDEz*_ga_CW55HF8NVT*MTY5OTU0Mjk5NC4zNC4xLjE2OTk1NDMwMzguMTYuMC4w"),
                                         contentDescription = "image",
@@ -738,8 +803,8 @@ object LandingPage  : Screen {
                                     )
                                 }
                                 Image(
-                                    painter = rememberAsyncImagePainter(if(UserDABS.isEmpty() || UserDABS[0].profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
-                                        UserDABS[0].profilePicture
+                                    painter = rememberAsyncImagePainter(if(user.profilePicture=="" || user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
+                                        user.profilePicture
                                     }),
                                     contentDescription = "image",
                                     modifier = Modifier
@@ -772,17 +837,75 @@ object LandingPage  : Screen {
                                )
                        }
                        item {
-                           Row(
-                               Modifier
-                                   .horizontalScroll(rememberScrollState())
-                                   .padding(horizontal = 10.dp)){
-                               for(hotel in Hotels){
-                                   Box(modifier = Modifier.clickable {
-                                       navigator.push(HotelScreen(hotel))
-                                   }){
-                                       HotelCardWithSlider(name = hotel.name, images = hotel.images, location = hotel.location, price = hotel.averagePrice.toString())                                   }
+                           Row(modifier = Modifier.fillMaxWidth(),
+                               verticalAlignment = Alignment.CenterVertically,
+                               horizontalArrangement = Arrangement.SpaceBetween,){
+                               Box(modifier = Modifier.padding(5.dp)){
+                                   IconButton(enabled = pagerStatePopular.canScrollBackward, modifier = Modifier.size(20.dp), onClick = {
+                                       scope.launch {
+                                           pagerStatePopular.animateScrollToPage(pagerStatePopular.currentPage - 1)
+                                       }
+                                   }) {
+                                       Icon(imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = "back")
+                                   }
+                               }
+                               HorizontalPager(
+                                   pageCount = Hotels.size,
+                                   state = pagerStatePopular,
+                                   contentPadding = PaddingValues(horizontal = 0.dp),
+                                   modifier = Modifier
+                                       .weight(1.5f)
+                                       .fillMaxWidth()
+                               ) { page ->
+                                   val pageOffset =
+                                       (pagerStatePopular.currentPage - page) + pagerStatePopular.currentPageOffsetFraction
+
+                                   val scaleFactor = 0.75f + (1f - 0.75f) * (1f - pageOffset.absoluteValue)
+
+
+                                   Box(modifier = Modifier
+//                                       .graphicsLayer {
+//                                           scaleX = scaleFactor
+//                                           scaleY = scaleFactor
+//                                       }
+//                                       .alpha(
+//                                           scaleFactor.coerceIn(0f, 1f)
+//                                       )
+//                                       .padding(0.dp)
+                                   ) {
+                                       Box(modifier = Modifier.clickable { navigator.push(HotelScreen(Hotels[page])) }){
+                                           HotelCardWithSlider(
+                                               images = Hotels[page].images,
+                                               name = Hotels[page].name,
+                                               location = Hotels[page].location,
+                                               price = Hotels[page].averagePrice.toString(),
+                                               rating =Hotels[page].averageRating.toString()
+                                           )
+                                       }
+                                       //CityCard(Citys[page].city,Citys[page].image,Citys[page].hotels)
+                                   }
+                               }
+                               Box(modifier = Modifier.padding(5.dp)){
+                                   IconButton(enabled = pagerStatePopular.currentPage != Hotels.size - 1,modifier = Modifier.size(20.dp), onClick = {
+                                       scope.launch {
+                                           pagerStatePopular.animateScrollToPage(pagerStatePopular.currentPage + 1)
+                                       }
+                                   }) {
+                                       Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "forward")
+                                   }
                                }
                            }
+//                           Row(
+//                               Modifier
+//                                   .horizontalScroll(rememberScrollState())
+//                                   .padding(horizontal = 10.dp)){
+//                               for(hotel in Hotels){
+//                                   Box(modifier = Modifier.clickable {
+//                                       navigator.push(HotelScreen(hotel))
+//                                   }){
+//                                       HotelCardWithSlider(name = hotel.name, images = hotel.images, location = hotel.location, price = hotel.averagePrice.toString())                                   }
+//                               }
+//                           }
                        }
                        item{
                            Text(
@@ -798,17 +921,76 @@ object LandingPage  : Screen {
                                )
                        }
                        item {
-                           Row(
-                               Modifier
-                                   .horizontalScroll(rememberScrollState())
-                                   .padding(horizontal = 10.dp)){
-                               for(hotel in Hotels){
-                                   Box(modifier = Modifier.clickable {
-                                       navigator.push(HotelScreen(hotel))
-                                   }){
-                                       HotelCardWithSlider(name = hotel.name, images = hotel.images, location = hotel.location, price = hotel.averagePrice.toString())                                   }
+                           Row(modifier = Modifier.fillMaxWidth(),
+                               verticalAlignment = Alignment.CenterVertically,
+                               horizontalArrangement = Arrangement.SpaceBetween,){
+                              Box(modifier = Modifier.padding(5.dp)){
+                                  IconButton(enabled = pagerState.canScrollBackward, modifier = Modifier.size(20.dp), onClick = {
+                                      scope.launch {
+                                          pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                      }
+                                  }) {
+                                      Icon(imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = "back")
+                                  }
+                              }
+                               HorizontalPager(
+                                   pageCount = Hotels.size,
+                                   state = pagerState,
+                                   contentPadding = PaddingValues(horizontal = 0.dp),
+                                   modifier = Modifier
+                                       .fillMaxWidth().weight(1.5f)
+                               ) { page ->
+                                   val pageOffset =
+                                       (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+
+                                   val scaleFactor = 0.75f + (1f - 0.75f) * (1f - pageOffset.absoluteValue)
+
+
+                                   Box(modifier = Modifier
+//                                       .graphicsLayer {
+//                                           scaleX = scaleFactor
+//                                           scaleY = scaleFactor
+//                                       }
+//                                       .alpha(
+//                                           scaleFactor.coerceIn(0f, 1f)
+//                                       )
+//                                       .padding(0.dp)
+                                   ) {
+                                       Box(modifier = Modifier.clickable {
+                                           navigator.push(HotelScreen(Hotels[page]))
+                                       }){
+                                           HotelCardWithSlider(
+                                               images = Hotels[page].images,
+                                               name = Hotels[page].name,
+                                               location = Hotels[page].location,
+                                               price = Hotels[page].averagePrice.toString(),
+                                               rating =Hotels[page].averageRating.toString()
+                                           )
+                                       }
+                                       //CityCard(Citys[page].city,Citys[page].image,Citys[page].hotels)
+                                   }
+                               }
+                               Box(modifier = Modifier.padding(5.dp)){
+                                   IconButton(enabled = pagerState.currentPage != Hotels.size - 1, modifier = Modifier.size(20.dp), onClick = {
+                                       scope.launch {
+                                           pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                       }
+                                   }) {
+                                       Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "forward")
+                                   }
                                }
                            }
+//                           Row(
+//                               Modifier
+//                                   .horizontalScroll(rememberScrollState())
+//                                   .padding(horizontal = 10.dp)){
+//                               for(hotel in Hotels){
+//                                   Box(modifier = Modifier.clickable {
+//                                       navigator.push(HotelScreen(hotel))
+//                                   }){
+//                                       HotelCardWithSlider(name = hotel.name, images = hotel.images, location = hotel.location, price = hotel.averagePrice.toString())                                   }
+//                               }
+//                           }
                        }
                        item {
                            Text(
@@ -825,6 +1007,57 @@ object LandingPage  : Screen {
                        }
                        item{
                            CustomSliderCity(Citys = Cities)
+                       }
+                       item {
+                           Text(
+                               text = "View Hotel on Maps",
+                               color = Color.Black,
+                               textAlign = TextAlign.Start,
+                               fontSize = 12.sp,
+                               modifier = Modifier
+                                   .fillMaxWidth()
+                                   .padding(10.dp),
+                               fontWeight = FontWeight.W400,
+
+                               )
+                       }
+                       item {
+                          Box(modifier = Modifier
+                              .fillMaxWidth()
+                              .padding(10.dp)){
+                              Box(modifier = Modifier
+                                  .fillMaxWidth()
+                                  .clickable {
+                                      navigator.push(ViewHotelOnMaps(Hotels))
+                                  }
+                                  .background(
+                                      color = Color(0xFF9D57FF),
+                                      RoundedCornerShape(20.dp)
+                                  )
+                                  .padding(10.dp), contentAlignment = Alignment.Center){
+                                  Row(
+                                      modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+                                  ){
+                                      Box(modifier = Modifier.width((screenWidthDp/2)-10.dp)){
+                                          Text(text = "View Hotel on Map and see what suits your interest.", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
+                                      }
+                                      Image(
+                                          painter = rememberAsyncImagePainter("https://www.techjunkie.com/wp-content/uploads/2015/04/map-location-pin.jpg"),
+                                          contentDescription = "image",
+                                          modifier = Modifier
+                                              .size(140.dp)
+                                              .clip(
+                                                  RoundedCornerShape(
+                                                      (CornerSize(
+                                                          20.dp
+                                                      ))
+                                                  )
+                                              ),
+                                          contentScale = ContentScale.FillBounds
+                                      )
+                                  }
+                              }
+                          }
                        }
                        item{
                            Row(
@@ -922,7 +1155,7 @@ object LandingPage  : Screen {
                                    Column (modifier = Modifier
                                        .fillMaxWidth()
                                        .width(250.dp)
-                                       .height(223.dp)
+                                       .height(220.dp)
                                        .padding(10.dp)
                                        .background(
                                            Color(0xFFFF57C1),
@@ -965,75 +1198,200 @@ object LandingPage  : Screen {
                                }
                            }
                        }
-                       item{
-                           Row(modifier = Modifier
-                               .fillMaxWidth()
-                               .padding(10.dp)
-                               .horizontalScroll(rememberScrollState())){
-                               for(i in 0 until 8){
-                                   Box(modifier = Modifier.padding(horizontal=5.dp)){
-                                       Box(modifier = Modifier
-                                           .width(280.dp)
-                                           .height(170.dp)
-                                           // .background(Color(0xFFFEFEFE))
-                                           .border(
-                                               0.2.dp,
-                                               Color(0xFFB6B4BB),
-                                               RoundedCornerShape(10.dp)
-                                           )
-                                       ){
-                                           Column(
-                                               Modifier
-                                                   .fillMaxWidth()){
-                                               Row (modifier = Modifier
-                                                   .padding(5.dp)
-                                                   .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
-                                                   Row{
-                                                       Image(
-                                                           painter = rememberAsyncImagePainter("https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Outdoors-man-portrait_%28cropped%29.jpg/800px-Outdoors-man-portrait_%28cropped%29.jpg"),
-                                                           contentDescription = "image",
-                                                           modifier = Modifier
-                                                               .size(40.dp)
-                                                               .clip(
-                                                                   RoundedCornerShape(
-                                                                       (CornerSize(
-                                                                           50.dp
-                                                                       ))
-                                                                   )
-                                                               ),
-                                                           contentScale = ContentScale.FillBounds
-                                                       )
-                                                       Spacer(modifier = Modifier.size(10.dp))
-                                                       Column {
-                                                           Text(text = "Abdul Mateen", fontWeight = FontWeight.W700, fontSize = 14.sp)
-                                                           Text(text = "25-10-2022", fontWeight = FontWeight.W400, fontSize = 11.sp, color = Color.Gray)
+
+                       item {
+                           Row(modifier = Modifier.fillMaxWidth(),
+                               verticalAlignment = Alignment.CenterVertically,
+                               horizontalArrangement = Arrangement.SpaceBetween,){
+                               IconButton(enabled = pagerStateTestimonial.canScrollBackward, onClick = {
+                                   scope.launch {
+                                       pagerStateTestimonial.animateScrollToPage(pagerStateTestimonial.currentPage - 1)
+                                   }
+                               }) {
+                                   Icon(imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = "back")
+                               }
+                               HorizontalPager(
+                                   pageCount = reviews.size,
+                                   state = pagerStateTestimonial,
+                                   contentPadding = PaddingValues(horizontal = 0.dp),
+                                   modifier = Modifier
+                                       .width(screenWidthDp-100.dp)
+                               ) { page ->
+                                   val pageOffset =
+                                       (pagerStateTestimonial.currentPage - page) + pagerStateTestimonial.currentPageOffsetFraction
+
+                                   val scaleFactor = 0.75f + (1f - 0.75f) * (1f - pageOffset.absoluteValue)
+
+
+                                   Box(modifier = Modifier
+                                       .graphicsLayer {
+                                           scaleX = scaleFactor
+                                           scaleY = scaleFactor
+                                       }
+                                       .alpha(
+                                           scaleFactor.coerceIn(0f, 1f)
+                                       )
+                                       .padding(0.dp)
+                                   ) {
+                                       Box(modifier = Modifier.padding(horizontal=5.dp)){
+                                           Box(modifier = Modifier
+                                               .width(280.dp)
+                                               .height(170.dp)
+                                               // .background(Color(0xFFFEFEFE))
+                                               .border(
+                                                   0.2.dp,
+                                                   Color(0xFFB6B4BB),
+                                                   RoundedCornerShape(10.dp)
+                                               )
+                                           ){
+                                               Column(
+                                                   Modifier
+                                                       .fillMaxWidth()){
+                                                   Row (modifier = Modifier
+                                                       .padding(5.dp)
+                                                       .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                                                       Row{
+                                                           Image(
+                                                               painter = rememberAsyncImagePainter(reviews[page].profilePicture),
+                                                               contentDescription = "image",
+                                                               modifier = Modifier
+                                                                   .size(40.dp)
+                                                                   .clip(
+                                                                       RoundedCornerShape(
+                                                                           (CornerSize(
+                                                                               50.dp
+                                                                           ))
+                                                                       )
+                                                                   ),
+                                                               contentScale = ContentScale.FillBounds
+                                                           )
+                                                           Spacer(modifier = Modifier.size(10.dp))
+                                                           Column {
+                                                               Text(text = reviews[page].name, fontWeight = FontWeight.W700, fontSize = 14.sp)
+                                                               Text(text = reviews[page].position, fontWeight = FontWeight.W400, fontSize = 11.sp, color = GlobalStrings.CustomerColorMain)
+                                                               Text(text = reviews[page].date, fontWeight = FontWeight.W400, fontSize = 11.sp, color = Color.Gray)
+                                                           }
+                                                       }
+                                                       Row(verticalAlignment = Alignment.CenterVertically){
+                                                           Icon(
+                                                               Icons.Outlined.Star, contentDescription =null, tint = Color(
+                                                                   0xFFFFC107
+                                                               ), modifier = Modifier.size(22.dp)
+                                                           )
+                                                           Text(text = reviews[page].rating.toString(), fontSize = 15.sp)
+                                                       }
+
+                                                   }
+                                                   Column(modifier = Modifier
+                                                       .padding(10.dp)
+                                                       .height(50.dp)) {
+                                                       Box(modifier = Modifier
+                                                           .fillMaxWidth()){
+                                                           Text(text = reviews[page].review, fontSize = 14.sp, fontWeight = FontWeight.W300, letterSpacing = 0.2.sp, color = Color.Black, lineHeight = 15.sp)
                                                        }
                                                    }
-                                                   Row(verticalAlignment = Alignment.Bottom){
-                                                       Icon(
-                                                           Icons.Outlined.Star, contentDescription =null, tint = Color(
-                                                               0xFFFFC107
-                                                           ), modifier = Modifier.size(22.dp)
-                                                       )
-                                                       Text(text = "3.5", fontSize = 15.sp)
-                                                   }
+                                               }
 
-                                               }
-                                               Column(modifier = Modifier
-                                                   .padding(10.dp)
-                                                   .height(50.dp)) {
-                                                   Box(modifier = Modifier
-                                                       .fillMaxWidth()){
-                                                       Text(text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ornare arcu a dolor lacinia egestas. Aliquam faucibus, magna eget laoreet aliquam, leo est dapibus felis, quis tincidunt lacus urna quis neque. Pellentesque accumsan quis sapien pulvinar pharetra. Etiam efficitur nisl sem, ut dignissim lectus pulvinar at. Quisque mattis euismod bibendum. Donec magna leo, ultricies id molestie sit amet, vehicula sit amet orci. Integer nec arcu sit amet ex fermentum suscipit. Cras massa mi, viverra ornare nisi sed, euismod molestie sapien. Aliquam ut arcu dolor. ", fontSize = 14.sp, fontWeight = FontWeight.W300, letterSpacing = 0.2.sp, color = Color.Black, lineHeight = 15.sp)
-                                                   }
-                                               }
                                            }
-
                                        }
+                                       //CityCard(Citys[page].city,Citys[page].image,Citys[page].hotels)
                                    }
                                }
+                               IconButton(enabled = pagerStateTestimonial.currentPage != Hotels.size - 1, onClick = {
+                                   scope.launch {
+                                       pagerStateTestimonial.animateScrollToPage(pagerStateTestimonial.currentPage + 1)
+                                   }
+                               }) {
+                                   Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "forward")
+                               }
                            }
+
+//                           Row(
+//                               Modifier
+//                                   .horizontalScroll(rememberScrollState())
+//                                   .padding(horizontal = 10.dp)){
+//                               for(hotel in Hotels){
+//                                   Box(modifier = Modifier.clickable {
+//                                       navigator.push(HotelScreen(hotel))
+//                                   }){
+//                                       HotelCardWithSlider(name = hotel.name, images = hotel.images, location = hotel.location, price = hotel.averagePrice.toString())                                   }
+//                               }
+//                           }
                        }
+                       item{
+                           Spacer(modifier = Modifier.size(15.dp))
+                       }
+
+//                       item{
+//                           Row(modifier = Modifier
+//                               .fillMaxWidth()
+//                               .padding(10.dp)
+//                               .horizontalScroll(rememberScrollState())){
+//                               for(review in reviews){
+//                                   Box(modifier = Modifier.padding(horizontal=5.dp)){
+//                                       Box(modifier = Modifier
+//                                           .width(280.dp)
+//                                           .height(170.dp)
+//                                           // .background(Color(0xFFFEFEFE))
+//                                           .border(
+//                                               0.2.dp,
+//                                               Color(0xFFB6B4BB),
+//                                               RoundedCornerShape(10.dp)
+//                                           )
+//                                       ){
+//                                           Column(
+//                                               Modifier
+//                                                   .fillMaxWidth()){
+//                                               Row (modifier = Modifier
+//                                                   .padding(5.dp)
+//                                                   .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+//                                                   Row{
+//                                                       Image(
+//                                                           painter = rememberAsyncImagePainter(review.profilePicture),
+//                                                           contentDescription = "image",
+//                                                           modifier = Modifier
+//                                                               .size(40.dp)
+//                                                               .clip(
+//                                                                   RoundedCornerShape(
+//                                                                       (CornerSize(
+//                                                                           50.dp
+//                                                                       ))
+//                                                                   )
+//                                                               ),
+//                                                           contentScale = ContentScale.FillBounds
+//                                                       )
+//                                                       Spacer(modifier = Modifier.size(10.dp))
+//                                                       Column {
+//                                                           Text(text = review.name, fontWeight = FontWeight.W700, fontSize = 14.sp)
+//                                                           Text(text = review.position, fontWeight = FontWeight.W400, fontSize = 11.sp, color = GlobalStrings.CustomerColorMain)
+//                                                           Text(text = review.date, fontWeight = FontWeight.W400, fontSize = 11.sp, color = Color.Gray)
+//                                                       }
+//                                                   }
+//                                                   Row(verticalAlignment = Alignment.Bottom){
+//                                                       Icon(
+//                                                           Icons.Outlined.Star, contentDescription =null, tint = Color(
+//                                                               0xFFFFC107
+//                                                           ), modifier = Modifier.size(22.dp)
+//                                                       )
+//                                                       Text(text = review.rating.toString(), fontSize = 15.sp)
+//                                                   }
+//
+//                                               }
+//                                               Column(modifier = Modifier
+//                                                   .padding(10.dp)
+//                                                   .height(50.dp)) {
+//                                                   Box(modifier = Modifier
+//                                                       .fillMaxWidth()){
+//                                                       Text(text = review.review, fontSize = 14.sp, fontWeight = FontWeight.W300, letterSpacing = 0.2.sp, color = Color.Black, lineHeight = 15.sp)
+//                                                   }
+//                                               }
+//                                           }
+//
+//                                       }
+//                                   }
+//                               }
+//                           }
+//                       }
                    }
                     else{
                         item{
@@ -1053,7 +1411,8 @@ object LandingPage  : Screen {
 
                                     if(HotelFilter.isEmpty()){
                                         Box(modifier = Modifier
-                                            .fillMaxWidth().padding(horizontal = 50.dp)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 50.dp)
                                             .height(screenHeightDp - 200.dp), contentAlignment = Alignment.Center){
                                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                 Image(
@@ -1091,7 +1450,10 @@ object LandingPage  : Screen {
                                                     Box(modifier = Modifier.clickable {
                                                         navigator.push(HotelScreen(it))
                                                     }){
-                                                        HotelCardWithSlider(name = it.name, images = it.images, location = it.location, price = it.averagePrice.toString())}
+                                                        HotelCardWithSlider(
+                                                            name = it.name, images = it.images, location = it.location,
+                                                            rating =it.averageRating.toString(),
+                                                            price = it.averagePrice.toString())}
                                                 }
                                             }
                                         Row(modifier = Modifier
@@ -1177,7 +1539,7 @@ object LandingPage  : Screen {
                             Icon(painter = rememberVectorPainter(Icons.Outlined.DateRange), contentDescription = "Booking", tint = Color.Black)
                         }
                         IconButton(onClick = {navigator.replace(LandingPage)}, modifier = Modifier.padding(12.dp)) {
-                            Icon(painter = rememberVectorPainter(Icons.Filled.Home), contentDescription = "Landing", tint = GlobalStrings.CustomerColorMain)
+                            Icon(painter = rememberVectorPainter(Icons.Outlined.Home), contentDescription = "Landing", tint = GlobalStrings.CustomerColorMain)
                         }
                         IconButton(onClick = {
                             navigator.replace(WishList)
@@ -1196,14 +1558,19 @@ object LandingPage  : Screen {
             }
         }
 
-       getHotels(context)
-        getServices(context)
-        getServicesRoom(context)
-        getInventory(context)
-        AuthorizationDABS(context){
+       if(called==false){
+           getHotels(context)
+           getServices(context)
+           getServicesRoom(context)
+           getInventory(context)
 
-        }
-        getCities(context)
+           getCities(context)
+           called=true
+       }
+//        AuthorizationDABS(context){
+//
+//        }
+
     }
 
 
@@ -1607,7 +1974,7 @@ object LandingPage  : Screen {
                         var VideoList = mutableStateListOf<String>()
                         var FloorList = mutableStateListOf<String>()
                         var RulesList = mutableStateListOf<String>()
-                        var ReviewsList = mutableStateListOf<String>()
+                        var ReviewsList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Review>()
                         var RefundList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Refund>()
                         var ImageList = mutableStateListOf<String>()
                         var RoomsList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Room>()
@@ -1639,7 +2006,7 @@ object LandingPage  : Screen {
                         var hotelisDeleted = hotel.getBoolean("isDeleted")
                         var hoteldeletedAt = hotel.get("deletedAt")
                         var hotel__v = hotel.getInt("__v")
-                      //  var hotelaverageRating = hotel.getInt("averageRating")
+                        var hotelaverageRating = hotel.get("averageRating").toString()
                         var hoteltotalReviews = hotel.getInt("totalReviews")
                         var hotelaveragePrice = hotel.getInt("averagePrice")
                       //  var hotelid = hotel.getInt("id")
@@ -1666,8 +2033,21 @@ object LandingPage  : Screen {
                         }
                         var hotelreviews = hotel.getJSONArray("reviews")
                         for(i in 0 until hotelreviews.length()){
-                            var hotelReviewList = hotelreviews.getString(i)
-                            ReviewsList.add(hotelReviewList)
+                            var reviewOne = hotelreviews.getJSONObject(i)
+                            var review_id = reviewOne.getString("_id")
+                            var customer = reviewOne.getString("customer")
+                            var CC = Customer(name = "AA", profile = "aaas")
+                            var title = reviewOne.getString("title")
+                            var description = reviewOne.getString("description")
+                            var isDeleted = reviewOne.getBoolean("isDeleted")
+                            var deletedAt = reviewOne.get("deletedAt")
+                            var stars = reviewOne.getInt("stars")
+                            var createdAt = reviewOne.getString("createdAt")
+                            var updatedAt = reviewOne.getString("updatedAt")
+                            var __v = reviewOne.getInt("__v")
+                            var Revieww = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Review(__v = __v,_id=review_id,
+                                createdAt=createdAt,customer=CC,deletedAt=deletedAt, description = description, isDeleted = isDeleted, stars = stars,title=title, updatedAt = updatedAt)
+                            ReviewsList.add(Revieww)
                         }
                         var hotelfloors = hotel.getJSONArray("floors")
                         for(i in 0 until hotelfloors.length()){
@@ -1713,34 +2093,34 @@ object LandingPage  : Screen {
                         }
 
 
-                        var hotelrefundPolicy = hotel.getString("refundPolicy")
-//                        var hotelrefundPolicy_id = hotelrefundPolicy.getString("_id")
-//                        var hotelrefundPolicydescription = hotelrefundPolicy.getString("description")
-//                        var hotelrefundPolicyrefunds = hotelrefundPolicy.getJSONArray("refunds")
-//                        for(i in 0 until hotelrefundPolicyrefunds.length()){
-//                            var refundsOBJ = hotelrefundPolicyrefunds.getJSONObject(i)
-//                            var refundsOBJdays = refundsOBJ.getInt("days")
-//                            var refundsOBJpercentage = refundsOBJ.getInt("percentage")
-//                            var refundsOBJ_id = refundsOBJ.getString("_id")
-//                            var refundsOBJisDeleted = refundsOBJ.getBoolean("isDeleted")
-//                            var refundsOBJdeletedAt = refundsOBJ.get("deletedAt")
-//                            var refundOBJ = Refund(_id=refundsOBJ_id, days = refundsOBJdays, deletedAt = refundsOBJdeletedAt,
-//                                isDeleted = refundsOBJisDeleted, percentage = refundsOBJpercentage)
-//                            RefundList.add(refundOBJ)
-//
-//                        }
+                        var hotelrefundPolicy = hotel.getJSONObject("refundPolicy")
+                        var hotelrefundPolicy_id = hotelrefundPolicy.getString("_id")
+                        var hotelrefundPolicydescription = hotelrefundPolicy.getString("description")
+                        var hotelrefundPolicyrefunds = hotelrefundPolicy.getJSONArray("refunds")
+                        for(i in 0 until hotelrefundPolicyrefunds.length()){
+                            var refundsOBJ = hotelrefundPolicyrefunds.getJSONObject(i)
+                            var refundsOBJdays = refundsOBJ.getInt("days")
+                            var refundsOBJpercentage = refundsOBJ.getInt("percentage")
+                            var refundsOBJ_id = refundsOBJ.getString("_id")
+                            var refundsOBJisDeleted = refundsOBJ.getBoolean("isDeleted")
+                            var refundsOBJdeletedAt = refundsOBJ.get("deletedAt")
+                            var refundOBJ = Refund(_id=refundsOBJ_id, days = refundsOBJdays, deletedAt = refundsOBJdeletedAt,
+                                isDeleted = refundsOBJisDeleted, percentage = refundsOBJpercentage)
+                            RefundList.add(refundOBJ)
 
-//                        var hotelrefundPolicyisDeleted = hotelrefundPolicy.getBoolean("isDeleted")
-//                        var hotelrefundPolicydeletedAt = hotelrefundPolicy.get("deletedAt")
-//                        var hotelrefundPolicycreatedAt = hotelrefundPolicy.getString("createdAt")
-//                        var hotelrefundPolicyupdatedAt = hotelrefundPolicy.getString("updatedAt")
-//                        var hotelrefundPolicy__v = hotelrefundPolicy.getInt("__v")
-                        var RefundPolicy = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.RefundPolicy(__v = 0,_id="hotelrefundPolicy_id", createdAt = "hotelrefundPolicycreatedAt",
-                            deletedAt = "hotelrefundPolicydeletedAt", description = "hotelrefundPolicydescription", isDeleted = false,
-                            refunds = RefundList, updatedAt = "hotelrefundPolicyupdatedAt")
-//                        var RefundPolicy = RefundPolicy(__v = hotelrefundPolicy__v,_id=hotelrefundPolicy_id, createdAt = hotelrefundPolicycreatedAt,
-//                            deletedAt = hotelrefundPolicydeletedAt, description = hotelrefundPolicydescription, isDeleted = hotelrefundPolicyisDeleted,
-//                            refunds = RefundList, updatedAt = hotelrefundPolicyupdatedAt)
+                        }
+
+                        var hotelrefundPolicyisDeleted = hotelrefundPolicy.getBoolean("isDeleted")
+                        var hotelrefundPolicydeletedAt = hotelrefundPolicy.get("deletedAt")
+                        var hotelrefundPolicycreatedAt = hotelrefundPolicy.getString("createdAt")
+                        var hotelrefundPolicyupdatedAt = hotelrefundPolicy.getString("updatedAt")
+                        var hotelrefundPolicy__v = hotelrefundPolicy.getInt("__v")
+//                        var RefundPolicy = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.RefundPolicy(__v = 0,_id="hotelrefundPolicy_id", createdAt = "hotelrefundPolicycreatedAt",
+//                            deletedAt = "hotelrefundPolicydeletedAt", description = "hotelrefundPolicydescription", isDeleted = false,
+//                            refunds = RefundList, updatedAt = "hotelrefundPolicyupdatedAt")
+                        var RefundPolicy = RefundPolicy(__v = hotelrefundPolicy__v,_id=hotelrefundPolicy_id, createdAt = hotelrefundPolicycreatedAt,
+                            deletedAt = hotelrefundPolicydeletedAt, description = hotelrefundPolicydescription, isDeleted = hotelrefundPolicyisDeleted,
+                            refunds = RefundList, updatedAt = hotelrefundPolicyupdatedAt)
                         try{
                             var rooms = hotel.getJSONArray("room")
                             for(i in 0 until rooms.length()){
@@ -1779,8 +2159,15 @@ object LandingPage  : Screen {
                         catch(e:Exception){
                             e.printStackTrace()
                         }
+                        var avgrat = 0
+                        if(hotelaverageRating=="null"){
+                            avgrat=0
+                        }
+                        else{
+                            avgrat=hotelaverageRating.toInt()
+                        }
 
-                        var Hotel = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Hotel(__v = hotel__v,_id=_id, averagePrice = hotelaveragePrice, averageRating = 9,
+                        var Hotel = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Hotel(__v = hotel__v,_id=_id, averagePrice = hotelaveragePrice, averageRating = avgrat,
                             city = hotelcity, createdAt = hotelcreatedAt, deletedAt = hoteldeletedAt, description = hoteldescription,
                             facebookURL = hotelfacebookURL, floors = FloorList, hotelOwner = hotelOwnerOBJ, id = 0, images = ImageList,
                             instagramURL = hotelinstagramURL, isDeleted = hotelisDeleted, lat = hotellat, lng = hotellng, location = hotellocation,
@@ -1839,7 +2226,6 @@ object LandingPage  : Screen {
             val request = object : JsonObjectRequest(
                 Request.Method.GET, url, params,
                 { response ->
-                    Hotels.clear()
                     Log.d("HAPP",response.toString())
                     var hotels  = response.getJSONArray("hotels")
                     for(i in 0 until hotels.length()){
@@ -1854,7 +2240,7 @@ object LandingPage  : Screen {
                 },
                 { error ->
                     Log.d("HASHDASDAS222",error.toString())
-                    Hotels.clear()
+                    Cities.clear()
                     HotelJsonArrayError = mutableStateOf(error.toString())
                     progressDialog.dismiss()
                 }) {
@@ -1877,6 +2263,7 @@ object LandingPage  : Screen {
 
     fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
         if(UserDABS.isNotEmpty()){
+//            if(UserDABS[0].profilePicture=="")
             return
         }
         val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
@@ -2023,7 +2410,7 @@ object LandingPage  : Screen {
                         var VideoList = mutableStateListOf<String>()
                         var FloorList = mutableStateListOf<String>()
                         var RulesList = mutableStateListOf<String>()
-                        var ReviewsList = mutableStateListOf<String>()
+                        var ReviewsList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Review>()
                         var RefundList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Refund>()
                         var ImageList = mutableStateListOf<String>()
                         var RoomsList = mutableStateListOf<com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Room>()
@@ -2081,7 +2468,7 @@ object LandingPage  : Screen {
                         var hotelisDeleted = hotel.getBoolean("isDeleted")
                         var hoteldeletedAt = hotel.get("deletedAt")
                         var hotel__v = hotel.getInt("__v")
-                        //  var hotelaverageRating = hotel.getInt("averageRating")
+                          var hotelaverageRating = hotel.get("averageRating").toString()
                         var hoteltotalReviews = hotel.getInt("totalReviews")
                         var hotelaveragePrice = hotel.getInt("averagePrice")
                         //  var hotelid = hotel.getInt("id")
@@ -2108,8 +2495,21 @@ object LandingPage  : Screen {
                         }
                         var hotelreviews = hotel.getJSONArray("reviews")
                         for(i in 0 until hotelreviews.length()){
-                            var hotelReviewList = hotelreviews.getString(i)
-                            ReviewsList.add(hotelReviewList)
+                            var reviewOne = hotelreviews.getJSONObject(i)
+                            var review_id = reviewOne.getString("_id")
+                            var customer = reviewOne.getString("customer")
+                            var CC = Customer(name = "AA", profile = "aaas")
+                            var title = reviewOne.getString("title")
+                            var description = reviewOne.getString("description")
+                            var isDeleted = reviewOne.getBoolean("isDeleted")
+                            var deletedAt = reviewOne.get("deletedAt")
+                            var stars = reviewOne.getInt("stars")
+                            var createdAt = reviewOne.getString("createdAt")
+                            var updatedAt = reviewOne.getString("updatedAt")
+                            var __v = reviewOne.getInt("__v")
+                            var Revieww = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Review(__v = __v,_id=review_id,
+                                createdAt=createdAt,customer=CC,deletedAt=deletedAt, description = description, isDeleted = isDeleted, stars = stars,title=title, updatedAt = updatedAt)
+                            ReviewsList.add(Revieww)
                         }
                         var hotelfloors = hotel.getJSONArray("floors")
                         for(i in 0 until hotelfloors.length()){
@@ -2119,21 +2519,21 @@ object LandingPage  : Screen {
 
                         var hotelservices = hotel.getJSONArray("services")
                         for(i in 0 until hotelservices.length()){
-//                            var serviceOBJ = hotelservices.getJSONObject(i)
-//                            var hotelservices_id = serviceOBJ.getString("_id")
-//                            var hotelservicestype = serviceOBJ.getString("type")
-//                            var hotelservicesname = serviceOBJ.getString("name")
-//                            var hotelservicesdescription = serviceOBJ.getString("description")
-//                            var hotelservicesimage = serviceOBJ.getString("image")
-//                            var hotelservicespriceRate = serviceOBJ.getString("priceRate")
-//                            var hotelservicesprice = serviceOBJ.getInt("price")
-//                            var hotelservicesaddedByRole = serviceOBJ.getString("addedByRole")
-//                            var hotelservicesdeletedAt = serviceOBJ.get("deletedAt")
-//                            var hotelservicesvisible = serviceOBJ.getBoolean("visible")
-//                            var hotelservicesisDeleted = serviceOBJ.getBoolean("isDeleted")
-//                            var hotelservicescreatedAt = serviceOBJ.getString("createdAt")
-//                            var hotelservicesupdatedAt = serviceOBJ.getString("updatedAt")
-//                            var hotelservices__v = serviceOBJ.getInt("__v")
+                            var serviceOBJ = hotelservices.getJSONObject(i)
+                            var hotelservices_id = serviceOBJ.getString("_id")
+                            var hotelservicestype = serviceOBJ.getString("type")
+                            var hotelservicesname = serviceOBJ.getString("name")
+                            var hotelservicesdescription = serviceOBJ.getString("description")
+                            var hotelservicesimage = serviceOBJ.getString("image")
+                            var hotelservicespriceRate = serviceOBJ.getString("priceRate")
+                            var hotelservicesprice = serviceOBJ.getInt("price")
+                            var hotelservicesaddedByRole = serviceOBJ.getString("addedByRole")
+                            var hotelservicesdeletedAt = serviceOBJ.get("deletedAt")
+                            var hotelservicesvisible = serviceOBJ.getBoolean("visible")
+                            var hotelservicesisDeleted = serviceOBJ.getBoolean("isDeleted")
+                            var hotelservicescreatedAt = serviceOBJ.getString("createdAt")
+                            var hotelservicesupdatedAt = serviceOBJ.getString("updatedAt")
+                            var hotelservices__v = serviceOBJ.getInt("__v")
 
 
 //                            var hotelservicesserviceCategory = serviceOBJ.getJSONObject("serviceCategory")
@@ -2148,43 +2548,43 @@ object LandingPage  : Screen {
                             var cat = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.ServiceCategory(__v = 0,_id="hotelservicesserviceCategory_id", createdAt = "hotelservicesserviceCategorycreatedAt",
                                 deletedAt ="hotelservicesserviceCategorydeletedAt", image = "hotelservicesserviceCategoryimage", isDeleted = false,
                                 title = "hotelservicesserviceCategorytitle", updatedAt = "hotelservicesserviceCategoryupdatedAt")
-                            var ser = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Service(__v = 0,_id="hotelservices_id", addedByRole = "hotelservicesaddedByRole",
-                                createdAt = "hotelservicescreatedAt", deletedAt = "hotelservicesdeletedAt", description = "hotelservicesdescription",
-                                image = "hotelservicesimage",isDeleted = false, name = "hotelservicesname",
-                                price = 0, priceRate = "hotelservicespriceRate", type = "hotelservicestype",
-                                updatedAt = "hotelservicesupdatedAt", visible = false, serviceCategory = cat)
+                            var ser = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Service(__v = hotelservices__v,_id=hotelservices_id, addedByRole = hotelservicesaddedByRole,
+                                createdAt = hotelservicescreatedAt, deletedAt = hotelservicesdeletedAt, description = hotelservicesdescription,
+                                image = hotelservicesimage,isDeleted = hotelservicesisDeleted, name = hotelservicesname,
+                                price = hotelservicesprice, priceRate = hotelservicespriceRate, type = hotelservicestype,
+                                updatedAt = hotelservicesupdatedAt, visible = hotelservicesvisible, serviceCategory = cat)
                             ServiceList.add(ser)
                         }
 
 
-                        var hotelrefundPolicy = hotel.getString("refundPolicy")
-//                        var hotelrefundPolicy_id = hotelrefundPolicy.getString("_id")
-//                        var hotelrefundPolicydescription = hotelrefundPolicy.getString("description")
-//                        var hotelrefundPolicyrefunds = hotelrefundPolicy.getJSONArray("refunds")
-//                        for(i in 0 until hotelrefundPolicyrefunds.length()){
-//                            var refundsOBJ = hotelrefundPolicyrefunds.getJSONObject(i)
-//                            var refundsOBJdays = refundsOBJ.getInt("days")
-//                            var refundsOBJpercentage = refundsOBJ.getInt("percentage")
-//                            var refundsOBJ_id = refundsOBJ.getString("_id")
-//                            var refundsOBJisDeleted = refundsOBJ.getBoolean("isDeleted")
-//                            var refundsOBJdeletedAt = refundsOBJ.get("deletedAt")
-//                            var refundOBJ = Refund(_id=refundsOBJ_id, days = refundsOBJdays, deletedAt = refundsOBJdeletedAt,
-//                                isDeleted = refundsOBJisDeleted, percentage = refundsOBJpercentage)
-//                            RefundList.add(refundOBJ)
-//
-//                        }
+                        var hotelrefundPolicy = hotel.getJSONObject("refundPolicy")
+                        var hotelrefundPolicy_id = hotelrefundPolicy.getString("_id")
+                        var hotelrefundPolicydescription = hotelrefundPolicy.getString("description")
+                        var hotelrefundPolicyrefunds = hotelrefundPolicy.getJSONArray("refunds")
+                        for(i in 0 until hotelrefundPolicyrefunds.length()){
+                            var refundsOBJ = hotelrefundPolicyrefunds.getJSONObject(i)
+                            var refundsOBJdays = refundsOBJ.getInt("days")
+                            var refundsOBJpercentage = refundsOBJ.getInt("percentage")
+                            var refundsOBJ_id = refundsOBJ.getString("_id")
+                            var refundsOBJisDeleted = refundsOBJ.getBoolean("isDeleted")
+                            var refundsOBJdeletedAt = refundsOBJ.get("deletedAt")
+                            var refundOBJ = Refund(_id=refundsOBJ_id, days = refundsOBJdays, deletedAt = refundsOBJdeletedAt,
+                                isDeleted = refundsOBJisDeleted, percentage = refundsOBJpercentage)
+                            RefundList.add(refundOBJ)
 
-//                        var hotelrefundPolicyisDeleted = hotelrefundPolicy.getBoolean("isDeleted")
-//                        var hotelrefundPolicydeletedAt = hotelrefundPolicy.get("deletedAt")
-//                        var hotelrefundPolicycreatedAt = hotelrefundPolicy.getString("createdAt")
-//                        var hotelrefundPolicyupdatedAt = hotelrefundPolicy.getString("updatedAt")
-//                        var hotelrefundPolicy__v = hotelrefundPolicy.getInt("__v")
-                        var RefundPolicy = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.RefundPolicy(__v = 0,_id="hotelrefundPolicy_id", createdAt = "hotelrefundPolicycreatedAt",
-                            deletedAt = "hotelrefundPolicydeletedAt", description = "hotelrefundPolicydescription", isDeleted = false,
-                            refunds = RefundList, updatedAt = "hotelrefundPolicyupdatedAt")
-//                        var RefundPolicy = RefundPolicy(__v = hotelrefundPolicy__v,_id=hotelrefundPolicy_id, createdAt = hotelrefundPolicycreatedAt,
-//                            deletedAt = hotelrefundPolicydeletedAt, description = hotelrefundPolicydescription, isDeleted = hotelrefundPolicyisDeleted,
-//                            refunds = RefundList, updatedAt = hotelrefundPolicyupdatedAt)
+                        }
+
+                        var hotelrefundPolicyisDeleted = hotelrefundPolicy.getBoolean("isDeleted")
+                        var hotelrefundPolicydeletedAt = hotelrefundPolicy.get("deletedAt")
+                        var hotelrefundPolicycreatedAt = hotelrefundPolicy.getString("createdAt")
+                        var hotelrefundPolicyupdatedAt = hotelrefundPolicy.getString("updatedAt")
+                        var hotelrefundPolicy__v = hotelrefundPolicy.getInt("__v")
+//                        var RefundPolicy = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.RefundPolicy(__v = 0,_id="hotelrefundPolicy_id", createdAt = "hotelrefundPolicycreatedAt",
+//                            deletedAt = "hotelrefundPolicydeletedAt", description = "hotelrefundPolicydescription", isDeleted = false,
+//                            refunds = RefundList, updatedAt = "hotelrefundPolicyupdatedAt")
+                        var RefundPolicy = RefundPolicy(__v = hotelrefundPolicy__v,_id=hotelrefundPolicy_id, createdAt = hotelrefundPolicycreatedAt,
+                            deletedAt = hotelrefundPolicydeletedAt, description = hotelrefundPolicydescription, isDeleted = hotelrefundPolicyisDeleted,
+                            refunds = RefundList, updatedAt = hotelrefundPolicyupdatedAt)
                         try{
                             var rooms = hotel.getJSONArray("room")
                             for(i in 0 until rooms.length()){
@@ -2223,8 +2623,14 @@ object LandingPage  : Screen {
                         catch(e:Exception){
                             e.printStackTrace()
                         }
-
-                        var Hotel = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Hotel(__v = hotel__v,_id=_id, averagePrice = hotelaveragePrice, averageRating = 9,
+                        var avgrat = 0
+                        if(hotelaverageRating=="null"){
+                            avgrat=0
+                        }
+                        else{
+                            avgrat=hotelaverageRating.toInt()
+                        }
+                        var Hotel = com.example.adminoffice.ui.theme.Customer.DataClassesCustomer.Hotel(__v = hotel__v,_id=_id, averagePrice = hotelaveragePrice, averageRating = avgrat,
                             city = hotelcity, createdAt = hotelcreatedAt, deletedAt = hoteldeletedAt, description = hoteldescription,
                             facebookURL = hotelfacebookURL, floors = FloorList, hotelOwner = hotelOwnerOBJ, id = 0, images = ImageList,
                             instagramURL = hotelinstagramURL, isDeleted = hotelisDeleted, lat = hotellat, lng = hotellng, location = hotellocation,
@@ -2233,6 +2639,7 @@ object LandingPage  : Screen {
                             updatedAt = hotelupdatedAt, videos = VideoList, websiteURL = hotelwebsiteURL, rooms = RoomsList)
 
                         HotelFilter.add(Hotel)
+                        progressDialog.dismiss()
 
                     }
                     progressDialog.dismiss()
@@ -2241,6 +2648,7 @@ object LandingPage  : Screen {
                     Log.d("HASHDASDAS",error.toString())
                     Log.d("HASHDASDAS",error.networkResponse.statusCode.toString())
                     HotelFilter.clear()
+                    progressDialog.dismiss()
                     HotelJsonArrayError = mutableStateOf(error.toString())
                     progressDialog.dismiss()
                 }) {
