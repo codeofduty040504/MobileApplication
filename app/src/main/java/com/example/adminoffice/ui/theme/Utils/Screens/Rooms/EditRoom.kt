@@ -113,6 +113,7 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Inventories.Inventory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Inventories.InventoryCategory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Rooms.Room
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Header
 import com.example.adminoffice.ui.theme.Utils.Logo
@@ -155,6 +156,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.example.adminoffice.ui.theme.Utils.isValidDescription
@@ -290,178 +292,7 @@ data class EditRoom(
         var selectedSubItem by remember { mutableStateOf(-1) }
         ModalNavigationDrawer(
             drawerContent = {
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState= drawerState,
         ) {
@@ -486,7 +317,7 @@ data class EditRoom(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.house ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -498,130 +329,132 @@ data class EditRoom(
                                     }
                                 }
                                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
-                                            .padding(16.dp)
-                                            .clickable { isExpandedHotel.value = true }
-                                    ) {
-                                        Row {
-                                            Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
-                                            Text(text = if(hotelSelect==""){
-                                                "Select Hotel"
-                                            }
-                                            else{
-                                                hotelSelect
-                                            },
-                                                color =  if(hotelSelect==""){
-                                                    Color.Gray
+                                    if(getRoleFromLocalStorage(context)=="admin"){
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
+                                                .padding(16.dp)
+                                                .clickable { isExpandedHotel.value = true }
+                                        ) {
+                                            Row {
+                                                Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
+                                                Text(text = if(hotelSelect==""){
+                                                    "Select Hotel"
                                                 }
                                                 else{
-                                                    Color.Black
-                                                }
-                                            )
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = isExpandedHotel.value,
-                                            onDismissRequest = {isExpandedHotel.value=false },
-                                            modifier = Modifier
-                                                .size(300.dp, 120.dp)
-                                                .fillMaxWidth()
-                                        ) {
-                                            Hotels.forEach { option ->
-                                                DropdownMenuItem(text = { Column{
-                                                    Text(text = option.name)
-                                                    Text(text = option.location, fontSize = 10.sp)
-                                                } } , leadingIcon = {
-                                                    Box(){
-                                                        Image(
-                                                            painter = rememberAsyncImagePainter(option.images[0], contentScale = ContentScale.Fit),
-                                                            contentDescription = "image",
-                                                            modifier = Modifier
-                                                                .size(70.dp)
-                                                                .clip(
-                                                                    RoundedCornerShape(
-                                                                        (CornerSize(
-                                                                            20.dp
-                                                                        ))
-                                                                    )
-                                                                )
-                                                        )
+                                                    hotelSelect
+                                                },
+                                                    color =  if(hotelSelect==""){
+                                                        Color.Gray
                                                     }
-                                                }, onClick = {
-                                                    hotelSelect = option.name
-                                                    hotelID = option._id
-                                                    //getFloors(context= context,id= hotelID)
-                                                    Floors.clear()
-                                                    floorSelect=""
-                                                    for (hotel in Hotels){
-                                                        if(hotel._id== hotelID){
-                                                            for(i in 0 until hotel.floors.size){
-                                                                Floors.add(hotel.floors[i])
+                                                    else{
+                                                        Color.Black
+                                                    }
+                                                )
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = isExpandedHotel.value,
+                                                onDismissRequest = {isExpandedHotel.value=false },
+                                                modifier = Modifier
+                                                    .size(300.dp, 120.dp)
+                                                    .fillMaxWidth()
+                                            ) {
+                                                Hotels.forEach { option ->
+                                                    DropdownMenuItem(text = { Column{
+                                                        Text(text = option.name)
+                                                        Text(text = option.location, fontSize = 10.sp)
+                                                    } } , leadingIcon = {
+                                                        Box(){
+                                                            Image(
+                                                                painter = rememberAsyncImagePainter(option.images[0], contentScale = ContentScale.Fit),
+                                                                contentDescription = "image",
+                                                                modifier = Modifier
+                                                                    .size(70.dp)
+                                                                    .clip(
+                                                                        RoundedCornerShape(
+                                                                            (CornerSize(
+                                                                                20.dp
+                                                                            ))
+                                                                        )
+                                                                    )
+                                                            )
+                                                        }
+                                                    }, onClick = {
+                                                        hotelSelect = option.name
+                                                        hotelID = option._id
+                                                        //getFloors(context= context,id= hotelID)
+                                                        Floors.clear()
+                                                        floorSelect=""
+                                                        for (hotel in Hotels){
+                                                            if(hotel._id== hotelID){
+                                                                for(i in 0 until hotel.floors.size){
+                                                                    Floors.add(hotel.floors[i])
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                    isExpandedHotel.value = false
-                                                }, modifier = Modifier.padding(5.dp))
+                                                        isExpandedHotel.value = false
+                                                    }, modifier = Modifier.padding(5.dp))
+                                                }
                                             }
                                         }
-                                    }
-                                    if (isErrorHotel) {
-                                        Text(
-                                            text = "Please select a Hotel",
-                                            color = Color.Red,
-                                            modifier = Modifier.align(Alignment.Start),
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
-                                            .padding(16.dp)
-                                            .clickable { isExpandedFloor.value = true }
-                                    ) {
-                                        Row {
-                                            Icon(painterResource(id = R.drawable.elevator), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
-                                            Text(text = if(floorSelect==""){
-                                                "Select Floor"
-                                            }
-                                            else{
-                                                floorSelect
-                                            },
-                                                color =  if(floorSelect==""){
-                                                    Color.Gray
-                                                }
-                                                else{
-                                                    Color.Black
-                                                }
+                                        if (isErrorHotel) {
+                                            Text(
+                                                text = "Please select a Hotel",
+                                                color = Color.Red,
+                                                modifier = Modifier.align(Alignment.Start),
+                                                fontSize = 11.sp
                                             )
                                         }
-
-                                        DropdownMenu(
-                                            expanded = isExpandedFloor.value,
-                                            onDismissRequest = {isExpandedFloor.value=false },
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Box(
                                             modifier = Modifier
-                                                .size(300.dp, 120.dp)
                                                 .fillMaxWidth()
+                                                .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
+                                                .padding(16.dp)
+                                                .clickable { isExpandedFloor.value = true }
                                         ) {
-                                            Floors.forEach { option ->
-                                                DropdownMenuItem(text = { Text(text = option) }, onClick = {
-                                                    floorSelect = option
-                                                    isExpandedFloor.value = false
-                                                })
+                                            Row {
+                                                Icon(painterResource(id = R.drawable.elevator), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
+                                                Text(text = if(floorSelect==""){
+                                                    "Select Floor"
+                                                }
+                                                else{
+                                                    floorSelect
+                                                },
+                                                    color =  if(floorSelect==""){
+                                                        Color.Gray
+                                                    }
+                                                    else{
+                                                        Color.Black
+                                                    }
+                                                )
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = isExpandedFloor.value,
+                                                onDismissRequest = {isExpandedFloor.value=false },
+                                                modifier = Modifier
+                                                    .size(300.dp, 120.dp)
+                                                    .fillMaxWidth()
+                                            ) {
+                                                Floors.forEach { option ->
+                                                    DropdownMenuItem(text = { Text(text = option) }, onClick = {
+                                                        floorSelect = option
+                                                        isExpandedFloor.value = false
+                                                    })
+                                                }
                                             }
                                         }
-                                    }
-                                    if (isErrorFloor) {
-                                        Text(
-                                            text = "Please select a Floor",
-                                            color = Color.Red,
-                                            modifier = Modifier.align(Alignment.Start),
-                                            fontSize = 11.sp
-                                        )
+                                        if (isErrorFloor) {
+                                            Text(
+                                                text = "Please select a Floor",
+                                                color = Color.Red,
+                                                modifier = Modifier.align(Alignment.Start),
+                                                fontSize = 11.sp
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(5.dp))
                                     OutlinedTextField(
@@ -638,7 +471,7 @@ data class EditRoom(
                                             if (it.length <= 11) RoomNumber.value=it
                                         },
                                         leadingIcon = {
-                                            Icon(Icons.Default.List, contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.List, contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Room Number", color = Color.Gray)
@@ -669,7 +502,7 @@ data class EditRoom(
                                             .clickable { isExpandedRoomType.value = true }
                                     ) {
                                         Row {
-                                            Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                             Text(text = if(roomTypeSelect==""){
                                                 "Select Room Type"
                                             }
@@ -724,7 +557,7 @@ data class EditRoom(
                                             if (it.length <= 11) size.value=it
                                         },
                                         leadingIcon = {
-                                            Icon(painterResource(id = R.drawable.hotel), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.hotel), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Room Size", color = Color.Gray)
@@ -761,7 +594,7 @@ data class EditRoom(
                                             if (it.length <= 11) price.value=it
                                         },
                                         leadingIcon = {
-                                            Icon(painterResource(id = R.drawable.money), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.money), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Room Price", color = Color.Gray)
@@ -808,7 +641,7 @@ data class EditRoom(
                                             }
                                         },
                                         leadingIcon = {
-                                            Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Adults", color = Color.Gray)
@@ -856,7 +689,7 @@ data class EditRoom(
                                             }
                                         },
                                         leadingIcon = {
-                                            Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Children", color = Color.Gray)
@@ -893,7 +726,7 @@ data class EditRoom(
                                                 roomDescription=it
                                         },
                                         leadingIcon = {
-                                            Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                         },
                                         label = {
                                             Text(text = "Room Description",color = Color.Gray)
@@ -942,10 +775,10 @@ data class EditRoom(
                                         },
                                             colors = ButtonDefaults.outlinedButtonColors(
                                                 contentColor = Color.White, // Text color
-                                                containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                                containerColor = GlobalStrings.AdminColorMain, // Border color
                                                 // You can customize other colors here
                                             ),
-                                            border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                            border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                             shape = RoundedCornerShape(CornerSize(3.dp))) {
                                             Text(text = "Next")
                                         }
@@ -962,7 +795,7 @@ data class EditRoom(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.house ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1007,10 +840,10 @@ data class EditRoom(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -1027,7 +860,7 @@ data class EditRoom(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.house ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1071,10 +904,10 @@ data class EditRoom(
                                     },
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = Color.White, // Text color
-                                            containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                            containerColor = GlobalStrings.AdminColorMain, // Border color
                                             // You can customize other colors here
                                         ),
-                                        border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                        border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                         shape = RoundedCornerShape(CornerSize(3.dp))) {
                                         Text(text = "Next")
                                     }
@@ -1091,7 +924,7 @@ data class EditRoom(
                                             .padding(10.dp)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colorScheme.primary,
+                                                GlobalStrings.AdminColorMain,
                                                 shape = RoundedCornerShape(45.dp)
                                             )){
                                             Icon(painterResource(id= R.drawable.video ), contentDescription = "House" , modifier = Modifier.padding(10.dp))
@@ -1222,6 +1055,11 @@ data class EditRoom(
                                                         filePath = selectedImageUris
                                                     )
                                                 }
+                                                else{
+                                                    for(img in room.images){
+                                                        imageURL.add(img)
+                                                    }
+                                                }
                                                     addRoom(context = context,adults=adults.value.toInt(), children = children.value.toInt(), description = roomDescription, floor = floorSelect,
                                                         hotelid = hotelID, panoramicView = "a", price = price.value.toInt(), roomNumber = RoomNumber.value.toInt(), images = imageURL, inventories = inventoriesSelected, services = servicesSelected, size = size.value, type = roomTypeSelect,
                                                         videos = imageURL, id = room._id){
@@ -1234,10 +1072,10 @@ data class EditRoom(
                                         },
                                             colors = ButtonDefaults.outlinedButtonColors(
                                                 contentColor = Color.White, // Text color
-                                                containerColor = MaterialTheme.colorScheme.primary, // Border color
+                                                containerColor = GlobalStrings.AdminColorMain, // Border color
                                                 // You can customize other colors here
                                             ),
-                                            border= BorderStroke(1.dp,MaterialTheme.colorScheme.primary,),
+                                            border= BorderStroke(1.dp,GlobalStrings.AdminColorMain,),
                                             shape = RoundedCornerShape(CornerSize(3.dp))) {
                                             Text(text = "Next")
                                         }
@@ -1256,7 +1094,8 @@ data class EditRoom(
     }
     // GET Hotels Function
     fun getHotels(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/hotels/getHotels"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/hotels/getHotels"
         val progressDialog = ProgressDialog(context)
         val params = JSONObject()
         progressDialog.setTitle("Loading Hotels...")
@@ -1495,7 +1334,9 @@ data class EditRoom(
                 images:List<String>,
                 videos:List<String>,callback: (Boolean) -> Unit){
         Log.d("HAPP",id)
-        val url = "${GlobalStrings.baseURL}admin/rooms/updateRoom/${id}"
+        Log.d("HAPP",hotelid)
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/rooms/updateRoom/${id}"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Please Wait")
         progressDialog.show()
@@ -1542,7 +1383,7 @@ data class EditRoom(
             jsonElement.put("name",item.name)
             jsonElement.put("color",item.color)
             jsonElement.put("category",item.category)
-            jsonElement.put("id",item.id)
+           // jsonElement.put("id",item.id)
             jsonElement.put("updatedAt",item.updatedAt)
             val CategoryJSON = JSONObject()
             CategoryJSON.put("__v",item.inventoryCategory.__v)
@@ -1567,7 +1408,6 @@ data class EditRoom(
         params.put("children", children)
         params.put("description", description)
         params.put("floor", floor)
-        params.put("hotelid", hotelid)
         params.put("panoramicView", "null")
         params.put("price", price)
         params.put("roomNumber", roomNumber)
@@ -1680,7 +1520,7 @@ data class EditRoom(
                 // Table header
                 Row (modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(GlobalStrings.AdminColorMain)
                 ){
                     Box(modifier = Modifier.width(50.dp), contentAlignment = Alignment.Center){
                         Text(text = "ID", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
@@ -2094,7 +1934,7 @@ data class EditRoom(
                 // Table header
                 Row (modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(GlobalStrings.AdminColorMain)
                 ){
                     Box(modifier = Modifier.width(50.dp), contentAlignment = Alignment.Center){
                         Text(text = "ID", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
@@ -2345,7 +2185,8 @@ data class EditRoom(
 
     // GET Categories Function
     fun getCategories(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/services/getRoomServices"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/services/getRoomServices"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Services...")
         progressDialog.show()
@@ -2457,7 +2298,8 @@ data class EditRoom(
 
     // GET Categories Function
     fun getInventories(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/inventories/getInventories"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/inventories/getInventories"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Inventories...")
         progressDialog.show()

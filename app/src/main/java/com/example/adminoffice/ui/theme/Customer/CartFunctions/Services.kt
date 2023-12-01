@@ -170,6 +170,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.example.adminoffice.ui.theme.Utils.saveTokenToLocalStorage
 import com.google.firebase.storage.FirebaseStorage
@@ -193,7 +194,6 @@ object Services  : Screen {
     @OptIn(ExperimentalComposeUiApi::class)
     val keyboardController = LocalSoftwareKeyboardController
     var rooms = mutableStateListOf<RoomCustomerBooking>()
-    var UserDABS = mutableStateListOf<DabsUser>()
     var serviceCategories = mutableStateListOf<ViewService.TableRow>()
     var check = mutableStateOf(1)
     data class RoomTypeClass(
@@ -248,6 +248,7 @@ object Services  : Screen {
         val configuration = LocalConfiguration.current
         val screenWidthDp: Dp = configuration.screenWidthDp.dp
         val screenHeightDp: Dp = configuration.screenHeightDp.dp
+        var user = getUserFromLocal(context)
         hotelID= getHotelID(context)
         // Initialize Stripe with your publishable key
         PaymentConfiguration.init(context, "pk_test_51NAwR3IoGI30N9jFX4aSt1YTus7cMnAgtRDxZJjI9zsboH5zlyyhkm2ggxJolNaaqX2FwYAJw3lboYtjnNiEPZ3G00b7f4qQ0X")
@@ -1085,7 +1086,7 @@ object Services  : Screen {
                                                     ))
                                                     Log.d("KKKKKKKpaymentintent",paymentIntentResult.toString())
                                                     var rooms = getRoomsIdinCart(context)
-                                                    var customeID = UserDABS[0]._id
+                                                    var customeID = user._id
                                                         addBooking(context=context,adults=adults.value.toInt(), bookingDetails = roomDescription,
                                                             childern = children.value.toInt(), checkInDate = mDate.value, checkOutDate = eDate.value,
                                                             customerData = customeID, hotelid = hotelID, roomCharges = roomCharges, serviceCharges = servicesCharges,
@@ -1093,6 +1094,7 @@ object Services  : Screen {
                                                                 it->
                                                             if(it){
                                                                 navigator.popUntilRoot()
+                                                                ClearCart(context)
                                                                 navigator.push(LandingPage)
                                                             }
                                                         }
@@ -1117,9 +1119,9 @@ object Services  : Screen {
 
             }
             getCategories(context)
-            AuthorizationDABS(context){
-
-            }
+//            AuthorizationDABS(context){
+//
+//            }
         }
 
     }
@@ -2490,88 +2492,89 @@ object Services  : Screen {
             }
         }
     }
-    fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
-        if(UserDABS.isNotEmpty()){
-            return
-        }
-        val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
-        // Request parameters
-        val params = JSONObject()
-        params.put("token", getTokenFromLocalStorage(context))
-        Log.d("LOOOO",params.toString())
-        val progressDialog = ProgressDialog(context)
-        progressDialog.setTitle("Please Wait")
-        progressDialog.show()
-        if(!isInternetAvailable(context)){
-            Toast
-                .makeText(
-                    context,
-                    "Internet is not Available",
-                    Toast.LENGTH_SHORT
-                )
-                .show()
-            progressDialog.dismiss()
-        }
-        else{
-            val request = object : JsonObjectRequest(
-                Request.Method.POST, url, params,
-                { response ->
-                    UserDABS.clear()
-                    // Handle successful login response
-                    Log.d("LOOOO", response.toString())
-                    var user = response.getJSONObject("user")
-                    var _id = user.getString("_id")
-                    var firstname = user.getString("firstName")
-                    var lastname = user.getString("lastName")
-                    var email = user.getString("email")
-                    var contactNo = user.getString("contactNo")
-                    var cnic = user.getString("cnic")
-                    var profilePicture = user.getString("profilePicture")
-                    var role = user.getString("role")
-                    var userD = DabsUser(_id,  firstname, lastname,email, contactNo, cnic, profilePicture, role)
-                    UserDABS.add(userD)
-                    progressDialog.dismiss()
-                    // Assuming the API returns a JSON object with a field "valid" indicating user validity
-
-                    callback(true)
-                },
-                { error ->
-                    UserDABS.clear()
-                    // Handle error response
-                    Log.e("LOOOO Error", error.toString())
-                    Log.e("LOOOO Error", error.networkResponse.data.toString())
-                    Log.e("LOOOO Error", error.networkResponse.statusCode.toString())
-                    progressDialog.dismiss()
-                    Toast
-                        .makeText(
-                            context,
-                            "Connection Error or try with different Credentials",
-                            Toast.LENGTH_SHORT
-                        )
-                        .show()
-                    callback(false)
-                }) {
-
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-//                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
-                    headers["Authorization"] = ""
-                    return headers
-                }
-            }
-
-
-            // Add the request to the RequestQueue.
-            val requestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(request)
-        }
-    }
+//    fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
+//        if(UserDABS.isNotEmpty()){
+//            return
+//        }
+//        val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
+//        // Request parameters
+//        val params = JSONObject()
+//        params.put("token", getTokenFromLocalStorage(context))
+//        Log.d("LOOOO",params.toString())
+//        val progressDialog = ProgressDialog(context)
+//        progressDialog.setTitle("Please Wait")
+//        progressDialog.show()
+//        if(!isInternetAvailable(context)){
+//            Toast
+//                .makeText(
+//                    context,
+//                    "Internet is not Available",
+//                    Toast.LENGTH_SHORT
+//                )
+//                .show()
+//            progressDialog.dismiss()
+//        }
+//        else{
+//            val request = object : JsonObjectRequest(
+//                Request.Method.POST, url, params,
+//                { response ->
+//                    UserDABS.clear()
+//                    // Handle successful login response
+//                    Log.d("LOOOO", response.toString())
+//                    var user = response.getJSONObject("user")
+//                    var _id = user.getString("_id")
+//                    var firstname = user.getString("firstName")
+//                    var lastname = user.getString("lastName")
+//                    var email = user.getString("email")
+//                    var contactNo = user.getString("contactNo")
+//                    var cnic = user.getString("cnic")
+//                    var profilePicture = user.getString("profilePicture")
+//                    var role = user.getString("role")
+//                    var userD = DabsUser(_id,  firstname, lastname,email, contactNo, cnic, profilePicture, role)
+//                    UserDABS.add(userD)
+//                    progressDialog.dismiss()
+//                    // Assuming the API returns a JSON object with a field "valid" indicating user validity
+//
+//                    callback(true)
+//                },
+//                { error ->
+//                    UserDABS.clear()
+//                    // Handle error response
+//                    Log.e("LOOOO Error", error.toString())
+//                    Log.e("LOOOO Error", error.networkResponse.data.toString())
+//                    Log.e("LOOOO Error", error.networkResponse.statusCode.toString())
+//                    progressDialog.dismiss()
+//                    Toast
+//                        .makeText(
+//                            context,
+//                            "Connection Error or try with different Credentials",
+//                            Toast.LENGTH_SHORT
+//                        )
+//                        .show()
+//                    callback(false)
+//                }) {
+//
+//                @Throws(AuthFailureError::class)
+//                override fun getHeaders(): MutableMap<String, String> {
+//                    val headers = HashMap<String, String>()
+//                    headers["Content-Type"] = "application/json"
+////                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+//                    headers["Authorization"] = ""
+//                    return headers
+//                }
+//            }
+//
+//
+//            // Add the request to the RequestQueue.
+//            val requestQueue = Volley.newRequestQueue(context)
+//            requestQueue.add(request)
+//        }
+//    }
     // GET Categories Function
     fun getCategories(context: Context) {
         var hotelid = getHotelID(context)
         val url = "${GlobalStrings.baseURL}customer/rooms/getHotelRooms/${hotelid}"
+        Log.d("HASHDASDAS555",url)
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Services...")
         progressDialog.show()
@@ -2609,7 +2612,8 @@ object Services  : Screen {
                         var inventory = dd.getJSONArray("inventories")
                         var inventories = mutableStateListOf<String>()
                         for(i in 0 until inventory.length()){
-                            inventories.add(images.get(i).toString())
+                            var inventoryyy = inventory.get(i)
+                            inventories.add(inventoryyy.toString())
                         }
                         var adults = dd.getInt("adults")
                         var children = dd.getInt("children")
@@ -2621,29 +2625,30 @@ object Services  : Screen {
                         var size = dd.getString("size")
                         // var deletedAt = category.get("deletedAt")
                         var type = dd.getString("type")
-                      //  var categories  = response.getJSONArray("services")
+                        var servvv  = dd.getJSONArray("services")
                         services.clear()
-                        for(i in 0 until categories.length()){
-//                            var category = categories.getJSONObject(i)
-//
-//                            //var id = category.getInt("id")
-//                            var _id = category.getString("_id")
-//                            var serviceImage = category.getString("image")
-//                            var serviceName = category.getString("name")
-//                            var servicedescription = category.getString("description")
-//                            var serviceprice = category.getInt("price")
-//                            var servicepriceRate = category.getString("priceRate")
-//                            var serviceaddedByRole = category.getString("addedByRole")
-//                            var servicevisible = category.getBoolean("visible")
-//                            var serviceisDeleted = category.getBoolean("isDeleted")
-//                            var servicedeletedAt = category.getString("deletedAt")
-//                            var servicecreatedAt = category.getString("createdAt")
-//                            var serviceupdatedAt = category.getString("updatedAt")
-//                            var service__v = category.getInt("__v")
-//                            var serviceType = category.getString("type")
+                        for(i in 0 until servvv.length()){
+                            var category = servvv.getJSONObject(i)
+
+                            //var id = category.getInt("id")
+                            var _id = category.getString("_id")
+                            var serviceImage = category.getString("image")
+                            var serviceName = category.getString("name")
+                            var servicedescription = category.getString("description")
+                            var serviceprice = category.getInt("price")
+                            var servicepriceRate = category.getString("priceRate")
+                            var serviceaddedByRole = category.getString("addedByRole")
+                            var servicevisible = category.getBoolean("visible")
+                            var serviceisDeleted = category.getBoolean("isDeleted")
+                            var servicedeletedAt = category.getString("deletedAt")
+                            var servicecreatedAt = category.getString("createdAt")
+                            var serviceupdatedAt = category.getString("updatedAt")
+                            var service__v = category.getInt("__v")
+                            var serviceType = category.getString("type")
 //                            var serviceCa = category.getJSONObject("serviceCategory")
 //                            var serviceCategoryID = serviceCa.getString("_id")
 //                            var serviceCategoryTitle = serviceCa.getString("title")
+//                            var serviceCategoryImage = serviceCa.getString("image")
 //                            var serviceCategoryImage = serviceCa.getString("image")
 //                            var serviceCategoryDeletedAt = serviceCa.getString("deletedAt")
 //                            var serviceCategoryIsDeleted = serviceCa.getBoolean("isDeleted")
@@ -2665,19 +2670,19 @@ object Services  : Screen {
                                 Service(
                                     _id = _id,
                                     serviceCategory = serviceCategoryObject,
-                                    type = "serviceType",
-                                    name = "serviceName",
-                                    description = "servicedescription",
-                                    image = "serviceImage",
-                                    priceRate = "servicepriceRate",
-                                    price = 80,
-                                    addedByRole = "serviceaddedByRole",
-                                    visible = true,
-                                    isDeleted = false,
-                                    deletedAt = "servicedeletedAt",
-                                    createdAt = "servicecreatedAt",
-                                    updatedAt = "serviceupdatedAt",
-                                    __v = 0
+                                    type = serviceType,
+                                    name = serviceName,
+                                    description = servicedescription,
+                                    image = serviceImage,
+                                    priceRate = servicepriceRate,
+                                    price = serviceprice,
+                                    addedByRole = serviceaddedByRole,
+                                    visible = servicevisible,
+                                    isDeleted = serviceisDeleted,
+                                    deletedAt = servicedeletedAt,
+                                    createdAt = servicecreatedAt,
+                                    updatedAt = serviceupdatedAt,
+                                    __v = service__v
                                 )
                             )
                         }

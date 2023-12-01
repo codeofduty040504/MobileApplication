@@ -12,17 +12,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
 import com.example.adminoffice.ui.theme.AdminOfficeTheme
+import com.example.adminoffice.ui.theme.Customer.Bookings.AddComplaint
 import com.example.adminoffice.ui.theme.Customer.Bookings.BookingDetails
 import com.example.adminoffice.ui.theme.Customer.Bookings.CancelBookingCustomer
 import com.example.adminoffice.ui.theme.Customer.Bookings.ExtendBookingCustomer
 import com.example.adminoffice.ui.theme.Customer.Bookings.ViewBookingsCustomer
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.CartView
 import com.example.adminoffice.ui.theme.Customer.CartFunctions.Services
+import com.example.adminoffice.ui.theme.Customer.Chat.ChatCustomer
+import com.example.adminoffice.ui.theme.Customer.Functions.CompareHotel
 import com.example.adminoffice.ui.theme.Customer.Functions.HotelScreen
+import com.example.adminoffice.ui.theme.Customer.Functions.ViewRoom
 import com.example.adminoffice.ui.theme.Customer.LandingPage
+import com.example.adminoffice.ui.theme.Customer.Profile.ComplaintsCustomer
 import com.example.adminoffice.ui.theme.Customer.Profile.ContactUs
 import com.example.adminoffice.ui.theme.Customer.Profile.FAQs
+import com.example.adminoffice.ui.theme.Customer.Profile.Policy
 import com.example.adminoffice.ui.theme.Customer.Profile.ViewProfile
+import com.example.adminoffice.ui.theme.Customer.Wishlist.WishList
 import com.example.adminoffice.ui.theme.Utils.Screens.Dashboard
 import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
 
@@ -31,7 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AdminOfficeTheme {
-                Navigator(Login)
+                Navigator(ChatCustomer)
                 // A surface container using the 'background' color from the theme
 //                Surface(
 //                    modifier = Modifier.fillMaxSize(),

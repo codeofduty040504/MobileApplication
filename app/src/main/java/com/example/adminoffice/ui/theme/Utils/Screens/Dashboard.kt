@@ -29,6 +29,7 @@ import com.stripe.android.*
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import android.app.Application
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -152,14 +153,18 @@ import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.startActivity
 import com.example.adminoffice.ui.theme.Customer.Profile.ViewProfile
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Accountings.Expense
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Accountings.Revenue
+import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Booking
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Hotel
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.HotelOwner
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Refund
@@ -168,6 +173,7 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Room
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Service
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Chat.Chat
 import com.example.adminoffice.ui.theme.Utils.Screens.Coupons.AddCoupon
@@ -175,6 +181,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Coupons.ViewCoupons
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.AboutUs
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.FAQ
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -208,8 +215,9 @@ object Dashboard  : Screen {
     var staff=  mutableStateOf(0)
     var revenueCal=  mutableStateOf(0)
     var expenseCal=  mutableStateOf(0)
-    var profitCal=  mutableStateOf(0)
-
+    var accountStripe = true
+    var modalopen = mutableStateOf(true)
+    var URLStripe = ""
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -224,178 +232,7 @@ object Dashboard  : Screen {
         ModalNavigationDrawer(
             drawerContent = {
 
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.push(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.push(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.push(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.push(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.push(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.push(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.push(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.push(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.push(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.push(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.push(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.push(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.push(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.push(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.push(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState = drawerState,
         ) {
@@ -409,7 +246,10 @@ object Dashboard  : Screen {
                 }
             )
             {
-
+                if(!modalopen.value){
+                    createStripeAccount(context)
+                    CustomProgressDialog(context)
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -481,7 +321,10 @@ object Dashboard  : Screen {
                                 })
                         }
                     }
-                    PieChart(size = 100.dp)
+                    var role = getRoleFromLocalStorage(context)
+                    if(role =="admin"){
+                        PieChart(size = 100.dp)
+                    }
                     Spacer(modifier = Modifier.size(5.dp))
                    DoughnutChart(size = 100.dp)
 //                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){
@@ -532,11 +375,123 @@ object Dashboard  : Screen {
         getCategoriesR(context)
         getCategories(context)
         ViewBookings.getCategories(context)
+        if(getRoleFromLocalStorage(context) != "admin"){
+            verifyStripeAccount(context)
+        }
+    }
+    fun openUrl(context: Context, url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+    }
+    @Composable
+    fun CustomProgressDialog(context: Context) {
+        Dialog(
+            onDismissRequest = {}
+        ) {
+                Box(modifier = Modifier.fillMaxWidth().height(45.dp).background(GlobalStrings.CustomerColorMain,
+                    RoundedCornerShape(15.dp)
+                ).clickable {
+                    val url = URLStripe
+                    openUrl(context, url)
+                }, contentAlignment = Alignment.Center){
+                    Text(text = "Create Stripe Account", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                }
+
+           }
+    }
+    fun verifyStripeAccount(context: Context) {
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/payments/verifyStripeAccount"
+        val progressDialog = ProgressDialog(context)
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet not available.",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.GET, url, ViewExpense.params,
+                { response ->
+                    Log.d("HASHDASDASVeru",response.toString())
+                    var accountExists = response.getBoolean("accountExists")
+                    accountStripe=accountExists
+                    modalopen.value= accountStripe
+                    progressDialog.dismiss()
+                },
+                { error ->
+                    Log.d("HASHDASDASVeru",error.toString())
+                    Log.d("HASHDASDASVeru",error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
+    fun createStripeAccount(context: Context) {
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/payments/create-connect-account"
+        val progressDialog = ProgressDialog(context)
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet not available.",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.POST, url, ViewExpense.params,
+                { response ->
+                    Log.d("HASHDASDASVeru",response.toString())
+                    var url = response.getString("url")
+                    URLStripe=url
+                    progressDialog.dismiss()
+                },
+                { error ->
+                    Log.d("HASHDASDASVeru",error.toString())
+                    Log.d("HASHDASDASVeru",error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                }) {
+
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
 
     }
     // GET Categories Function
     fun getCategories(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/expense/getExpenses"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/expense/getExpenses"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Expense...")
         progressDialog.show()
@@ -602,7 +557,8 @@ object Dashboard  : Screen {
     }
     // GET Categories Function
     fun getCategoriesR(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/revenue/getRevenues"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/revenue/getRevenues"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Revenue...")
         progressDialog.show()
@@ -716,7 +672,7 @@ object Dashboard  : Screen {
                 Color(0xFFFFFFFF),
                 RoundedCornerShape(10.dp)
             )) {
-            Text(text = "Users Breakdown", fontWeight = FontWeight.W400, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = "Users Breakdown", fontWeight = FontWeight.W400, fontSize = 16.sp, color = GlobalStrings.AdminColorMain)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
 
@@ -820,7 +776,7 @@ object Dashboard  : Screen {
                     .fillMaxWidth()){
                 Spacer(modifier = Modifier.size(15.dp))
 Column( horizontalAlignment = Alignment.CenterHorizontally){
-    Text(text = "Hotels", fontWeight = FontWeight.W400, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
+    Text(text = "Hotels", fontWeight = FontWeight.W400, fontSize = 16.sp, color = GlobalStrings.AdminColorMain)
     Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
             .padding(5.dp)
@@ -857,7 +813,8 @@ Column( horizontalAlignment = Alignment.CenterHorizontally){
     }
     // GET Hotels Function
     fun getHotels(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/hotels/getHotels"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/hotels/getHotels"
         val progressDialog = ProgressDialog(context)
         val params = JSONObject()
 
@@ -904,8 +861,7 @@ Column( horizontalAlignment = Alignment.CenterHorizontally){
                 },
                 { error ->
                     Log.d("HASHDASDAS",error.toString())
-                    ViewHotel.Hotels.clear()
-                    ViewHotel.HotelJsonArrayError = mutableStateOf(error.toString())
+                    Hotels.clear()
                     progressDialog.dismiss()
                 }) {
 
@@ -927,7 +883,8 @@ Column( horizontalAlignment = Alignment.CenterHorizontally){
 
     // GET USERS Function
     fun GetUsers(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/users/getUsers"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/users/getUsers"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Users...")
         progressDialog.show()

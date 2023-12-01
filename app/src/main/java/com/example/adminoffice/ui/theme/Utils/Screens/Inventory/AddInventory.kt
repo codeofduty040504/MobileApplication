@@ -136,6 +136,7 @@ import org.json.JSONObject
 import java.util.UUID
 import androidx.compose.material3.Surface
 import androidx.compose.ui.text.input.TextFieldValue
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddBooking
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddReview
@@ -160,6 +161,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Reviews.ViewReview
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.AboutUs
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.FAQ
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import kotlin.math.roundToInt
 
 object AddInventory  : Screen {
@@ -185,178 +187,7 @@ object AddInventory  : Screen {
         var selectedSubItem by remember { mutableStateOf(-1) }
         ModalNavigationDrawer(
             drawerContent = {
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState= drawerState,
         ) {
@@ -423,7 +254,7 @@ object AddInventory  : Screen {
                     Column(Modifier.verticalScroll(rememberScrollState())) {
                         Text(
                             text = "Add Inventory",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = GlobalStrings.AdminColorMain,
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
                             modifier = Modifier
@@ -441,7 +272,7 @@ object AddInventory  : Screen {
                                 .clickable { isExpandedCategory.value = true }
                         ) {
                             Row {
-                                Icon(painterResource(id = R.drawable.category), contentDescription = "category", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                Icon(painterResource(id = R.drawable.category), contentDescription = "category", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                 Text(text = if(category==""){
                                     "Select Category"
                                 }
@@ -509,7 +340,7 @@ object AddInventory  : Screen {
                                     serviceName.value=it
                             },
                             leadingIcon = {
-                                Icon(painterResource(id = R.drawable.bookmark), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                Icon(painterResource(id = R.drawable.bookmark), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                             },
                             label = {
                                 Text(text = "Inventory Name",color = Color.Gray)
@@ -544,7 +375,7 @@ object AddInventory  : Screen {
                                     serviceDescription.value=it
                             },
                             leadingIcon = {
-                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                             },
                             label = {
                                 Text(text = "Inventory Description",color = Color.Gray)
@@ -573,7 +404,7 @@ object AddInventory  : Screen {
                                 .clickable { isColorPickerVisible=true }
                         ) {
                             Row {
-                                Icon(painterResource(id = R.drawable.category), contentDescription = "category", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                Icon(painterResource(id = R.drawable.category), contentDescription = "category", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                 Text(text = if(ColorToHex(selectedColor)==""){
                                     "Select Inventory Color"
                                 }
@@ -656,7 +487,7 @@ object AddInventory  : Screen {
                         }
                         OutlinedButton(
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
+                                containerColor = GlobalStrings.AdminColorMain,
                                 contentColor = Color.White),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -696,7 +527,7 @@ object AddInventory  : Screen {
                                 }
                             },
                             shape = RoundedCornerShape(15.dp),
-                            border = BorderStroke(2.dp,MaterialTheme.colorScheme.primary)
+                            border = BorderStroke(2.dp,GlobalStrings.AdminColorMain)
                         ) {
                             Text(text = "Add Inventory", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold)
                         }
@@ -907,7 +738,8 @@ object AddInventory  : Screen {
     // Add Category Function
     fun AddService(context: Context, id: String, name: String,
                    description: String, image: String,color:String,callback: (Boolean) -> Unit){
-        val url = "${GlobalStrings.baseURL}admin/inventories/addInventory"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/inventories/addInventory"
 
         // Request parameters
         val params = JSONObject()
@@ -974,7 +806,8 @@ object AddInventory  : Screen {
 
     // GET Categories Function
     fun getCategories(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/inventories/getInventoryCategories"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/inventories/getInventoryCategories"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Loading Categories...")
         progressDialog.show()

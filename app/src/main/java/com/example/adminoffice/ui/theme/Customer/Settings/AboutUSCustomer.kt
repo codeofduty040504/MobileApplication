@@ -71,7 +71,7 @@ object AboutUSCustomer  : Screen {
                     modifier = Modifier
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 10.dp)
+                        .padding(20.dp)
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
                         Text(text = "About Us", color = GlobalStrings.CustomerColorMain, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
@@ -401,43 +401,43 @@ object AboutUSCustomer  : Screen {
 
                 }
             }
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .background(color =GlobalStrings.CustomerColorMain),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ){
-                IconButton(onClick = {
-                    navigator.pop()
-                    // navigator.push(CouponList)
-                }, modifier = Modifier.padding(10.dp)) {
-                    Icon(painter = rememberVectorPainter(Icons.Outlined.LocationOn), contentDescription = "AR", tint = Color.White)
-                }
-                IconButton(onClick = {}, modifier = Modifier.padding(10.dp)) {
-                    Icon(painter = rememberVectorPainter(Icons.Outlined.DateRange), contentDescription = "Booking", tint = Color.White)
-                }
-                IconButton(onClick = {
-                    navigator.pop()
-                    navigator.pop()
-                     navigator.push(LandingPage)
-                }, modifier = Modifier.padding(10.dp)) {
-                    Icon(painter = rememberVectorPainter(Icons.Filled.Home), contentDescription = "Landing", tint = Color.White)
-                }
-                IconButton(onClick = {
-                    navigator.pop()
-                    navigator.pop()
-                    navigator.push(WishList)
-                }, modifier = Modifier.padding(10.dp)) {
-                    Icon(painter = rememberVectorPainter(Icons.Outlined.FavoriteBorder), contentDescription = "WishList", tint = Color.White)
-                }
-                IconButton(onClick = {
-                    navigator.pop()
-                    //    navigator.push(ViewProfile)
-                }, modifier = Modifier.padding(10.dp)) {
-                    Icon(painter = rememberVectorPainter(Icons.Outlined.Person), contentDescription = "Account", tint = Color.White)
-                }
-            }
+//            Row (
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(50.dp)
+//                    .background(color =GlobalStrings.CustomerColorMain),
+//                horizontalArrangement = Arrangement.SpaceEvenly
+//            ){
+//                IconButton(onClick = {
+//                    navigator.pop()
+//                    // navigator.push(CouponList)
+//                }, modifier = Modifier.padding(10.dp)) {
+//                    Icon(painter = rememberVectorPainter(Icons.Outlined.LocationOn), contentDescription = "AR", tint = Color.White)
+//                }
+//                IconButton(onClick = {}, modifier = Modifier.padding(10.dp)) {
+//                    Icon(painter = rememberVectorPainter(Icons.Outlined.DateRange), contentDescription = "Booking", tint = Color.White)
+//                }
+//                IconButton(onClick = {
+//                    navigator.pop()
+//                    navigator.pop()
+//                     navigator.push(LandingPage)
+//                }, modifier = Modifier.padding(10.dp)) {
+//                    Icon(painter = rememberVectorPainter(Icons.Filled.Home), contentDescription = "Landing", tint = Color.White)
+//                }
+//                IconButton(onClick = {
+//                    navigator.pop()
+//                    navigator.pop()
+//                    navigator.push(WishList)
+//                }, modifier = Modifier.padding(10.dp)) {
+//                    Icon(painter = rememberVectorPainter(Icons.Outlined.FavoriteBorder), contentDescription = "WishList", tint = Color.White)
+//                }
+//                IconButton(onClick = {
+//                    navigator.pop()
+//                    //    navigator.push(ViewProfile)
+//                }, modifier = Modifier.padding(10.dp)) {
+//                    Icon(painter = rememberVectorPainter(Icons.Outlined.Person), contentDescription = "Account", tint = Color.White)
+//                }
+//            }
         }
 
     }

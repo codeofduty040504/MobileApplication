@@ -31,6 +31,7 @@ import com.example.adminoffice.R
 fun CustomTopAppBar(callback: ()-> Unit){
     val navigator = LocalNavigator.currentOrThrow
     val context = LocalContext.current
+    var role = getRoleFromLocalStorage(context)
     TopAppBar(
         title = {
             Row(
@@ -40,12 +41,21 @@ fun CustomTopAppBar(callback: ()-> Unit){
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Admin Panel",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                if(role=="admin"){
+                    Text(
+                        text = "Admin Dashboard",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }else{
+                    Text(
+                        text = "Owner Dashboard",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 IconButton(onClick = {
                     saveTokenToLocalStorage(context, "")
                     navigator.popUntilRoot()

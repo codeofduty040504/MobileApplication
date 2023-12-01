@@ -97,6 +97,7 @@ import com.android.volley.toolbox.Volley
 import com.example.adminoffice.R
 import com.example.adminoffice.ui.theme.Utils.CustomTopAppBar
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Booking
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Header
 import com.example.adminoffice.ui.theme.Utils.Logo
@@ -138,6 +139,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
 import com.example.adminoffice.ui.theme.Utils.convertDateFormat
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.example.adminoffice.ui.theme.Utils.isValidDescription
@@ -217,179 +219,7 @@ data class ExtendBooking
         ModalNavigationDrawer(
             drawerContent = {
 
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                navigator.pop()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState= drawerState,
         ) {
@@ -432,12 +262,12 @@ data class ExtendBooking
                         }
                     }
                     Row (horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){
-                        Text(text = "Old Booking Summary", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                        Text(text = "Old Booking Summary", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = GlobalStrings.AdminColorMain)
                     }
                     Column(modifier = Modifier
                         .padding(10.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = GlobalStrings.AdminColorMain,
                             shape = RoundedCornerShape(10.dp)
                         )) {
                         Column(modifier = Modifier
@@ -500,7 +330,7 @@ data class ExtendBooking
                                 .fillMaxWidth()
                                 .padding(horizontal = 5.dp)
                                 .background(
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = GlobalStrings.AdminColorMain,
                                     shape = RoundedCornerShape(10.dp)
                                 )
                                 .height(40.dp),
@@ -524,7 +354,7 @@ data class ExtendBooking
                         onValueChange = {},
                         readOnly = true,
                         leadingIcon = {
-                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                         },
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -538,7 +368,7 @@ data class ExtendBooking
                             .clickable { eDatePickerDialog.show() }
                     ) {
                         Row {
-                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                            Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                             Text(text = if(eDate.value==""){
                                 "Select New Check Out Date"
                             }
@@ -595,17 +425,17 @@ data class ExtendBooking
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                         Column {
-                            Text(text = "Check In", fontSize = 14.sp, fontWeight = FontWeight.Light, color = MaterialTheme.colorScheme.primary)
+                            Text(text = "Check In", fontSize = 14.sp, fontWeight = FontWeight.Light, color = GlobalStrings.AdminColorMain)
                             Text(text = convertDateFormat(booking.checkIn), fontSize = 14.sp, fontWeight = FontWeight.Bold, )
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text(text = "Check Out", fontSize = 14.sp, fontWeight = FontWeight.Light,color = MaterialTheme.colorScheme.primary)
+                            Text(text = "Check Out", fontSize = 14.sp, fontWeight = FontWeight.Light,color = GlobalStrings.AdminColorMain)
                             Text(text = eDate.value, fontSize = 14.sp, fontWeight = FontWeight.Bold,)
                         }
                     }
 
                     Row(modifier = Modifier.fillMaxWidth()){
-                        Text(text = booking.hotelName, fontSize = 18.sp, fontWeight = FontWeight.Bold,color = MaterialTheme.colorScheme.primary)
+                        Text(text = booking.hotelName, fontSize = 18.sp, fontWeight = FontWeight.Bold,color = GlobalStrings.AdminColorMain)
                     }
                     Row(modifier = Modifier.fillMaxWidth()){
                         Text(text = "Invoice Details", fontSize = 14.sp, fontWeight = FontWeight.Light,)
@@ -628,9 +458,9 @@ data class ExtendBooking
                         Text(text = addi.value.toString(), fontSize = 14.sp, fontWeight = FontWeight.Light,)
                     }
                     OutlinedButton(
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                        border = BorderStroke(2.dp, GlobalStrings.AdminColorMain),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
+                            containerColor = GlobalStrings.AdminColorMain,
                             contentColor = Color.White),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -668,7 +498,8 @@ data class ExtendBooking
     }
 
     suspend fun getIntentStripe(context: Context,amount:Int,hotelid: String,callback: (Boolean) -> Unit) {
-        val url = "${GlobalStrings.baseURL}admin/payments/create-payment-intent"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/payments/create-payment-intent"
         val progressDialog = ProgressDialog(context)
         progressDialog.setTitle("Please Wait")
         progressDialog.show()
@@ -732,7 +563,8 @@ data class ExtendBooking
     // Add Category Function
     fun ExtendBookingInSystem(context: Context,id:String, roomCharges: Int, checkOutDate: String,
                               callback: (Boolean) -> Unit){
-        val url = "${GlobalStrings.baseURL}admin/bookings/extendBooking/${id}"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/bookings/extendBooking/${id}"
         // Define the input date format
         val inputDateFormat = SimpleDateFormat("dd/M/yyyy")
 

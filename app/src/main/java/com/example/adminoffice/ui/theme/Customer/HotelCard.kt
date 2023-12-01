@@ -23,17 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -44,9 +41,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.alpha
@@ -54,9 +51,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
@@ -67,14 +62,17 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun HotelCardWithSlider(
-    images : List<String>,
+    images: List<String>,
     name: String,
     location: String,
-    price:String
+    price:String,
+    rating:String,
+    shown:Boolean=true,
+    callback: () -> Unit ={}
 ){
     Box(modifier = Modifier.padding(horizontal=15.dp)){
         Box(modifier = Modifier
-            .width(300.dp)
+            .width(350.dp)
             // .background(Color(0xFFFEFEFE))
             .border(
                 0.2.dp,
@@ -104,29 +102,33 @@ fun HotelCardWithSlider(
                             Text(text = location, color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight)
 
                         }
-                        Row(verticalAlignment = Alignment.Top, modifier = Modifier.height(20.dp)){
-                            Icon(
-                                Icons.Outlined.Star, contentDescription =null, tint = Color(
-                                    0xFFFFC107
-                                ), modifier = Modifier.size(18.dp)
-                            )
-                            Text(text = "3.5", fontSize = 12.sp)
-                            //  Text(text = "("+"141"+") reviews", fontSize = 8.sp)
+                        if(shown){
+                            Row(verticalAlignment = Alignment.Top, modifier = Modifier.height(20.dp)){
+                                Icon(
+                                    Icons.Outlined.Star, contentDescription =null, tint = Color(
+                                        0xFFFFC107
+                                    ), modifier = Modifier.size(18.dp)
+                                )
+                                Text(text = rating, fontSize = 12.sp)
+                                //  Text(text = "("+"141"+") reviews", fontSize = 8.sp)
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.size(7.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
-                        Text(text = "Rs. "+price+"/Night", fontSize = 12.sp, fontWeight = FontWeight.W600)
-                        Box(modifier = Modifier
-                            .background(
-                                GlobalStrings.CustomerColorMain,
-                                RoundedCornerShape(5.dp)
-                            )
-                            .padding(5.dp)
-                        ){
-                            Row(verticalAlignment = Alignment.Bottom, modifier = Modifier){
-                                Text(text = "Book Now", fontSize = 10.sp, fontWeight = FontWeight.W500,color=Color.White)
+                    if(shown){
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
+                            Text(text = "Rs. "+price+"/Night", fontSize = 12.sp, fontWeight = FontWeight.W600)
+                            Box(modifier = Modifier
+                                .background(
+                                    GlobalStrings.CustomerColorMain,
+                                    RoundedCornerShape(5.dp)
+                                )
+                                .padding(5.dp)
+                            ){
+                                Row(verticalAlignment = Alignment.Bottom, modifier = Modifier){
+                                    Text(text = "Book Now", fontSize = 10.sp, fontWeight = FontWeight.W500,color=Color.White)
 //                                                Text(text = "night",fontSize = 12.sp, fontWeight = FontWeight.Thin,color=Color.White)
+                                }
                             }
                         }
                     }

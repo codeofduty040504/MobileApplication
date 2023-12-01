@@ -155,6 +155,7 @@ import android.widget.DatePicker
 import androidx.compose.material3.Button
 import androidx.compose.ui.text.style.TextAlign
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Room
+import com.example.adminoffice.ui.theme.Utils.DrawerUni
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddBooking
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.AddReview
@@ -181,6 +182,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Rooms.ViewRoom
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.AboutUs
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.FAQ
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -283,178 +285,7 @@ object AddExpense  : Screen {
         var selectedSubItem by remember { mutableStateOf(-1) }
         ModalNavigationDrawer(
             drawerContent = {
-                ModalDrawerSheet {
-                    Logo(scope = scope, drawerState = drawerState)
-                    Menu().forEachIndexed{
-                            index, data ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Header(first = data.first, second = data.second) },
-                            selected = selectedItem==index,
-                            onClick = {
-                                selectedItem=index
-                                selectedSubItem = -1
-                                if(selectedItem==0){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.pop()
-                                    }
-
-                                }
-                                else if(selectedItem==10){
-                                    scope.launch {
-                                        drawerState.close()
-                                        navigator.replace(Chat)
-                                    }
-
-                                }
-                            })
-                        if (selectedItem == index) {
-                            val subMenuItems = data.third
-                            Column {
-                                subMenuItems.forEachIndexed { index, subItem ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.height(45.dp),
-                                        label = {
-                                            SubHeader(subItem=subItem)
-                                        },
-                                        selected = selectedSubItem == index,
-                                        onClick = {
-                                            //onSubItemClick()
-                                            scope.launch {
-                                                drawerState.close()
-                                                if (selectedItem == 1) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewUsers)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(Home)
-                                                    }
-                                                } else if (selectedItem == 2) {
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewServiceCategory)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.replace(AddServiceCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddService)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewService)
-                                                    }
-                                                } else if (selectedItem == 3) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddHotel)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewHotel)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddRoom)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewRoom)
-                                                    }
-                                                } else if (selectedItem == 4) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddInventoryCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewInventoryCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddInventory)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewInventory)
-                                                    }
-                                                }
-                                                else if (selectedItem == 5) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddCoupon)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewCoupons)
-                                                    }
-                                                }else if (selectedItem == 6) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddBooking)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewBookings)
-                                                    }
-                                                } else if (selectedItem == 7) {
-                                                    if (index == 0) {
-                                                        navigator.replace(ViewPayments)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRefunds)
-                                                    }
-                                                } else if (selectedItem == 8) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddDishCategory)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewDishCategory)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddDish)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewDish)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(AddMenu)
-                                                    }
-                                                    if (index == 5) {
-                                                        navigator.replace(ViewMenu)
-                                                    }
-                                                } else if (selectedItem == 9) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddReview)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewReview)
-                                                    }
-                                                } else if (selectedItem == 11) {
-                                                    if (index == 0) {
-                                                        navigator.replace(AddRevenue)
-                                                    }
-                                                    if (index == 1) {
-                                                        navigator.replace(ViewRevenue)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.replace(AddExpense)
-                                                    }
-                                                    if (index == 3) {
-                                                        navigator.replace(ViewExpense)
-                                                    }
-                                                    if (index == 4) {
-                                                        navigator.replace(ViewProfit)
-                                                    }
-                                                }
-                                                else if (selectedItem == 12) {
-                                                    if (index == 1) {
-                                                        navigator.replace(FAQ)
-                                                    }
-                                                    if (index == 0) {
-                                                        navigator.push(AboutUs)
-                                                    }
-                                                    if (index == 2) {
-                                                        navigator.push(Policy)
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DrawerUni(scope,drawerState)
             },
             drawerState= drawerState,
         ) {
@@ -473,7 +304,7 @@ object AddExpense  : Screen {
                         Column (Modifier.verticalScroll(rememberScrollState())){
                             Text(
                                 text = "Add Expense",
-                                color = MaterialTheme.colorScheme.primary,
+                                color = GlobalStrings.AdminColorMain,
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -491,7 +322,7 @@ object AddExpense  : Screen {
                                         .clickable { isExpandedHotel.value = true }
                                 ) {
                                     Row {
-                                        Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.house), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                         Text(text = if(hotelSelect==""){
                                             "Select Hotel"
                                         }
@@ -560,7 +391,7 @@ object AddExpense  : Screen {
                                         .clickable { mDatePickerDialog.show() }
                                 ) {
                                     Row {
-                                        Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.calendar), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.AdminColorMain)
                                         Text(text = if(mDate.value==""){
                                             "Select Date"
                                         }
@@ -591,7 +422,7 @@ object AddExpense  : Screen {
                                         title.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Title", color = Color.Gray)
@@ -625,7 +456,7 @@ object AddExpense  : Screen {
                                         type.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Type", color = Color.Gray)
@@ -659,7 +490,7 @@ object AddExpense  : Screen {
                                         amount.value=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.man), contentDescription = "person", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Amount", color = Color.Gray)
@@ -696,7 +527,7 @@ object AddExpense  : Screen {
                                             roomDescription=it
                                     },
                                     leadingIcon = {
-                                        Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(id = R.drawable.description), contentDescription = "add", tint = GlobalStrings.AdminColorMain)
                                     },
                                     label = {
                                         Text(text = "Expense Description",color = Color.Gray)
@@ -767,14 +598,14 @@ object AddExpense  : Screen {
                                     Spacer(modifier = Modifier.width(10.dp))
                                     OutlinedButton(
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            containerColor = GlobalStrings.AdminColorMain,
                                             contentColor = Color.White),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(0.dp, 10.dp)
                                             .size(400.dp, 45.dp),
                                         shape = RoundedCornerShape(15.dp),
-                                        border = BorderStroke(2.dp,MaterialTheme.colorScheme.primary),
+                                        border = BorderStroke(2.dp,GlobalStrings.AdminColorMain),
 
                                         onClick = {
                                             isErrorRoomDescription = !isValidDescription(roomDescription)
@@ -829,7 +660,8 @@ object AddExpense  : Screen {
 
     // GET Hotels Function
     fun getHotels(context: Context) {
-        val url = "${GlobalStrings.baseURL}admin/hotels/getHotels"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/hotels/getHotels"
         val progressDialog = ProgressDialog(context)
         val params = JSONObject()
         progressDialog.setTitle("Loading Hotels...")
@@ -1090,7 +922,8 @@ object AddExpense  : Screen {
 
     // Add Category Function
     fun AddRevenueToSystem(context: Context, amount : Int,date: String,details: String, hotelid: String,type: String,title:String,image:String, callback: (Boolean) -> Unit){
-        val url = "${GlobalStrings.baseURL}admin/expense/addExpense"
+        var role = getRoleFromLocalStorage(context)
+        val url = "${GlobalStrings.baseURL}${role}/expense/addExpense"
         // Define the input date format
         val inputDateFormat = SimpleDateFormat("dd/M/yyyy")
 

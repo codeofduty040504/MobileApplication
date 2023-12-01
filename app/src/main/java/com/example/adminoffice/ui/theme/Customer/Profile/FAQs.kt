@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -92,13 +93,8 @@ object FAQs  : Screen {
                         .size(100.dp, 200.dp)
                         .clip(RoundedCornerShape((CornerSize(20.dp))))
                 )
-                val faqList = listOf(
-                    FAQItem("What is Jetpack Compose?", "Jetpack Compose is Android’s modern, fully declarative UI toolkit."),
-                    FAQItem("How to use Jetpack Compose?", "To use Jetpack Compose, add the necessary dependencies to your build.gradle file, create a composable function to define your UI, and then call that composable function from your activity or fragment."),
-                    FAQItem("Is Jetpack Compose stable?", "As of the latest release, Jetpack Compose is in beta but is stable for use in production apps."),
-                    FAQItem("Can I mix Compose with XML layouts?", "Yes, you can mix Compose with XML layouts in the same app. You can use the `ComposeView` to embed Compose UI inside your existing XML layouts.")
-                )
-                FAQComponent(faqList = faqList)
+
+                FAQComponent(faqList = serviceCategories)
             }
         }
         getCategories(context)
@@ -190,7 +186,7 @@ object FAQs  : Screen {
                            fontWeight = FontWeight.Bold,
                            color = Color.White
                        )
-                       Icon(Icons.Filled.Add, contentDescription = null, tint = Color.White)
+                       Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White)
                    }
 
                     if (expanded) {
