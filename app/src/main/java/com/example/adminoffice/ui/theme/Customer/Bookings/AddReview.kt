@@ -171,14 +171,15 @@ data class AddReview(
         ) {
             Scaffold()
             {
-                Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.Center){
-                    Text(text = "Give us a Review", color = GlobalStrings.CustomerColorMain,
-                        fontSize = 24.sp
-                    )
-                }
+
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.Center){
+                        Text(text = "Give us a Review", color = GlobalStrings.CustomerColorMain,
+                            fontSize = 24.sp
+                        )
+                    }
                     Spacer(modifier = Modifier.size(10.dp))
                     OutlinedTextField(
                         shape = RoundedCornerShape(5.dp),

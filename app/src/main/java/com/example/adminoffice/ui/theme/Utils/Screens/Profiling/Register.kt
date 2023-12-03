@@ -485,7 +485,7 @@ object Register  : Screen {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(text = "Already a user?", color = Color.Gray)
-                Box(Modifier.padding(horizontal=3.dp).clickable { navigator.pop() }){
+                Box(Modifier.padding(horizontal=3.dp).clickable { navigator.replace(Login) }){
                     Text(text = "Log in", color = Color.Blue)
                 }
             }

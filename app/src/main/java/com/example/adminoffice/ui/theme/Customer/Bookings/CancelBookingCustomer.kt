@@ -400,7 +400,9 @@ data class CancelBookingCustomer(
                         },
                         placeholder = {
                             Text(text = "Enter IBAN Number")
-                        },
+                        }, keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
                         modifier = Modifier
                             .fillMaxWidth(),
                         singleLine = true

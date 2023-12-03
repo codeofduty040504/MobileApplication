@@ -29,6 +29,7 @@ import com.example.adminoffice.ui.theme.Customer.Profile.ContactUs
 import com.example.adminoffice.ui.theme.Customer.Profile.FAQs
 import com.example.adminoffice.ui.theme.Customer.Profile.Policy
 import com.example.adminoffice.ui.theme.Customer.Profile.ViewProfile
+import com.example.adminoffice.ui.theme.Customer.SplashScreen
 import com.example.adminoffice.ui.theme.Customer.Wishlist.WishList
 import com.example.adminoffice.ui.theme.Utils.Screens.Dashboard
 import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
@@ -38,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AdminOfficeTheme {
-                Navigator(ChatCustomer)
+                Navigator(SplashScreen)
                 // A surface container using the 'background' color from the theme
 //                Surface(
 //                    modifier = Modifier.fillMaxSize(),

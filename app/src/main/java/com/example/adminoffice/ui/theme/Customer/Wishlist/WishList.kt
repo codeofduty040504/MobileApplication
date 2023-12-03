@@ -90,56 +90,67 @@ object WishList  : Screen {
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Column (modifier = Modifier
                     .fillMaxWidth()
                     .height(screenHeightDp - 50.dp)
-                    .verticalScroll(
-                        rememberScrollState()
-                    ), horizontalAlignment = Alignment.CenterHorizontally){
-                    if(Hotels.isEmpty()){
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 50.dp)
-                            .height(screenHeightDp - 200.dp), contentAlignment = Alignment.Center){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Image(
-                                    painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logo%2Fno-records.png?alt=media&token=d15e43c9-f619-47c5-8817-41ab00247cc4"),
-                                    contentDescription = "image",
-                                    modifier = Modifier
-                                        .size(300.dp)
-                                        .clip(
-                                            RoundedCornerShape(
-                                                (CornerSize(
-                                                    10.dp
-                                                ))
-                                            )
-                                        ),
-                                    contentScale = ContentScale.FillBounds
-                                )
-
-                                Text(text = "No Hotels Found", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
+                    , horizontalAlignment = Alignment.CenterHorizontally){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp), contentAlignment = Alignment.Center){
+                        Text(text = "Wishlist", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
-                    else{
-                        for(it in Hotels){
-                            Spacer(modifier = Modifier.size(20.dp))
-                            Box{
+                    Divider(color = Color(0xFFE2E2E2))
+                    Column(modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(
+                            rememberScrollState()
+                        )) {
+                        if(Hotels.isEmpty()){
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 50.dp)
+                                .height(screenHeightDp - 200.dp), contentAlignment = Alignment.Center){
+                                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                    Image(
+                                        painter = rememberAsyncImagePainter("https://firebasestorage.googleapis.com/v0/b/kotlin-9839a.appspot.com/o/logo%2Fno-records.png?alt=media&token=d15e43c9-f619-47c5-8817-41ab00247cc4"),
+                                        contentDescription = "image",
+                                        modifier = Modifier
+                                            .size(300.dp)
+                                            .clip(
+                                                RoundedCornerShape(
+                                                    (CornerSize(
+                                                        10.dp
+                                                    ))
+                                                )
+                                            ),
+                                        contentScale = ContentScale.FillBounds
+                                    )
 
-                                HotelCardWithSlider(
-                                    name = it.name, images = it.images, location = it.location, price = it.averagePrice.toString(),
-                                    rating = it.averageRating.toString(), shown = false)
-                                Box(modifier = Modifier.background(Color.Red, RoundedCornerShape(10.dp)).clickable {
-                                    RemoveToWishlist(context=context,hotelid= it._id, customerid = user._id){
-                                        if(it){
-                                            getWishList(context)
-                                        }
-                                    }
-                                }){
-                                    Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                                    Text(text = "No Hotels Found", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
-                            Spacer(modifier = Modifier.size(20.dp))
+                        }
+                        else{
+                            for(it in Hotels){
+                                Spacer(modifier = Modifier.size(20.dp))
+                                Box{
+
+                                    HotelCardWithSlider(
+                                        name = it.name, images = it.images, location = it.location, price = it.averagePrice.toString(),
+                                        rating = it.averageRating.toString(), shown = false)
+                                    Box(modifier = Modifier.background(Color.Red, RoundedCornerShape(10.dp)).clickable {
+                                        RemoveToWishlist(context=context,hotelid= it._id, customerid = user._id){
+                                            if(it){
+                                                getWishList(context)
+                                            }
+                                        }
+                                    }){
+                                        Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
                 }

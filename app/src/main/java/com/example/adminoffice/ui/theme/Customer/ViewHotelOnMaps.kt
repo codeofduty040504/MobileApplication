@@ -173,15 +173,16 @@ data class ViewHotelOnMaps(
 
                                 Text(text = hotel.location, fontSize = 12.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Gray)
                             }
-                            Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom){
-                                Icon(
-                                    Icons.Outlined.Star, contentDescription =null, tint = Color(
-                                        0xFFFFC107
-                                    ), modifier = Modifier.size(22.dp)
-                                )
-                                Text(text = hotel.averageRating.toString(), fontSize = 15.sp)
-                                Text(text = "("+hotel.totalReviews+") reviews", fontSize = 12.sp, color = Color.Gray)
-                            }
+
+                        }
+                        Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom){
+                            Icon(
+                                Icons.Outlined.Star, contentDescription =null, tint = Color(
+                                    0xFFFFC107
+                                ), modifier = Modifier.size(22.dp)
+                            )
+                            Text(text = hotel.averageRating.toString(), fontSize = 15.sp)
+                            Text(text = "("+hotel.totalReviews+") reviews", fontSize = 12.sp, color = Color.Gray)
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))

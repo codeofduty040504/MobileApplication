@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.DateRange
@@ -101,7 +102,17 @@ data class ViewRoom(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            CustomSlider(sliderList = room.images)
+            Box{
+
+                CustomSlider(sliderList = room.images)
+                IconButton(onClick = { navigator.pop() }, modifier = Modifier.padding(10.dp)) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                }
+
+
+
+
+            }
             Column (modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
@@ -118,7 +129,7 @@ data class ViewRoom(
 
 
                 }
-                Text(text = room.description.toString(), fontSize = 12.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Gray)
+//                Text(text = room.description.toString(), fontSize = 12.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Color.Gray)
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
@@ -247,7 +258,7 @@ data class ViewRoom(
                         RoundedCornerShape(15.dp)
                     )
                     .height(45.dp), contentAlignment = Alignment.Center){
-                    Text(text = "Book Now", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = "Add To Cart", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }

@@ -52,13 +52,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -91,9 +94,15 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Bookings.Userid
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Payments.Payment
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Bookings.ViewBookings
+import com.example.adminoffice.ui.theme.Utils.Screens.Dashboard
 import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.AddHotel
+import com.example.adminoffice.ui.theme.Utils.Screens.Hotels.ViewHotel
 import com.example.adminoffice.ui.theme.Utils.Screens.Payments.ViewPayments
+import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
+import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Register
+import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -106,6 +115,7 @@ object ViewBookingsCustomer  : Screen {
     var bookings = mutableStateListOf<Booking>()
     var UserDABS = mutableStateListOf<DabsUser>()
     var payments = mutableStateListOf<Payment>()
+    var paymentTotal = mutableStateOf(0)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(){
@@ -114,6 +124,7 @@ object ViewBookingsCustomer  : Screen {
         val configuration = LocalConfiguration.current
         val screenWidthDp: Dp = configuration.screenWidthDp.dp
         val screenHeightDp: Dp = configuration.screenHeightDp.dp
+        var user = getUserFromLocal(context)
         var selectedTab = remember {
             mutableStateOf(1)
         }
@@ -122,335 +133,152 @@ object ViewBookingsCustomer  : Screen {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            LazyColumn(modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .height(screenHeightDp - 50.dp)) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Box(modifier = Modifier
-                            .width(120.dp)
-                            .height(40.dp)
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .clickable { selectedTab.value = 1 }
-                            .background(
-                                if (selectedTab.value == 1) {
-                                    GlobalStrings.CustomerColorMain
-                                } else {
-                                    Color(
-                                        0xFFEEECF1
-                                    )
-                                },
-                                RoundedCornerShape(12.dp)
-                            ), contentAlignment = Alignment.Center) {
-                            Row {
-                                Icon(
-                                    painterResource(id = R.drawable.calendar),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(15.dp),
-                                    tint = if (selectedTab.value == 1) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "Bookings",
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.W300,
-                                    color = if (selectedTab.value == 1) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
+            if(user._id != ""){
+                LazyColumn(modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .height(screenHeightDp - 50.dp)) {
+                    item{
+                        Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                            Box(modifier = Modifier.clickable {  selectedTab.value =1}){
+                                CardDetails(
+                                    if(selectedTab.value==1){Color(0xFF1E90D6)
+                                    }else{Color(0xFFE0F2FD)},
+                                    "Bookings",
+                                    bookings.size.toString(),selectedTab.value != 1
+                                ) {
+                                    // navigator.push(ViewUsers)
+                                    selectedTab.value = 1
+                                }
                             }
-                        }
-                        Spacer(modifier = Modifier.size(10.dp))
-                        Box(modifier = Modifier
-                            .width(120.dp)
-                            .height(40.dp)
-                            .clickable { selectedTab.value = 2 }
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .background(
-                                if (selectedTab.value == 2) {
-                                    GlobalStrings.CustomerColorMain
-                                } else {
-                                    Color(
-                                        0xFFEEECF1
-                                    )
-                                },
-                                RoundedCornerShape(12.dp)
-                            ), contentAlignment = Alignment.Center) {
-                            Row {
-                                Icon(
-                                    Icons.Filled.Star,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(15.dp),
-                                    tint = if (selectedTab.value == 2) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "Coupons",
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.W300,
-                                    color = if (selectedTab.value == 2) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.size(10.dp))
-                        Box(modifier = Modifier
-                            .width(120.dp)
-                            .height(40.dp)
-                            .clickable { selectedTab.value = 3 }
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .background(
-                                if (selectedTab.value == 3) {
-                                    GlobalStrings.CustomerColorMain
-                                } else {
-                                    Color(
-                                        0xFFEEECF1
-                                    )
-                                },
-                                RoundedCornerShape(12.dp)
-                            ), contentAlignment = Alignment.Center) {
-                            Row {
-                                Icon(
-                                    painterResource(id = R.drawable.money),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(15.dp),
-                                    tint = if (selectedTab.value == 3) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "Payments",
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.W300,
-                                    color = if (selectedTab.value == 3) {
-                                        Color.White
-                                    } else {
-                                        Color.Black
-                                    }
-                                )
+                            Box(modifier = Modifier.clickable { selectedTab.value =2 }) {
+                                CardDetails(
+                                    if(selectedTab.value==2){Color(0xFF58BE34)
+                                    }else{Color(0xFFEEFDE0)},
+                                    "Payment",
+                                    paymentTotal.value.toString(), selectedTab.value != 2,
+                                ) {
+                                    //navigator.push(ViewHotel)
+                                    selectedTab.value = 2
+                                }
                             }
                         }
                     }
-                }
-                if (selectedTab.value == 1) {
-                    item {
-                       for(booking in bookings){
-                           var bookingdropdown = remember {
-                               mutableStateOf(false)
-                           }
-                          Box(modifier = Modifier.padding(10.dp)){
-                              Box(
-                                  modifier = Modifier
-                                      .width(screenWidthDp)
-                                      .background(
-                                          Color.White,
-                                          RoundedCornerShape(10.dp),
-                                      )
-                              ) {
-                                  Column(modifier = Modifier
-                                      .fillMaxWidth()
-                                      .padding(10.dp)) {
+//                    item {
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.SpaceEvenly
+//                        ) {
+//                            Box(modifier = Modifier
+//                                .width(150.dp)
+//                                .height(60.dp)
+//                                .padding(horizontal = 10.dp, vertical = 5.dp)
+//                                .clickable { selectedTab.value = 1 }
+//                                .background(
+//                                    if (selectedTab.value == 1) {
+//                                        GlobalStrings.CustomerColorMain
+//                                    } else {
+//                                        Color(
+//                                            0xFFEEECF1
+//                                        )
+//                                    },
+//                                    RoundedCornerShape(12.dp)
+//                                ), contentAlignment = Alignment.Center) {
+//                                Row {
+//                                    Icon(
+//                                        painterResource(id = R.drawable.calendar),
+//                                        contentDescription = null,
+//                                        modifier = Modifier.size(15.dp),
+//                                        tint = if (selectedTab.value == 1) {
+//                                            Color.White
+//                                        } else {
+//                                            Color.Black
+//                                        }
+//                                    )
+//                                    Spacer(modifier = Modifier.width(5.dp))
+//                                    Text(
+//                                        text = "Bookings",
+//                                        textAlign = TextAlign.Center,
+//                                        fontSize = 12.sp,
+//                                        fontWeight = FontWeight.W300,
+//                                        color = if (selectedTab.value == 1) {
+//                                            Color.White
+//                                        } else {
+//                                            Color.Black
+//                                        }
+//                                    )
+//                                }
+//                            }
+//
+//                            Spacer(modifier = Modifier.size(10.dp))
+//                            Box(modifier = Modifier
+//                                .width(150.dp)
+//                                .height(60.dp)
+//                                .clickable { selectedTab.value = 2 }
+//                                .padding(horizontal = 10.dp, vertical = 5.dp)
+//                                .background(
+//                                    if (selectedTab.value == 2) {
+//                                        GlobalStrings.CustomerColorMain
+//                                    } else {
+//                                        Color(
+//                                            0xFFEEECF1
+//                                        )
+//                                    },
+//                                    RoundedCornerShape(12.dp)
+//                                ), contentAlignment = Alignment.Center) {
+//                                Row {
+//                                    Icon(
+//                                        painterResource(id = R.drawable.money),
+//                                        contentDescription = null,
+//                                        modifier = Modifier.size(15.dp),
+//                                        tint = if (selectedTab.value == 2) {
+//                                            Color.White
+//                                        } else {
+//                                            Color.Black
+//                                        }
+//                                    )
+//                                    Spacer(modifier = Modifier.width(5.dp))
+//                                    Text(
+//                                        text = "Payments",
+//                                        textAlign = TextAlign.Center,
+//                                        fontSize = 12.sp,
+//                                        fontWeight = FontWeight.W300,
+//                                        color = if (selectedTab.value == 2) {
+//                                            Color.White
+//                                        } else {
+//                                            Color.Black
+//                                        }
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+                    if (selectedTab.value == 1) {
+                        item {
+                            for(booking in bookings){
+                                var bookingdropdown = remember {
+                                    mutableStateOf(false)
+                                }
+                                Box(modifier = Modifier.padding(10.dp)){
+                                    Box(
+                                        modifier = Modifier
+                                            .width(screenWidthDp)
+                                            .background(
+                                                Color.White,
+                                                RoundedCornerShape(10.dp),
+                                            )
+                                    ) {
+                                        Column(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)) {
 
-                                      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                                          Row{
-                                              Image(
-                                                  painter = rememberAsyncImagePainter(booking.rooms[0].images[0]),
-                                                  contentDescription = "image",
-                                                  modifier = Modifier
-                                                      .size(60.dp)
-                                                      .clip(
-                                                          RoundedCornerShape(
-                                                              (CornerSize(
-                                                                  15.dp
-                                                              ))
-                                                          )
-                                                      ),
-                                                  contentScale = ContentScale.FillBounds
-                                              )
-                                              Column(
-                                                  modifier = Modifier
-                                                      .padding(start = 10.dp)
-                                                      .width(screenWidthDp - 140.dp),
-                                              ) {
-                                                  Text(text = booking.hotelName, fontSize = 16.sp, fontWeight = FontWeight.Black)
-                                                  Text(text = booking.hotel.city, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
-                                                 // Text(text = booking.status, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
-                                                  Box(modifier = Modifier.padding(horizontal = 10.dp)){
-                                                      Box(modifier = Modifier
-                                                          .background(
-                                                              (if (booking.status == "new") {
-                                                                  Color(0x90355E3B)
-                                                              } else if (booking.status == "cancelled") {
-                                                                  Color(0x90EB0325)
-                                                              } else if (booking.status == "refunded") {
-                                                                  Color(0x901435D3)
-                                                              } else if (booking.status == "checked-in") {
-                                                                  Color(0x906215CF)
-                                                              } else if (booking.status == "checked-out") {
-                                                                  Color(0x90ECAF1C)
-                                                              } else {
-                                                                  Color(0x90E10AF8)
-                                                              }),
-                                                              RoundedCornerShape(15.dp)
-                                                          )
-                                                          .width(120.dp)
-                                                          .height(18.dp), contentAlignment = Alignment.Center){
-                                                          Text(text = booking.status, color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-                                                      }
-                                                  }
-//                                           Row{
-//                                               Text(text = "Deluxe Room", color = Color.Gray)
-//                                           }
-
-                                              }
-
-                                          }
-                                          Box(modifier = Modifier.clickable {
-                                                bookingdropdown.value=true
-                                          }){
-                                              Icon(painterResource(id = R.drawable.more),contentDescription = null)
-                                              DropdownMenu(
-                                                  expanded = bookingdropdown.value,
-                                                  onDismissRequest = {bookingdropdown.value=false },
-                                                  modifier = Modifier
-                                                      .width(screenWidthDp - 140.dp)
-                                                      .height(if(booking.status =="cancelled"){
-                                                          60.dp
-                                                      }else{
-                                                          160.dp
-                                                      })
-                                                      .background(Color.White)
-                                              ) {
-                                                  DropdownMenuItem(text = { Text(text = "View Details") } , leadingIcon = {
-                                                      Box(modifier = Modifier
-                                                          .size(30.dp)
-                                                          .background(
-                                                              Color.Black,
-                                                              RoundedCornerShape(10.dp)
-                                                          ), contentAlignment = Alignment.Center
-                                                      ){
-                                                          Icon(Icons.Filled.List, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
-                                                      }
-                                                  }, onClick = {
-                                                      bookingdropdown.value = false
-                                                      navigator.push(BookingDetails(booking))
-                                                  })
-                                                  if(booking.status !="cancelled"){
-                                                      DropdownMenuItem(text = { Text(text = "Extend Booking") } , leadingIcon = {
-                                                          Box(modifier = Modifier
-                                                              .size(30.dp)
-                                                              .background(
-                                                                  Color.Black,
-                                                                  RoundedCornerShape(10.dp)
-                                                              ), contentAlignment = Alignment.Center
-                                                          ){
-                                                              Icon(painterResource(id = R.drawable.extend), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
-                                                          }
-                                                      }, onClick = {
-                                                          bookingdropdown.value = false
-                                                          navigator.push(ExtendBookingCustomer(booking))
-                                                      })
-                                                      DropdownMenuItem(text = { Text(text = "Cancel Booking") } , leadingIcon = {
-                                                          Box(modifier = Modifier
-                                                              .size(30.dp)
-                                                              .background(
-                                                                  Color.Red,
-                                                                  RoundedCornerShape(10.dp)
-                                                              ), contentAlignment = Alignment.Center
-                                                          ){
-                                                              Icon(painterResource(id = R.drawable.close), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
-                                                          }
-                                                      }, onClick = {
-                                                          bookingdropdown.value = false
-                                                          navigator.push(CancelBookingCustomer(booking))
-                                                      })
-                                                  }
-
-                                              }
-                                          }
-                                      }
-                                      Row (verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
-                                          Text(
-                                              text = "Rs. "+(booking.roomCharges+booking.serviceCharges).toString(),
-                                              textAlign = TextAlign.Center,
-                                              fontSize = 18.sp,
-                                              fontWeight = FontWeight.Black,
-                                              color = GlobalStrings.CustomerColorMain
-                                          )
-                                      }
-
-                                      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                                          Column{
-                                              Spacer(modifier = Modifier.size(2.dp))
-                                              Text(text = "CHECK IN", fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
-                                              Text(text = booking.checkInDate, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                                          }
-                                          Column(horizontalAlignment = Alignment.End){
-                                              Spacer(modifier = Modifier.size(2.dp))
-                                              Text(text = "CHECK OUT", fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
-                                              Text(text = booking.checkOutDate, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                                          }
-                                      }
-                                  }
-                              }
-                          }
-                       }
-                    }
-                }
-                if (selectedTab.value == 2) {
-                    item {
-                        for(i in 0 until 8){
-                            Box(
-                                modifier = Modifier
-                                    .width(screenWidthDp).padding(10.dp)
-                            ) {
-                                Box(modifier = Modifier
-                                    .padding(5.dp)
-                                    .border(
-                                        0.8.dp, Color(0xD2E6E6E6),
-                                        RoundedCornerShape(10.dp)
-                                    )){
-                                    Column(modifier = Modifier.fillMaxWidth()) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(10.dp),
-                                            horizontalAlignment = Alignment.End
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalAlignment = Alignment.Bottom,
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                Row {
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                                Row{
                                                     Image(
-                                                        painter = rememberAsyncImagePainter("https://static.independent.co.uk/2023/03/24/09/Best%20New%20York%20boutique%20hotels.jpg?width=1200"),
+                                                        painter = rememberAsyncImagePainter(booking.rooms[0].images[0]),
                                                         contentDescription = "image",
                                                         modifier = Modifier
-                                                            .size(70.dp)
+                                                            .size(60.dp)
                                                             .clip(
                                                                 RoundedCornerShape(
                                                                     (CornerSize(
@@ -460,68 +288,168 @@ object ViewBookingsCustomer  : Screen {
                                                             ),
                                                         contentScale = ContentScale.FillBounds
                                                     )
-                                                    Spacer(modifier = Modifier.size(15.dp))
-                                                    Column {
-                                                        Text(
-                                                            text = "Royal Hotel",
-                                                            fontSize = 18.sp,
-                                                            fontWeight = FontWeight.W800,
-                                                            lineHeight = 17.sp
-                                                        )
-                                                        Box(modifier = Modifier
-                                                            .width(100.dp)
-                                                            .height(25.dp)
-                                                            .background(
-                                                                Color(
-                                                                    0xFFEEECF1
-                                                                ),
-                                                                RoundedCornerShape(12.dp)
-                                                            ), contentAlignment = Alignment.Center) {
-                                                            Row {
-                                                                Text(
-                                                                    text = "asd4dsg7w",
-                                                                    textAlign = TextAlign.Center,
-                                                                    fontSize = 12.sp,
-                                                                    fontWeight = FontWeight.W300,
-                                                                    color = Color.Black
-                                                                )
-                                                            }
-                                                        }
-                                                        Text(
-                                                            text = "Valid till 24-12-2023",
-                                                            fontSize = 11.sp,
-                                                            fontWeight = FontWeight.W400,
-                                                            lineHeight = 12.sp
-                                                        )
-                                                        Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .padding(start = 10.dp)
+                                                            .width(screenWidthDp - 140.dp),
+                                                    ) {
+                                                        Text(text = booking.hotelName, fontSize = 16.sp, fontWeight = FontWeight.Black)
+                                                        Text(text = booking.hotel.city, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
+                                                        // Text(text = booking.status, fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
+                                                        Box(modifier = Modifier.padding(horizontal = 10.dp)){
                                                             Box(modifier = Modifier
-                                                                .width(120.dp)
-                                                                .height(40.dp)
-                                                                .padding(
-                                                                    horizontal = 10.dp,
-                                                                    vertical = 5.dp
-                                                                )
                                                                 .background(
-                                                                    GlobalStrings.CustomerColorMain,
-                                                                    RoundedCornerShape(12.dp)
-                                                                ), contentAlignment = Alignment.Center) {
-                                                                Row {
-                                                                    Text(
-                                                                        text = "25% Discount",
-                                                                        textAlign = TextAlign.Center,
-                                                                        fontSize = 12.sp,
-                                                                        fontWeight = FontWeight.W300,
-                                                                        color = Color.White
-                                                                    )
-                                                                }
+                                                                    (if (booking.status == "new") {
+                                                                        Color(0x90355E3B)
+                                                                    } else if (booking.status == "cancelled") {
+                                                                        Color(0x90EB0325)
+                                                                    } else if (booking.status == "refunded") {
+                                                                        Color(0x901435D3)
+                                                                    } else if (booking.status == "checked-in") {
+                                                                        Color(0x906215CF)
+                                                                    } else if (booking.status == "checked-out") {
+                                                                        Color(0x90ECAF1C)
+                                                                    } else {
+                                                                        Color(0x90E10AF8)
+                                                                    }),
+                                                                    RoundedCornerShape(15.dp)
+                                                                )
+                                                                .width(120.dp)
+                                                                .height(18.dp), contentAlignment = Alignment.Center){
+                                                                Text(text = booking.status, color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                                                             }
                                                         }
+//                                           Row{
+//                                               Text(text = "Deluxe Room", color = Color.Gray)
+//                                           }
+
                                                     }
 
                                                 }
+                                                Box(modifier = Modifier.clickable {
+                                                    bookingdropdown.value=true
+                                                }){
+                                                    Icon(painterResource(id = R.drawable.more),contentDescription = null)
+                                                    DropdownMenu(
+                                                        expanded = bookingdropdown.value,
+                                                        onDismissRequest = {bookingdropdown.value=false },
+                                                        modifier = Modifier
+                                                            .width(screenWidthDp - 140.dp)
+                                                            .height(if(booking.status =="cancelled"){
+                                                                60.dp
+                                                            }else{
+                                                                160.dp
+                                                            })
+                                                            .background(Color.White)
+                                                    ) {
+                                                        DropdownMenuItem(text = { Text(text = "View Details") } , leadingIcon = {
+                                                            Box(modifier = Modifier
+                                                                .size(30.dp)
+                                                                .background(
+                                                                    Color.Black,
+                                                                    RoundedCornerShape(10.dp)
+                                                                ), contentAlignment = Alignment.Center
+                                                            ){
+                                                                Icon(Icons.Filled.List, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
+                                                            }
+                                                        }, onClick = {
+                                                            bookingdropdown.value = false
+                                                            navigator.push(BookingDetails(booking))
+                                                        })
+                                                        if(booking.status !="cancelled"){
+                                                            DropdownMenuItem(text = { Text(text = "Extend Booking") } , leadingIcon = {
+                                                                Box(modifier = Modifier
+                                                                    .size(30.dp)
+                                                                    .background(
+                                                                        Color.Black,
+                                                                        RoundedCornerShape(10.dp)
+                                                                    ), contentAlignment = Alignment.Center
+                                                                ){
+                                                                    Icon(painterResource(id = R.drawable.extend), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
+                                                                }
+                                                            }, onClick = {
+                                                                bookingdropdown.value = false
+                                                                navigator.push(ExtendBookingCustomer(booking))
+                                                            })
+                                                            DropdownMenuItem(text = { Text(text = "Cancel Booking") } , leadingIcon = {
+                                                                Box(modifier = Modifier
+                                                                    .size(30.dp)
+                                                                    .background(
+                                                                        Color.Red,
+                                                                        RoundedCornerShape(10.dp)
+                                                                    ), contentAlignment = Alignment.Center
+                                                                ){
+                                                                    Icon(painterResource(id = R.drawable.close), contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.White)
+                                                                }
+                                                            }, onClick = {
+                                                                bookingdropdown.value = false
+                                                                navigator.push(CancelBookingCustomer(booking))
+                                                            })
+                                                        }
 
+                                                    }
+                                                }
+                                            }
+                                            Row (verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                Text(
+                                                    text = "Rs. "+(booking.roomCharges+booking.serviceCharges).toString(),
+                                                    textAlign = TextAlign.Center,
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = GlobalStrings.CustomerColorMain
+                                                )
                                             }
 
+                                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                                Column{
+                                                    Spacer(modifier = Modifier.size(2.dp))
+                                                    Text(text = "CHECK IN", fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
+                                                    Text(text = booking.checkInDate, fontSize = 18.sp, fontWeight = FontWeight.Black)
+                                                }
+                                                Column(horizontalAlignment = Alignment.End){
+                                                    Spacer(modifier = Modifier.size(2.dp))
+                                                    Text(text = "CHECK OUT", fontSize = 12.sp, fontWeight = FontWeight.ExtraLight, color = Color.Gray)
+                                                    Text(text = booking.checkOutDate, fontSize = 18.sp, fontWeight = FontWeight.Black)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(selectedTab.value == 2){
+                        item{
+                            Column {
+                                for(pay in payments){
+                                    Box(modifier = Modifier.padding(5.dp)){
+                                        Box(modifier = Modifier
+                                            .padding(5.dp)
+                                            .border(
+                                                0.8.dp, Color(0xD2E6E6E6),
+                                                RoundedCornerShape(10.dp)
+                                            )){
+                                            Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top){
+                                                Box(modifier = Modifier
+                                                    .size(45.dp)
+                                                    .background(
+                                                        Color(0xFF58BE34),
+                                                        RoundedCornerShape(10.dp)
+                                                    ), contentAlignment = Alignment.Center
+                                                ){
+                                                    Icon(painterResource(id = R.drawable.money), contentDescription = null, modifier = Modifier.size(25.dp), tint = Color(
+                                                        0xFFFFFFFF
+                                                    )
+                                                    )
+                                                }
+                                                Column(modifier = Modifier.padding(5.dp)) {
+                                                    Text(text = pay.type, fontWeight = FontWeight.Light, fontSize = 18.sp)
+                                                    Text(text = pay._id, fontWeight = FontWeight.Light, fontSize = 12.sp)
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                                        Text(text = "Rs. "+pay.amount.toString(), fontWeight = FontWeight.Light, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -529,43 +457,42 @@ object ViewBookingsCustomer  : Screen {
                         }
                     }
                 }
-                if(selectedTab.value == 3){
-                   item{
-                       Column {
-                           for(pay in payments){
-                               Box(modifier = Modifier.padding(5.dp)){
-                                   Box(modifier = Modifier
-                                       .padding(5.dp)
-                                       .border(
-                                           0.8.dp, Color(0xD2E6E6E6),
-                                           RoundedCornerShape(10.dp)
-                                       )){
-                                       Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top){
-                                           Box(modifier = Modifier
-                                               .size(45.dp)
-                                               .background(
-                                                   Color(0xFF58BE34),
-                                                   RoundedCornerShape(10.dp)
-                                               ), contentAlignment = Alignment.Center
-                                           ){
-                                               Icon(painterResource(id = R.drawable.money), contentDescription = null, modifier = Modifier.size(25.dp), tint = Color(
-                                                   0xFFFFFFFF
-                                               )
-                                               )
-                                           }
-                                           Column(modifier = Modifier.padding(5.dp)) {
-                                               Text(text = pay.type, fontWeight = FontWeight.Light, fontSize = 18.sp)
-                                               Text(text = pay._id, fontWeight = FontWeight.Light, fontSize = 12.sp)
-                                               Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
-                                                   Text(text = "Rs. "+pay.amount.toString(), fontWeight = FontWeight.Light, fontSize = 12.sp)
-                                               }
-                                           }
-                                       }
-                                   }
-                               }
-                           }
-                       }
-                   }
+            }
+            else{
+                Column (modifier = Modifier
+                    .height(screenHeightDp - 50.dp)
+                    .padding(horizontal = 20.dp), verticalArrangement = Arrangement.Center){
+                    Text(text = "Your Profile", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.size(5.dp))
+                    Text(text = "Log in to view Bookings, Coupons and Payments.", fontSize = 12.sp, color = Color.Gray)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Box(modifier = Modifier
+                        .background(
+                            GlobalStrings.CustomerColorMain,
+                            RoundedCornerShape(5.dp)
+                        )
+                        .fillMaxWidth()
+                        .clickable {
+                            navigator.replace(Login)
+                        }
+                        .padding(0.dp, 10.dp)
+                        .size(400.dp, 30.dp), contentAlignment = Alignment.Center){
+                        Text(text = "Log in", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Box(modifier = Modifier
+                        .background(
+                            GlobalStrings.CustomerColorMain,
+                            RoundedCornerShape(5.dp)
+                        )
+                        .fillMaxWidth()
+                        .clickable {
+                            navigator.replace(Register)
+                        }
+                        .padding(0.dp, 10.dp)
+                        .size(400.dp, 30.dp), contentAlignment = Alignment.Center){
+                        Text(text = "Register", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
+                    }
                 }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -608,7 +535,9 @@ object ViewBookingsCustomer  : Screen {
             }
         }
         try{
-            getBookings(context)
+            if(user._id !=""){
+                getBookings(context)
+            }
 
 //            AuthorizationDABS(context){
 //
@@ -623,7 +552,6 @@ object ViewBookingsCustomer  : Screen {
     fun getBookings(context: Context) {
         val url = "${GlobalStrings.baseURL}customer/bookings/getBookings"
         val progressDialog = ProgressDialog(context)
-        progressDialog.setTitle("Loading Bookings...")
         progressDialog.show()
         if(!isInternetAvailable(context)){
             Toast
@@ -808,7 +736,6 @@ object ViewBookingsCustomer  : Screen {
     fun getPayments(context: Context) {
         val url = "${GlobalStrings.baseURL}customer/payments/getPayments"
         val progressDialog = ProgressDialog(context)
-        progressDialog.setTitle("Loading Payments...")
         progressDialog.show()
         if(!isInternetAvailable(context)){
             Toast
@@ -826,6 +753,7 @@ object ViewBookingsCustomer  : Screen {
                     Log.d("HASHDASDAS",response.toString())
                     var categories  = response.getJSONArray("payments")
                     payments.clear()
+                    paymentTotal.value = 0
                     for(i in 0 until categories.length()){
                         var category = categories.getJSONObject(i)
 
@@ -835,13 +763,14 @@ object ViewBookingsCustomer  : Screen {
                         var type = category.getString("type")
                         var booking = category.getJSONObject("booking")
                         var booking_id = booking.getString("_id")
-
+                        paymentTotal.value = paymentTotal.value + amount
                         payments.add(Payment(_id=_id, amount = amount, id = 0, type =type , bookingID = booking_id))
                     }
                     progressDialog.dismiss()
                 },
                 { error ->
                     payments.clear()
+                    paymentTotal.value = 0
                     Log.d("HASHDASDAS",error.toString())
                     Log.d("HASHDASDAS",error.networkResponse.statusCode.toString())
                     progressDialog.dismiss()
@@ -944,5 +873,31 @@ object ViewBookingsCustomer  : Screen {
             requestQueue.add(request)
         }
 
+    }
+
+    @Composable
+    fun CardDetails(color: Color,heading:String,quantiy:String,text:Boolean,callback: (Boolean) -> Unit) {
+        Box(modifier = Modifier
+            .height(120.dp)
+            .width(170.dp)
+            .padding(vertical = 5.dp)
+            .border(
+                0.2.dp, color,
+                RoundedCornerShape(10.dp)
+            )
+            .background(
+                color,
+                RoundedCornerShape(10.dp)
+            )){
+            Column(horizontalAlignment = Alignment.Start, modifier = Modifier.padding(10.dp)) {
+                Text(text = heading, fontWeight = FontWeight.Light, fontSize = 12.sp, color = if(text){Color.Black}else{Color.White}, style = TextStyle(shadow = Shadow(Color.Gray,
+                    Offset.Zero)
+                )
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(text = quantiy, fontSize = 30.sp, fontWeight = FontWeight.Bold,color = if(text){Color.Black}else{Color.White})
+            }
+
+        }
     }
 }

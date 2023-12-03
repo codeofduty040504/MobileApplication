@@ -132,6 +132,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 import kotlinx.coroutines.launch
 
@@ -151,6 +152,7 @@ object CartView  : Screen {
         val screenWidthDp: Dp = configuration.screenWidthDp.dp
         val screenHeightDp: Dp = configuration.screenHeightDp.dp
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        var user = getUserFromLocal(context)
         ModalNavigationDrawer(
             drawerContent = {},
             drawerState= drawerState,
@@ -273,7 +275,30 @@ object CartView  : Screen {
                                 Spacer(modifier = Modifier.size(5.dp))
                                 Box(modifier = Modifier
                                     .clickable {
-                                        navigator.push(Services)
+                                        if(roomsinCart.isEmpty()){
+                                            Toast
+                                                .makeText(
+                                                    context,
+                                                    "Please select rooms to proceed with Booking.",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                        }
+                                        else{
+                                            if(user._id !="" ){
+                                                navigator.push(Services)
+                                            }
+                                            else{
+                                                Toast
+                                                    .makeText(
+                                                        context,
+                                                        "Please Log in to proceed with Booking.",
+                                                        Toast.LENGTH_SHORT
+                                                    )
+                                                    .show()
+                                            }
+                                        }
+
                                     }
                                     .padding(0.dp, 5.dp)
                                     .background(
