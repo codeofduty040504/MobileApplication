@@ -289,7 +289,7 @@ object Login  : Screen {
                     Box(
                         Modifier
                             .padding(horizontal = 3.dp)
-                            .clickable { navigator.push(Register) }){
+                            .clickable { navigator.replace(Register) }){
                         Text(text = "Register", color = Color.Blue)
                     }
                 }

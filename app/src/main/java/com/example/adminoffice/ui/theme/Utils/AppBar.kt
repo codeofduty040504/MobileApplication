@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.adminoffice.R
+import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,7 @@ fun CustomTopAppBar(callback: ()-> Unit){
                 IconButton(onClick = {
                     saveTokenToLocalStorage(context, "")
                     navigator.popUntilRoot()
+                    navigator.replace(Login)
                 }) {
                     Icon(painterResource(id = R.drawable.baseline_logout_24), contentDescription = "", tint = Color.White)
                 }

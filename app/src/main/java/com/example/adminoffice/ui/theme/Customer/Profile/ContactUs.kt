@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -119,13 +120,27 @@ object ContactUs  : Screen {
         }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
+                .fillMaxSize(),
         ) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
+                Box(modifier = Modifier
+                    .size(40.dp)
+                    .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
+                    .padding(10.dp)
+                    .clickable {
+                        navigator.pop()
+                    }){
+                    Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                }
+                Spacer(modifier = Modifier.width((screenWidthDp/4)-5.dp))
+                Text(text = "Contact Us", fontSize = 18.sp, fontWeight = FontWeight.Black)
+            }
             Column (modifier = Modifier
-                .padding(10.dp)
+                .padding(20.dp)
                 .verticalScroll(rememberScrollState())){
-                Text(text = "Contact Us", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+             //   Text(text = "Contact Us", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text(text = "Leave your email and we will get back to you within 24 hours", fontSize = 14.sp, fontWeight = FontWeight.Light)
                 Box(
                     modifier = Modifier

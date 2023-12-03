@@ -38,6 +38,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.Lock
@@ -73,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -83,6 +85,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -186,6 +189,9 @@ object ChangePassword  : Screen {
                     var isExpandedRole = remember {
                         mutableStateOf(false)
                     }
+                    val configuration = LocalConfiguration.current
+                    val screenWidthDp: Dp = configuration.screenWidthDp.dp
+                    val screenHeightDp: Dp = configuration.screenHeightDp.dp
                     var isErrorPassword by remember { mutableStateOf(false) }
                     var isErrorRole by remember { mutableStateOf(false) }
                     var isErrorConfirmPassword by remember { mutableStateOf(false) }
@@ -231,176 +237,194 @@ object ChangePassword  : Screen {
                             imageURL=""
                             imageuri = uri }
                     )
-                    Column(
-                        modifier = Modifier
+                    Column{
+                        Row(modifier = Modifier
                             .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(vertical = 60.dp, horizontal = 30.dp),
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                            Text(text = "Change your Password", color = GlobalStrings.CustomerColorMain,
-                                fontSize = 24.sp
-                            )
-                        }
-                        OutlinedTextField(
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = CNIC.value,
-                            onValueChange = {
-                                if (it.length <= 13)
-                                    CNIC.value=it
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "Old Password", color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter Old Password")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Text
-                            ),
-                            singleLine = true,
-                        )
-                        if (isErrorCNIC) {
-                            Text(
-                                text = "Please provide a valid Old Password",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
-                            )
-                        }
-                        OutlinedTextField(
-                            visualTransformation = if(secure){
-                                PasswordVisualTransformation()
+                            .padding(10.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
+                            Box(modifier = Modifier
+                                .size(40.dp)
+                                .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
+                                .padding(10.dp)
+                                .clickable {
+                                    navigator.pop()
+                                }){
+                                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
                             }
-                            else{
-                                VisualTransformation.None
-                            },
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = password.value,
-                            onValueChange = {
-                                if (it.length <= 15) password.value=it
-//                    isErrorPassword = !isValidPassword(password.value)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            trailingIcon = { IconButton(onClick = { secure= !secure }) {
-                                Icon(painter = painterResource(id = R.drawable.eye),contentDescription = null, tint = GlobalStrings.CustomerColorMain)
-                            }
-                            },
-                            label = {
-                                Text(text = "New Password",color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter New Password")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            singleLine = true
-                        )
-                        if (isErrorPassword) {
-                            Text(
-                                text = "Password must contain at least one uppercase, one lowercase, one number, one special character  and must be 8 charactors long.",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp,
-                                lineHeight = 11.sp
-                            )
-                        }
-                        OutlinedTextField(
-                            visualTransformation = if(secureConfirm){
-                                PasswordVisualTransformation()
-                            }
-                            else{
-                                VisualTransformation.None
-                            },
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = confirmPassword.value,
-                            onValueChange = {
-                                if (it.length <= 15)  confirmPassword.value=it
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            trailingIcon = { IconButton(onClick = { secureConfirm= !secureConfirm }) {
-                                Icon(painter = painterResource(id = R.drawable.eye),contentDescription = null, tint = GlobalStrings.CustomerColorMain)
-                            }
-                            },
-                            label = {
-                                Text(text = "Confirm New Password",color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter Confirm New Password")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            singleLine = true
+                            Spacer(modifier = Modifier.width((screenWidthDp/4)-5.dp))
 
-                        )
-                        if (isErrorConfirmPassword) {
-                            Text(
-                                text = "Password does not match",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
-                            )
                         }
-                        Spacer(modifier = Modifier.size(10.dp))
-                        Box(modifier = Modifier.fillMaxWidth().clickable {
-                            isErrorPassword = !Home.isValidPassword(password.value)
-                            isErrorConfirmPassword = !Home.isConfirmPassword(
-                                password.value,
-                                confirmPassword.value
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                                .padding(vertical = 60.dp, horizontal = 30.dp),
+                        ) {
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                                Text(text = "Change your Password", color = GlobalStrings.CustomerColorMain,
+                                    fontSize = 24.sp
+                                )
+                            }
+                            OutlinedTextField(
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = CNIC.value,
+                                onValueChange = {
+                                    if (it.length <= 13)
+                                        CNIC.value=it
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                label = {
+                                    Text(text = "Old Password", color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter Old Password")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text
+                                ),
+                                singleLine = true,
                             )
-                            isErrorCNIC = !Home.isValidPassword(CNIC.value)
-                            if(!isErrorPassword &&  !isErrorCNIC
-                                && !isErrorConfirmPassword){
-                                scope.launch {
-                                    ChangePassword(context = context, oldPassword = CNIC.value, newPassword = password.value){
-                                        if(it){
-                                            navigator.pop()
+                            if (isErrorCNIC) {
+                                Text(
+                                    text = "Please provide a valid Old Password",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
+                            OutlinedTextField(
+                                visualTransformation = if(secure){
+                                    PasswordVisualTransformation()
+                                }
+                                else{
+                                    VisualTransformation.None
+                                },
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = password.value,
+                                onValueChange = {
+                                    if (it.length <= 15) password.value=it
+//                    isErrorPassword = !isValidPassword(password.value)
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                trailingIcon = { IconButton(onClick = { secure= !secure }) {
+                                    Icon(painter = painterResource(id = R.drawable.eye),contentDescription = null, tint = GlobalStrings.CustomerColorMain)
+                                }
+                                },
+                                label = {
+                                    Text(text = "New Password",color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter New Password")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done
+                                ),
+                                singleLine = true
+                            )
+                            if (isErrorPassword) {
+                                Text(
+                                    text = "Password must contain at least one uppercase, one lowercase, one number, one special character  and must be 8 charactors long.",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp,
+                                    lineHeight = 11.sp
+                                )
+                            }
+                            OutlinedTextField(
+                                visualTransformation = if(secureConfirm){
+                                    PasswordVisualTransformation()
+                                }
+                                else{
+                                    VisualTransformation.None
+                                },
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = confirmPassword.value,
+                                onValueChange = {
+                                    if (it.length <= 15)  confirmPassword.value=it
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.Lock, contentDescription = "password", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                trailingIcon = { IconButton(onClick = { secureConfirm= !secureConfirm }) {
+                                    Icon(painter = painterResource(id = R.drawable.eye),contentDescription = null, tint = GlobalStrings.CustomerColorMain)
+                                }
+                                },
+                                label = {
+                                    Text(text = "Confirm New Password",color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter Confirm New Password")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done
+                                ),
+                                singleLine = true
+
+                            )
+                            if (isErrorConfirmPassword) {
+                                Text(
+                                    text = "Password does not match",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(10.dp))
+                            Box(modifier = Modifier.fillMaxWidth().clickable {
+                                isErrorPassword = !Home.isValidPassword(password.value)
+                                isErrorConfirmPassword = !Home.isConfirmPassword(
+                                    password.value,
+                                    confirmPassword.value
+                                )
+                                isErrorCNIC = !Home.isValidPassword(CNIC.value)
+                                if(!isErrorPassword &&  !isErrorCNIC
+                                    && !isErrorConfirmPassword){
+                                    scope.launch {
+                                        ChangePassword(context = context, oldPassword = CNIC.value, newPassword = password.value){
+                                            if(it){
+                                                navigator.pop()
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                        }.height(50.dp).background(GlobalStrings.CustomerColorMain,
-                            RoundedCornerShape(10.dp)
-                        ), contentAlignment = Alignment.Center){
-                            Text(text = "Change Password", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Bold)
+                            }.height(50.dp).background(GlobalStrings.CustomerColorMain,
+                                RoundedCornerShape(10.dp)
+                            ), contentAlignment = Alignment.Center){
+                                Text(text = "Change Password", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }

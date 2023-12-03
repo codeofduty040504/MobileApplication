@@ -39,6 +39,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.Lock
@@ -75,6 +76,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -85,6 +87,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -193,6 +196,9 @@ data class ManageProfile(
                     var isExpandedRole = remember {
                         mutableStateOf(false)
                     }
+                    val configuration = LocalConfiguration.current
+                    val screenWidthDp: Dp = configuration.screenWidthDp.dp
+                    val screenHeightDp: Dp = configuration.screenHeightDp.dp
                     var isErrorPassword by remember { mutableStateOf(false) }
                     var isErrorRole by remember { mutableStateOf(false) }
                     var isErrorConfirmPassword by remember { mutableStateOf(false) }
@@ -238,174 +244,190 @@ data class ManageProfile(
                             imageURL=""
                             imageuri = uri }
                     )
-                    Column(
-                        modifier = Modifier
+                    Column{
+                        Row(modifier = Modifier
                             .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 30.dp, vertical = 20.dp),
-                    ) {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                launcher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
+                            .padding(10.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
+                            Box(modifier = Modifier
+                                .size(40.dp)
+                                .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
+                                .padding(10.dp)
+                                .clickable {
+                                    navigator.pop()
+                                }){
+                                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
                             }
-                            .padding(0.dp, 5.dp),
-                            contentAlignment = Alignment.Center
-                        ){
-                            if(imageuri==null){
-                                if(user.profilePicture=="user"){
-                                    Image(
-                                        painter = rememberAsyncImagePainter("https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"),
-                                        contentDescription = "image",
-                                        modifier = Modifier
-                                            .size(200.dp)
-                                            .clip(RoundedCornerShape((CornerSize(20.dp))))
+                            Spacer(modifier = Modifier.width((screenWidthDp/4)-5.dp))
+                            Text(text = "Update Account", fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 30.dp, vertical = 20.dp),
+                        ) {
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    launcher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                     )
                                 }
-                                else{
-                                    Image(
-                                        painter = rememberAsyncImagePainter(user.profilePicture),
-                                        contentDescription = "image",
-                                        modifier = Modifier
-                                            .size(200.dp)
-                                            .clip(RoundedCornerShape((CornerSize(20.dp))))
-                                    )
-                                }
-
-                            }
-                            else{
-                                imageuri?.let {
-                                    bitmap = if(Build.VERSION.SDK_INT < 28){
-                                        MediaStore.Images.Media.getBitmap(context.contentResolver,it)
+                                .padding(0.dp, 5.dp),
+                                contentAlignment = Alignment.Center
+                            ){
+                                if(imageuri==null){
+                                    if(user.profilePicture=="user"){
+                                        Image(
+                                            painter = rememberAsyncImagePainter("https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"),
+                                            contentDescription = "image",
+                                            modifier = Modifier
+                                                .size(200.dp)
+                                                .clip(RoundedCornerShape((CornerSize(20.dp))))
+                                        )
                                     }
                                     else{
-                                        val source = ImageDecoder.createSource(context.contentResolver,it)
-                                        ImageDecoder.decodeBitmap(source)
+                                        Image(
+                                            painter = rememberAsyncImagePainter(user.profilePicture),
+                                            contentDescription = "image",
+                                            modifier = Modifier
+                                                .size(200.dp)
+                                                .clip(RoundedCornerShape((CornerSize(20.dp))))
+                                        )
                                     }
 
-                                    Row(verticalAlignment = Alignment.Bottom) {
-                                        Image(bitmap= bitmap?.asImageBitmap()!!, contentDescription = "", modifier = Modifier
-                                            .size(200.dp)
-                                            .clip(RoundedCornerShape((CornerSize(20.dp)))),
-                                            contentScale = ContentScale.FillBounds)
+                                }
+                                else{
+                                    imageuri?.let {
+                                        bitmap = if(Build.VERSION.SDK_INT < 28){
+                                            MediaStore.Images.Media.getBitmap(context.contentResolver,it)
+                                        }
+                                        else{
+                                            val source = ImageDecoder.createSource(context.contentResolver,it)
+                                            ImageDecoder.decodeBitmap(source)
+                                        }
+
+                                        Row(verticalAlignment = Alignment.Bottom) {
+                                            Image(bitmap= bitmap?.asImageBitmap()!!, contentDescription = "", modifier = Modifier
+                                                .size(200.dp)
+                                                .clip(RoundedCornerShape((CornerSize(20.dp)))),
+                                                contentScale = ContentScale.FillBounds)
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(20.dp))
-                        OutlinedTextField(
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = CNIC.value,
-                            onValueChange = {
-                                if (it.length <= 13)
-                                    CNIC.value=it
-                            },
-                            leadingIcon = {
-                                Icon(painterResource(id = R.drawable.staff), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "CNIC", color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter CNIC")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Phone
-                            ),
-                            singleLine = true,
-                            visualTransformation = MaskVisualTransformation("#####-#######-#")
-                        )
-                        if (isErrorCNIC) {
-                            Text(
-                                text = "Please provide a valid CNIC",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
+                            Spacer(modifier = Modifier.height(20.dp))
+                            OutlinedTextField(
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = CNIC.value,
+                                onValueChange = {
+                                    if (it.length <= 13)
+                                        CNIC.value=it
+                                },
+                                leadingIcon = {
+                                    Icon(painterResource(id = R.drawable.staff), contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                label = {
+                                    Text(text = "CNIC", color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter CNIC")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Phone
+                                ),
+                                singleLine = true,
+                                visualTransformation = MaskVisualTransformation("#####-#######-#")
                             )
-                        }
-                        OutlinedTextField(
+                            if (isErrorCNIC) {
+                                Text(
+                                    text = "Please provide a valid CNIC",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
+                            OutlinedTextField(
 
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = firstName.value,
-                            onValueChange = {
-                                if (it.length <= 10)
-                                    firstName.value=it
-                            },
-                            leadingIcon = {
-                                Icon(painterResource(id = R.drawable.man), contentDescription = "add", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "First Name",color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter First Name")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            singleLine = true
-                        )
-                        if (isErrorFirstName) {
-                            Text(
-                                text = "Please provide a valid First Name",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = firstName.value,
+                                onValueChange = {
+                                    if (it.length <= 10)
+                                        firstName.value=it
+                                },
+                                leadingIcon = {
+                                    Icon(painterResource(id = R.drawable.man), contentDescription = "add", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                label = {
+                                    Text(text = "First Name",color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter First Name")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                singleLine = true
                             )
-                        }
-                        OutlinedTextField(
+                            if (isErrorFirstName) {
+                                Text(
+                                    text = "Please provide a valid First Name",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
+                            OutlinedTextField(
 
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = lastName.value,
-                            onValueChange = {
-                                if (it.length <= 10)
-                                    lastName.value=it
-                            },
-                            leadingIcon = {
-                                Icon(painterResource(id = R.drawable.man), contentDescription = "add", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "Last Name",color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter Last Name")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            singleLine = true
-                        )
-                        if (isErrorLastName) {
-                            Text(
-                                text = "Please provide a valid Last Name",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = lastName.value,
+                                onValueChange = {
+                                    if (it.length <= 10)
+                                        lastName.value=it
+                                },
+                                leadingIcon = {
+                                    Icon(painterResource(id = R.drawable.man), contentDescription = "add", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                label = {
+                                    Text(text = "Last Name",color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter Last Name")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                singleLine = true
                             )
-                        }
+                            if (isErrorLastName) {
+                                Text(
+                                    text = "Please provide a valid Last Name",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
 //                        OutlinedTextField(
 //                            shape = RoundedCornerShape(5.dp),
 //                            colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -443,83 +465,84 @@ data class ManageProfile(
 //                                fontSize = 11.sp
 //                            )
 //                        }
-                        OutlinedTextField(
-                            shape = RoundedCornerShape(5.dp),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray,
-                                errorBorderColor = Color.Red,
-                                placeholderColor = Color.Gray,
-                                disabledPlaceholderColor = Color.Gray
-                            ),
-                            value = PhoneNumber.value,
-                            onValueChange = {
-                                if (it.length <= 11) PhoneNumber.value=it
+                            OutlinedTextField(
+                                shape = RoundedCornerShape(5.dp),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Black,
+                                    unfocusedBorderColor = Color.Gray,
+                                    errorBorderColor = Color.Red,
+                                    placeholderColor = Color.Gray,
+                                    disabledPlaceholderColor = Color.Gray
+                                ),
+                                value = PhoneNumber.value,
+                                onValueChange = {
+                                    if (it.length <= 11) PhoneNumber.value=it
 //                    isErrorPhoneNumber = isValidPhoneNumber(PhoneNumber.value)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Phone, contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
-                            },
-                            label = {
-                                Text(text = "Phone Number", color = Color.Gray)
-                            },
-                            placeholder = {
-                                Text(text = "Enter 11 digit Phone Number")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Phone
-                            ),
-                            singleLine = true,
-                            visualTransformation = MaskVisualTransformation("####-#######")
-                        )
-                        if (isErrorPhoneNumber) {
-                            Text(
-                                text = "Please provide a valid Phone Number",
-                                color = Color.Red,
-                                modifier = Modifier.align(Alignment.Start),
-                                fontSize = 11.sp
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Phone, contentDescription = "person", tint = GlobalStrings.CustomerColorMain)
+                                },
+                                label = {
+                                    Text(text = "Phone Number", color = Color.Gray)
+                                },
+                                placeholder = {
+                                    Text(text = "Enter 11 digit Phone Number")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Phone
+                                ),
+                                singleLine = true,
+                                visualTransformation = MaskVisualTransformation("####-#######")
                             )
-                        }
-                        Spacer(modifier = Modifier.size(10.dp))
-                        Box(modifier = Modifier.fillMaxWidth().clickable {
-                            isErrorPhoneNumber = !Home.isValidPhoneNumber(PhoneNumber.value)
-                            isErrorCNIC = !Home.isValidCNIC(CNIC.value)
-                            isErrorFirstName = !Home.isValidFirstName(firstName.value.trim())
-                            isErrorLastName = !Home.isValidLastName(lastName.value)
-                            isErrorEmail = !Home.isValidEmail(email.value)
-                            if(!isErrorEmail && !isErrorCNIC
-                                && !isErrorFirstName
-                                && !isErrorLastName && !isErrorPhoneNumber){
-                                scope.launch {
-                                    if(imageuri!=null){
-                                        uploadImageToFireBase(context=context, filePath = imageuri)
-                                    }
-                                    updateUser(
-                                        context,
-                                        email.value,
-                                        password.value,
-                                        PhoneNumber.value,
-                                        CNIC.value,
-                                        firstName.value,
-                                        lastName.value,
-                                        imageURL,
-                                        role, userID = user._id
-                                    ) { isSuccess ->
-                                        if(isSuccess){
-                                            saveUsertoLocal(context,DabsUser(_id = user._id, firstname = firstName.value,lastName=lastName.value, email = user.email, contactNo = PhoneNumber.value, cnic = CNIC.value, profilePicture = imageURL, role = "customer"))
-                                            navigator.pop()
+                            if (isErrorPhoneNumber) {
+                                Text(
+                                    text = "Please provide a valid Phone Number",
+                                    color = Color.Red,
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 11.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(10.dp))
+                            Box(modifier = Modifier.fillMaxWidth().clickable {
+                                isErrorPhoneNumber = !Home.isValidPhoneNumber(PhoneNumber.value)
+                                isErrorCNIC = !Home.isValidCNIC(CNIC.value)
+                                isErrorFirstName = !Home.isValidFirstName(firstName.value.trim())
+                                isErrorLastName = !Home.isValidLastName(lastName.value)
+                                isErrorEmail = !Home.isValidEmail(email.value)
+                                if(!isErrorEmail && !isErrorCNIC
+                                    && !isErrorFirstName
+                                    && !isErrorLastName && !isErrorPhoneNumber){
+                                    scope.launch {
+                                        if(imageuri!=null){
+                                            uploadImageToFireBase(context=context, filePath = imageuri)
                                         }
+                                        updateUser(
+                                            context,
+                                            email.value,
+                                            password.value,
+                                            PhoneNumber.value,
+                                            CNIC.value,
+                                            firstName.value,
+                                            lastName.value,
+                                            imageURL,
+                                            role, userID = user._id
+                                        ) { isSuccess ->
+                                            if(isSuccess){
+                                                saveUsertoLocal(context,DabsUser(_id = user._id, firstname = firstName.value,lastName=lastName.value, email = user.email, contactNo = PhoneNumber.value, cnic = CNIC.value, profilePicture = imageURL, role = "customer"))
+                                                navigator.pop()
+                                            }
 
+                                        }
                                     }
                                 }
+                            }.height(50.dp).background(GlobalStrings.CustomerColorMain,
+                                RoundedCornerShape(10.dp)
+                            ), contentAlignment = Alignment.Center){
+                                Text(text = "Edit Profile", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Bold)
                             }
-                        }.height(50.dp).background(GlobalStrings.CustomerColorMain,
-                            RoundedCornerShape(10.dp)
-                        ), contentAlignment = Alignment.Center){
-                            Text(text = "Edit Profile", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Bold)
-                        }
 
+                        }
                     }
                 }
             }

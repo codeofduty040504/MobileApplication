@@ -802,22 +802,24 @@ object LandingPage  : Screen {
                                         contentScale = ContentScale.FillBounds
                                     )
                                 }
-                                Image(
-                                    painter = rememberAsyncImagePainter(if(user.profilePicture=="" || user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
-                                        user.profilePicture
-                                    }),
-                                    contentDescription = "image",
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(
-                                            RoundedCornerShape(
-                                                (CornerSize(
-                                                    50.dp
-                                                ))
-                                            )
-                                        ),
-                                    contentScale = ContentScale.FillBounds
-                                )
+                                Box(modifier = Modifier.clickable { navigator.replace(ViewProfile) }){
+                                    Image(
+                                        painter = rememberAsyncImagePainter(if(user.profilePicture=="" || user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
+                                            user.profilePicture
+                                        }),
+                                        contentDescription = "image",
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(
+                                                RoundedCornerShape(
+                                                    (CornerSize(
+                                                        50.dp
+                                                    ))
+                                                )
+                                            ),
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                }
                             }
                         }
                     }
@@ -2354,7 +2356,12 @@ object LandingPage  : Screen {
             filters.put("minPrice",minPrice)
         }
         filters.put("maxPrice",maxPrice)
-        filters.put("rating",rating)
+        if(rating=="All"){
+            filters.put("rating",rating)
+        }
+        else{
+            filters.put("rating",rating.substring(0,1).toInt())
+        }
         if(meals=="Yes"){
             filters.put("menu",true)
         }

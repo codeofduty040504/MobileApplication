@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
@@ -35,6 +36,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -142,7 +144,17 @@ data class HotelScreen(
                 .height(screenHeightDp)
         ) {
             item{
-                CustomSlider(sliderList = hotel.images)
+               Box{
+
+                   CustomSlider(sliderList = hotel.images)
+                               IconButton(onClick = { navigator.pop() }, modifier = Modifier.padding(10.dp)) {
+                                   Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                               }
+
+
+
+
+               }
             }
             item{
                 Column(modifier = Modifier
@@ -625,7 +637,7 @@ data class HotelScreen(
                                                         .padding(5.dp)
                                                     ){
                                                         Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.height(20.dp)){
-                                                            Text(text = "Book Now", fontSize = 14.sp, fontWeight = FontWeight.W500,color=Color.White)
+                                                            Text(text = "Add To Cart", fontSize = 14.sp, fontWeight = FontWeight.W500,color=Color.White)
 //                                                Text(text = "night",fontSize = 12.sp, fontWeight = FontWeight.Thin,color=Color.White)
                                                         }
                                                     }
@@ -765,7 +777,7 @@ data class HotelScreen(
                                             .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically){
                                             Row{
                                                 Image(
-                                                    painter = rememberAsyncImagePainter("https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Outdoors-man-portrait_%28cropped%29.jpg/800px-Outdoors-man-portrait_%28cropped%29.jpg"),
+                                                    painter = rememberAsyncImagePainter(review.customer.profile),
                                                     contentDescription = "image",
                                                     modifier = Modifier
                                                         .size(40.dp)
@@ -971,7 +983,52 @@ data class HotelScreen(
             }
             if(selectedTab.value==6){
                 item{
-                    Text(text = "Menus")
+                    Box(modifier = Modifier.padding(10.dp)){
+                        Box(modifier = Modifier
+                            .background(Color(0xFDF1ECFA), RoundedCornerShape(15.dp))
+                            .padding(10.dp)
+                            .fillMaxWidth()){
+                            Column() {
+                                Text(text = "Special Sunday", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                for(i in 0 until 5){
+                                    Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically){
+                                        Image(
+                                            painter = rememberAsyncImagePainter("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLJY69KiD8GFtsyFj0vG9C5m8_y3cyBOcOTkEeAWG5V0M3xxk5WFZdLN7l4F-iMQ7FwSc&usqp=CAU"),
+                                            contentDescription = "image",
+                                            modifier = Modifier
+                                                .size(35.dp)
+                                                .clip(
+                                                    RoundedCornerShape(
+                                                        (CornerSize(
+                                                            20.dp
+                                                        ))
+                                                    )
+                                                ),
+                                            contentScale = ContentScale.FillBounds
+                                        )
+                                        Spacer(modifier = Modifier.size(15.dp))
+                                        Column{
+                                            //Text(text =user.firstname+" "+user.lastName, fontSize = 18.sp, fontWeight = FontWeight.Light)
+                                            Text(text = "Sea Food", fontSize = 12.sp, fontWeight = FontWeight.Light, color = Color.Black
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.size(30.dp))
+                                    }
+                                }
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                                    Box(modifier = Modifier
+                                        .width(100.dp)
+                                        .height(25.dp)
+                                        .background(
+                                            GlobalStrings.CustomerColorMain,
+                                            RoundedCornerShape(10.dp)
+                                        ), contentAlignment = Alignment.Center){
+                                        Text(text = "Rs. 6000", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             if(selectedTab.value==7){

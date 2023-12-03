@@ -169,6 +169,7 @@ import com.example.adminoffice.ui.theme.Utils.Screens.Settings.Policy
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.Home
 import com.example.adminoffice.ui.theme.Utils.Screens.Users.ViewUsers
 import com.example.adminoffice.ui.theme.Utils.SubHeader
+import com.example.adminoffice.ui.theme.Utils.getRoleFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
@@ -422,6 +423,14 @@ object Services  : Screen {
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(10.dp))
+                                    if (isErrorRoomNumber) {
+                                        Text(
+                                            text = "Please select Check In Date",
+                                            color = Color.Red,
+                                            modifier = Modifier.align(Alignment.Start),
+                                            fontSize = 11.sp
+                                        )
+                                    }
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -452,6 +461,14 @@ object Services  : Screen {
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(5.dp))
+                                    if (isErrorFloor) {
+                                        Text(
+                                            text = "Please select Check Out Date",
+                                            color = Color.Red,
+                                            modifier = Modifier.align(Alignment.Start),
+                                            fontSize = 11.sp
+                                        )
+                                    }
                                     OutlinedTextField(
                                         shape = RoundedCornerShape(5.dp),
                                         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -555,45 +572,6 @@ object Services  : Screen {
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(10.dp))
-//                                    Box(
-//                                        modifier = Modifier
-//                                            .fillMaxWidth()
-//                                            .border(0.6.dp, Color.Black, MaterialTheme.shapes.small)
-//                                            .padding(16.dp)
-//                                            .clickable { isExpandedCustomerType.value = true }
-//                                    ) {
-//                                        Row {
-//                                            Icon(painterResource(id = R.drawable.bed), contentDescription = "person", modifier = Modifier.padding(0.dp,0.dp,10.dp,0.dp),tint= GlobalStrings.CustomerColorMain)
-//                                            Text(text = if(customerSelect==""){
-//                                                "Select Customer Type"
-//                                            }
-//                                            else{
-//                                                customerSelect
-//                                            },
-//                                                color =  if(customerSelect==""){
-//                                                    Color.Gray
-//                                                }
-//                                                else{
-//                                                    Color.Black
-//                                                }
-//                                            )
-//                                        }
-//
-//                                        DropdownMenu(
-//                                            expanded = isExpandedCustomerType.value,
-//                                            onDismissRequest = {isExpandedCustomerType.value=false },
-//                                            modifier = Modifier
-//                                                .size(300.dp, 120.dp)
-//                                                .fillMaxWidth()
-//                                        ) {
-//                                            customerType.forEach { option ->
-//                                                DropdownMenuItem(text = { Text(text = option) }, onClick = {
-//                                                    customerSelect = option
-//                                                    isExpandedCustomerType.value = false
-//                                                })
-//                                            }
-//                                        }
-//                                    }
                                     OutlinedTextField(
                                         shape = RoundedCornerShape(5.dp),
                                         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -633,58 +611,26 @@ object Services  : Screen {
                                     Row(modifier= Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.End){
                                         Spacer(modifier = Modifier.width(10.dp))
-//                                        OutlinedButton(onClick = {
-////                                            isErrorRoomDescription = !isValidDescription(roomDescription)
-////                                            isErrorAdults = adults.value == ""
-////                                            isErrorChildren = children.value == ""
-////                                            isErrorRoomType = roomTypeSelect == ""
-////                                            isErrorPrice = price.value == ""
-////                                            isErrorHotel = hotelID == ""
-////                                            isErrorFloor = floorSelect == ""
-////                                            isErrorRoomNumber = RoomNumber.value == ""
-////                                            isErrorSize = size.value == ""
-//
-////                                            if(!isErrorRoomDescription
-////                                                && !isErrorAdults
-////                                                && !isErrorChildren
-////                                                && !isErrorRoomType
-////                                                && !isErrorPrice
-////                                                && !isErrorHotel
-////                                                && !isErrorFloor
-////                                                && !isErrorRoomNumber
-////                                                && !isErrorSize
-////                                            ){
-////                                                step.value++
-////                                            }
-//                                            step.value++
-//                                        },
-//                                            colors = ButtonDefaults.outlinedButtonColors(
-//                                                contentColor = Color.White,
-//                                                containerColor = GlobalStrings.CustomerColorMain,
-//                                            ),
-//                                            border= BorderStroke(1.dp,GlobalStrings.CustomerColorMain),
-//                                            shape = RoundedCornerShape(CornerSize(3.dp))) {
-//                                            Text(text = "Next")
-//                                        }
                                         Box(modifier = Modifier
                                             .background(
                                                 GlobalStrings.CustomerColorMain,
                                                 RoundedCornerShape(15.dp)
                                             )
                                             .clickable {
-                                                step.value++
+                                                isErrorRoomDescription = roomDescription.length<29
+                                                isErrorChildren = children.value==""
+                                                isErrorAdults = adults.value==""
+                                                isErrorFloor = eDate.value==""
+                                                isErrorRoomNumber = mDate.value==""
+
+                                                if(!isErrorFloor && !isErrorRoomNumber && !isErrorChildren && !isErrorAdults && !isErrorRoomDescription){
+                                                    step.value++
+                                                }
                                             }
                                             .padding(0.dp, 10.dp)
                                             .size(100.dp, 30.dp), contentAlignment = Alignment.Center){
                                             Text(text = "Next", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
                                         }
-//                                        Box(modifier = Modifier.width(50.dp).height(150.dp).border(
-//                                            0.2.dp,GlobalStrings.CustomerColorMain,RoundedCornerShape(10.dp)
-//                                        ).clickable {
-//
-//                                        }){
-//                                            Text(text = "Next")
-//                                        }
                                     }
                                 }
                             }
@@ -735,21 +681,21 @@ object Services  : Screen {
 
                                     CustomProgressDialog(current)
                                 }
-                                var servi by remember {
-                                    mutableStateOf<List<Service>>(emptyList())
+//                                for(h in Hotels){
+//                                    if(hotelID== h._id){
+//                                        servi = h.services
+//                                    }
+//                                }
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                                    Text(text = "Hotel Services", fontSize = 18.sp, fontWeight = FontWeight.Bold,)
                                 }
-                                for(h in Hotels){
-                                    if(hotelID== h._id){
-                                        servi = h.services
-                                    }
-                                }
-//                                SortableTable(
-//                                    context = context,
-//                                    rows = servicesHotel,
-//                                    sortOrder = sortOrder,
-//                                    onSortOrderChange = { newSortOrder ->
-//                                        sortOrder = newSortOrder
-//                                    })
+                                SortableTable(
+                                    context = context,
+                                    rows = servicesHotel,
+                                    sortOrder = sortOrder,
+                                    onSortOrderChange = { newSortOrder ->
+                                        sortOrder = newSortOrder
+                                    })
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Row(modifier= Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.End){
@@ -805,9 +751,10 @@ object Services  : Screen {
                                                 roomCharges =
                                                     roomCharges + room.price * daysBetween.toInt()
                                             }
-//                                            for(serv in servicesSelectedHotel){
-//                                                servicesCharges=servicesCharges+serv.price
-//                                            }
+                                            for(serv in servicesSelectedHotel){
+                                                servicesCharges=servicesCharges+serv.price
+                                            }
+                                            servicesCharges = servicesCharges* daysBetween.toInt()
                                             Log.d("KKKKKKKK", "Hello G")
                                             amount = servicesCharges + roomCharges
                                             BookingAmount = amount
@@ -821,7 +768,17 @@ object Services  : Screen {
                                                 ) { it ->
                                                     Log.d("KKKKKKKK", "Hello Ggt")
                                                     if (it) {
+
                                                         step.value++
+                                                    }
+                                                    else{
+                                                        Toast
+                                                            .makeText(
+                                                                context,
+                                                                "Cant find Owners Bank Account. Try again Later.",
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                            .show()
                                                     }
                                                 }
                                             }
@@ -830,18 +787,6 @@ object Services  : Screen {
                                         .size(100.dp, 30.dp), contentAlignment = Alignment.Center){
                                         Text(text = "Next", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
                                     }
-//                                    OutlinedButton(onClick = {
-//
-//                                    },
-//                                        colors = ButtonDefaults.outlinedButtonColors(
-//                                            contentColor = Color.White, // Text color
-//                                            containerColor = GlobalStrings.CustomerColorMain, // Border color
-//                                            // You can customize other colors here
-//                                        ),
-//                                        border= BorderStroke(1.dp,GlobalStrings.CustomerColorMain),
-//                                        shape = RoundedCornerShape(CornerSize(3.dp))) {
-//                                        Text(text = "Next")
-//                                    }
                                     Spacer(modifier = Modifier.width(10.dp))
                                 }
                             }
@@ -905,13 +850,13 @@ object Services  : Screen {
                                         Text(text = "Services", fontSize = 14.sp, fontWeight = FontWeight.Light)
                                         Text(text = servicesCharges.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                     }
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
-                                        Text(text = "Refund Details", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = GlobalStrings.CustomerColorMain)
-                                    }
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(text = "Total Bill", fontSize = 14.sp, fontWeight = FontWeight.Light)
-                                        Text(text = BookingAmount.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                    }
+//                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+//                                        Text(text = "Refund Details", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = GlobalStrings.CustomerColorMain)
+//                                    }
+//                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+//                                        Text(text = "Total Bill", fontSize = 14.sp, fontWeight = FontWeight.Light)
+//                                        Text(text = BookingAmount.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+//                                    }
                                     Divider(
                                         Modifier
                                             .fillMaxWidth()
@@ -1119,14 +1064,96 @@ object Services  : Screen {
 
             }
             getCategories(context)
-//            AuthorizationDABS(context){
-//
-//            }
+            getHotel(context)
         }
 
     }
 
+    // GET Hotels Function
+    fun getHotel(context: Context) {
+        var hotel  = getHotelID(context)
+        val url = "${GlobalStrings.baseURL}customer/hotels/getHotel/${hotel}"
+        Log.d("AASDASDAS",url)
+        val progressDialog = ProgressDialog(context)
+        val params = JSONObject()
+        progressDialog.setTitle("Loading Hotels...")
+        progressDialog.show()
+        if(!isInternetAvailable(context)){
+            Toast
+                .makeText(
+                    context,
+                    "Internet not available.",
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+        }
+        else{
+            val request = object : JsonObjectRequest(
+                Request.Method.GET, url, params,
+                { response ->
+                    Log.d("HAPP",response.toString())
+                    var hotels  = response.getJSONObject("hotel")
+                    var hotelservices = hotels.getJSONArray("services")
+                    servicesHotel.clear()
+                    for(i in 0 until hotelservices.length()){
+                        var serviceOBJ = hotelservices.getJSONObject(i)
+                        var hotelservices_id = serviceOBJ.getString("_id")
+                        var hotelservicestype = serviceOBJ.getString("type")
+                        var hotelservicesname = serviceOBJ.getString("name")
+                        var hotelservicesdescription = serviceOBJ.getString("description")
+                        var hotelservicesimage = serviceOBJ.getString("image")
+                        var hotelservicespriceRate = serviceOBJ.getString("priceRate")
+                        var hotelservicesprice = serviceOBJ.getInt("price")
+                        var hotelservicesaddedByRole = serviceOBJ.getString("addedByRole")
+                        var hotelservicesdeletedAt = serviceOBJ.get("deletedAt")
+                        var hotelservicesvisible = serviceOBJ.getBoolean("visible")
+                        var hotelservicesisDeleted = serviceOBJ.getBoolean("isDeleted")
+                        var hotelservicescreatedAt = serviceOBJ.getString("createdAt")
+                        var hotelservicesupdatedAt = serviceOBJ.getString("updatedAt")
+                        var hotelservices__v = serviceOBJ.getInt("__v")
+//                        var hotelservicesserviceCategory = serviceOBJ.getJSONObject("serviceCategory")
+//                        var hotelservicesserviceCategory_id = hotelservicesserviceCategory.getString("_id")
+//                        var hotelservicesserviceCategorytitle = hotelservicesserviceCategory.getString("title")
+//                        var hotelservicesserviceCategoryimage = hotelservicesserviceCategory.getString("image")
+//                        var hotelservicesserviceCategoryisDeleted = hotelservicesserviceCategory.getBoolean("isDeleted")
+//                        var hotelservicesserviceCategorydeletedAt = hotelservicesserviceCategory.get("deletedAt")
+//                        var hotelservicesserviceCategorycreatedAt = hotelservicesserviceCategory.getString("createdAt")
+//                        var hotelservicesserviceCategoryupdatedAt = hotelservicesserviceCategory.getString("updatedAt")
+//                        var hotelservicesserviceCategory__v = hotelservicesserviceCategory.getInt("__v")
+                        var cat = ServiceCategory(__v = 0,_id="hotelservicesserviceCategory_id", createdAt = "hotelservicesserviceCategorycreatedAt",
+                            deletedAt ="hotelservicesserviceCategorydeletedAt", image = "hotelservicesserviceCategoryimage", isDeleted = false,
+                            title = "hotelservicesserviceCategorytitle", updatedAt = "hotelservicesserviceCategoryupdatedAt")
+                        var ser = Service(__v = hotelservices__v,_id=hotelservices_id, addedByRole = hotelservicesaddedByRole,
+                            createdAt = hotelservicescreatedAt, deletedAt = hotelservicesdeletedAt, description = hotelservicesdescription,
+                            image = hotelservicesimage,isDeleted = hotelservicesisDeleted, name = hotelservicesname,
+                            price = hotelservicesprice, priceRate = hotelservicespriceRate, type = hotelservicestype,
+                            updatedAt = hotelservicesupdatedAt, visible = hotelservicesvisible, serviceCategory = cat)
+                        servicesHotel.add(ser)
+                    }
+                    progressDialog.dismiss()
+                },
+                { error ->
+                    servicesHotel.clear()
+                    Log.d("HASHDASDAS",error.toString())
+                    Log.d("HASHDASDAS",error.networkResponse.statusCode.toString())
+                    progressDialog.dismiss()
+                }) {
 
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
+                    return headers
+                }
+            }
+
+            // Add the request to the RequestQueue.
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+        }
+
+    }
     fun convertion(date:String): String {
         val inputDateStr = date
 
@@ -1434,14 +1461,14 @@ object Services  : Screen {
                         }, contentAlignment = Alignment.Center){
                         Text(text = "Service Name", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
                     }
-                    Box(modifier = Modifier
-                        .width(150.dp)
-                        .clickable {
-                            sortHeader = "category"
-                            onSortOrderChange(sortOrder.toggle())
-                        }, contentAlignment = Alignment.Center){
-                        Text(text = "Category", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
-                    }
+//                    Box(modifier = Modifier
+//                        .width(150.dp)
+//                        .clickable {
+//                            sortHeader = "category"
+//                            onSortOrderChange(sortOrder.toggle())
+//                        }, contentAlignment = Alignment.Center){
+//                        Text(text = "Category", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
+//                    }
                     Box(modifier = Modifier
                         .width(150.dp)
                         .clickable {
@@ -1738,14 +1765,14 @@ object Services  : Screen {
                         }, contentAlignment = Alignment.Center){
                         Text(text = "Service Name", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
                     }
-                    Box(modifier = Modifier
-                        .width(150.dp)
-                        .clickable {
-                            sortHeader = "category"
-                            onSortOrderChange(sortOrder.toggle())
-                        }, contentAlignment = Alignment.Center){
-                        Text(text = "Category", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
-                    }
+//                    Box(modifier = Modifier
+//                        .width(150.dp)
+//                        .clickable {
+//                            sortHeader = "category"
+//                            onSortOrderChange(sortOrder.toggle())
+//                        }, contentAlignment = Alignment.Center){
+//                        Text(text = "Category", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(10.dp))
+//                    }
                     Box(modifier = Modifier
                         .width(150.dp)
                         .clickable {
@@ -2000,10 +2027,10 @@ object Services  : Screen {
 //                }, RoundedCornerShape(5.dp)
 //            )
             .clickable {
-                if (servicesSelected.contains(row)) {
-                    servicesSelected.remove(row)
+                if (servicesSelectedHotel.contains(row)) {
+                    servicesSelectedHotel.remove(row)
                 } else {
-                    servicesSelected.add(row)
+                    servicesSelectedHotel.add(row)
                 }
             }
             .border(0.3.dp, Color.Gray, RoundedCornerShape(5.dp))){
@@ -2016,7 +2043,7 @@ object Services  : Screen {
                 ){
                 Box(modifier = Modifier.width(50.dp), contentAlignment = Alignment.Center){
 //                    Text(text = row.id.toString())
-                    Checkbox(checked =  if (servicesSelected.contains(row)) {
+                    Checkbox(checked =  if (servicesSelectedHotel.contains(row)) {
                         true
                     } else {
                         false
@@ -2062,9 +2089,9 @@ object Services  : Screen {
                 Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
                     Text(text = row.name)
                 }
-                Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
-                    Text(text = row.serviceCategory.title)
-                }
+//                Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
+//                    Text(text = row.serviceCategory.title)
+//                }
                 Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
                     Text(text = row.type)
                 }
@@ -2159,9 +2186,9 @@ object Services  : Screen {
                 Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
                     Text(text = row.name)
                 }
-                Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
-                    Text(text = row.serviceCategory.title)
-                }
+//                Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
+//                    Text(text = row.serviceCategory.title)
+//                }
                 Box(modifier = Modifier.width(150.dp), contentAlignment = Alignment.Center){
                     Text(text = row.type)
                 }
@@ -2492,84 +2519,6 @@ object Services  : Screen {
             }
         }
     }
-//    fun AuthorizationDABS(context: Context, callback: (Boolean) -> Unit) {
-//        if(UserDABS.isNotEmpty()){
-//            return
-//        }
-//        val url = "${GlobalStrings.baseURL}auth/getAuthroizedUser"
-//        // Request parameters
-//        val params = JSONObject()
-//        params.put("token", getTokenFromLocalStorage(context))
-//        Log.d("LOOOO",params.toString())
-//        val progressDialog = ProgressDialog(context)
-//        progressDialog.setTitle("Please Wait")
-//        progressDialog.show()
-//        if(!isInternetAvailable(context)){
-//            Toast
-//                .makeText(
-//                    context,
-//                    "Internet is not Available",
-//                    Toast.LENGTH_SHORT
-//                )
-//                .show()
-//            progressDialog.dismiss()
-//        }
-//        else{
-//            val request = object : JsonObjectRequest(
-//                Request.Method.POST, url, params,
-//                { response ->
-//                    UserDABS.clear()
-//                    // Handle successful login response
-//                    Log.d("LOOOO", response.toString())
-//                    var user = response.getJSONObject("user")
-//                    var _id = user.getString("_id")
-//                    var firstname = user.getString("firstName")
-//                    var lastname = user.getString("lastName")
-//                    var email = user.getString("email")
-//                    var contactNo = user.getString("contactNo")
-//                    var cnic = user.getString("cnic")
-//                    var profilePicture = user.getString("profilePicture")
-//                    var role = user.getString("role")
-//                    var userD = DabsUser(_id,  firstname, lastname,email, contactNo, cnic, profilePicture, role)
-//                    UserDABS.add(userD)
-//                    progressDialog.dismiss()
-//                    // Assuming the API returns a JSON object with a field "valid" indicating user validity
-//
-//                    callback(true)
-//                },
-//                { error ->
-//                    UserDABS.clear()
-//                    // Handle error response
-//                    Log.e("LOOOO Error", error.toString())
-//                    Log.e("LOOOO Error", error.networkResponse.data.toString())
-//                    Log.e("LOOOO Error", error.networkResponse.statusCode.toString())
-//                    progressDialog.dismiss()
-//                    Toast
-//                        .makeText(
-//                            context,
-//                            "Connection Error or try with different Credentials",
-//                            Toast.LENGTH_SHORT
-//                        )
-//                        .show()
-//                    callback(false)
-//                }) {
-//
-//                @Throws(AuthFailureError::class)
-//                override fun getHeaders(): MutableMap<String, String> {
-//                    val headers = HashMap<String, String>()
-//                    headers["Content-Type"] = "application/json"
-////                    headers["Authorization"] = "${getTokenFromLocalStorage(context)}"
-//                    headers["Authorization"] = ""
-//                    return headers
-//                }
-//            }
-//
-//
-//            // Add the request to the RequestQueue.
-//            val requestQueue = Volley.newRequestQueue(context)
-//            requestQueue.add(request)
-//        }
-//    }
     // GET Categories Function
     fun getCategories(context: Context) {
         var hotelid = getHotelID(context)

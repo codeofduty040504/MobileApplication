@@ -4,7 +4,13 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.Html.FROM_HTML_MODE_COMPACT
+import android.text.method.LinkMovementMethod
 import android.util.Log
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,12 +26,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -46,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -53,8 +62,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -69,6 +81,7 @@ import com.example.adminoffice.ui.theme.Customer.Wishlist.WishList
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Settings.FAQ
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
+import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
 
 object Policy  : Screen {
@@ -81,7 +94,10 @@ object Policy  : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
-
+        val configuration = LocalConfiguration.current
+        val screenWidthDp: Dp = configuration.screenWidthDp.dp
+        val screenHeightDp: Dp = configuration.screenHeightDp.dp
+        val user = getUserFromLocal(context)
         Column(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -92,15 +108,30 @@ object Policy  : Screen {
                         .verticalScroll(rememberScrollState())
                         .padding(20.dp)
                 ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                            Text(
-                                text = "Policy",
-                                color = GlobalStrings.CustomerColorMain,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 24.sp
-                            )
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
+                        Box(modifier = Modifier
+                            .size(40.dp)
+                            .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
+                            .padding(10.dp)
+                            .clickable {
+                                navigator.pop()
+                            }){
+                            Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
                         }
+                        Spacer(modifier = Modifier.width((screenWidthDp/4)-5.dp))
+                        Text(text = "Policy", fontSize = 18.sp, fontWeight = FontWeight.Black)
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+//                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+//                            Text(
+//                                text = "Policy",
+//                                color = GlobalStrings.CustomerColorMain,
+//                                fontWeight = FontWeight.SemiBold,
+//                                fontSize = 24.sp
+//                            )
+//                        }
                         Row(
                             Modifier
                                 .fillMaxWidth()
@@ -111,14 +142,16 @@ object Policy  : Screen {
                         }
                         Spacer(modifier = Modifier.size(10.dp))
 
-                        HtmlTextExample()
                     }
+                    
+
                 }
             }
 
         }
-       // getCategories(context)
+      //  getCategories(context)
     }
+
     // GET Categories Function
     fun getCategories(context: Context) {
         val url = "${GlobalStrings.baseURL}customer/settings/getSettings"
@@ -162,35 +195,5 @@ object Policy  : Screen {
             requestQueue.add(request)
         }
 
-    }
-
-    @Composable
-    fun HtmlTextExample() {
-        val htmlText =
-            "<p style=\"text-align: start\">At <strong>DABS,</strong> we prioritize the privacy and security of our users. This Privacy Policy outlines our commitment to safeguarding the personal information you entrust to us through our hotel booking platform.</p>"
-
-        val annotatedString = buildAnnotatedString {
-            val startIndex = htmlText.indexOf("<strong>")
-            val endIndex = htmlText.indexOf("</strong>")
-
-            if (startIndex != -1 && endIndex != -1) {
-                // Style the "strong" text with bold
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(htmlText.substring(startIndex + "<strong>".length, endIndex))
-                }
-
-                // Append the rest of the text
-                append(htmlText.substring(endIndex + "</strong>".length))
-            } else {
-                // If no strong tag found, append the entire text
-                append(htmlText)
-            }
-        }
-
-        Text(
-            text = annotatedString,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp), color = Color.Black
-        )
     }
 }

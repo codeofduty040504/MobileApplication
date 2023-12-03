@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,10 +67,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -98,6 +101,7 @@ import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.ServiceCategory
 import com.example.adminoffice.ui.theme.Utils.DataClasses.Hotels.Userid
 import com.example.adminoffice.ui.theme.Utils.GlobalStrings
 import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Login
+import com.example.adminoffice.ui.theme.Utils.Screens.Profiling.Register
 import com.example.adminoffice.ui.theme.Utils.getTokenFromLocalStorage
 import com.example.adminoffice.ui.theme.Utils.getUserFromLocal
 import com.example.adminoffice.ui.theme.Utils.isInternetAvailable
@@ -115,6 +119,9 @@ object ViewProfile  : Screen {
     override fun Content(){
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
+        val configuration = LocalConfiguration.current
+        val screenWidthDp: Dp = configuration.screenWidthDp.dp
+        val screenHeightDp: Dp = configuration.screenHeightDp.dp
         val scope = rememberCoroutineScope()
         var user = getUserFromLocal(context)
                 Column(
@@ -127,364 +134,375 @@ object ViewProfile  : Screen {
                             modifier = Modifier.background(Color.White),
                             contentAlignment = Alignment.TopCenter
                         ) {
-                            LazyColumn(
-                                //  contentPadding = padding,
-                                modifier = Modifier
-                                    .widthIn(max = 600.dp).padding(15.dp)
-                                    .background(Color.White),
-                            ) {
-                                item{
-                                    Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically){
-                                        Image(
-                                            painter = rememberAsyncImagePainter(if(user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
-                                                user.profilePicture}),
-                                            contentDescription = "image",
-                                            modifier = Modifier
-                                                .size(80.dp)
-                                                .clip(
-                                                    RoundedCornerShape(
-                                                        (CornerSize(
-                                                            20.dp
-                                                        ))
-                                                    )
-                                                ),
-                                            contentScale = ContentScale.FillBounds
-                                        )
-                                        Spacer(modifier = Modifier.size(15.dp))
-                                        Column{
-                                            Text(text =user.firstname+" "+user.lastName, fontSize = 18.sp, fontWeight = FontWeight.Light)
-                                            Text(text = user.email, fontSize = 12.sp, fontWeight = FontWeight.Light, color = Color.Gray
+                            if(user._id != ""){
+                                LazyColumn(
+                                    //  contentPadding = padding,
+                                    modifier = Modifier
+                                        .widthIn(max = 600.dp)
+                                        .padding(15.dp)
+                                        .background(Color.White),
+                                ) {
+                                    item{
+                                        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically){
+                                            Image(
+                                                painter = rememberAsyncImagePainter(if(user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
+                                                    user.profilePicture}),
+                                                contentDescription = "image",
+                                                modifier = Modifier
+                                                    .size(80.dp)
+                                                    .clip(
+                                                        RoundedCornerShape(
+                                                            (CornerSize(
+                                                                20.dp
+                                                            ))
+                                                        )
+                                                    ),
+                                                contentScale = ContentScale.FillBounds
                                             )
-                                        }
-                                        Spacer(modifier = Modifier.size(30.dp))
-                                    }
-                                }
-                                item {
-                                    CategoryItem(
-                                        title = "Manage Account",
-                                        icon = Icons.Outlined.AccountCircle
-                                    ) {
-                                        navigator.push(ManageProfile(user))
-                                    }
-                                }
+                                            Spacer(modifier = Modifier.size(15.dp))
+                                            Column{
+                                                Text(text =user.firstname+" "+user.lastName, fontSize = 18.sp, fontWeight = FontWeight.Light)
+                                                Text(text = user.email, fontSize = 12.sp, fontWeight = FontWeight.Light, color = Color.Gray
+                                                )
+                                            }
 
-                                item {
-                                    CategoryItem(
-                                        title = "Change Password",
-                                        icon = Icons.Outlined.Lock,
-                                        color = Color.Black
-                                    ) {
-                                        navigator.push(ChangePassword)
-                                    }
-                                }
-
-                                item {
-                                    CategoryItem(
-                                        title = "Policy",
-                                        icon = Icons.Outlined.Lock
-                                    ) {
-                                        navigator.push(Policy)
-                                    }
-                                }
-
-                                item {
-                                    CategoryItem(
-                                        title = "Wishlist",
-                                        icon = Icons.Outlined.FavoriteBorder
-                                    ) { navigator.replace(WishList) }
-                                }
-
-                                item {
-                                    /**
-                                     * Icon generated from https://composables.com/icons
-                                     */
-                                    /**
-                                     * Icon generated from https://composables.com/icons
-                                     */
-                                    @Composable
-                                    fun rememberStyle(): ImageVector {
-                                        return remember {
-                                            ImageVector.Builder(
-                                                name = "style",
-                                                defaultWidth = 24.0.dp,
-                                                defaultHeight = 24.0.dp,
-                                                viewportWidth = 24.0f,
-                                                viewportHeight = 24.0f
-                                            ).apply {
-                                                path(
-                                                    fill = SolidColor(Color.Black),
-                                                    fillAlpha = 1f,
-                                                    stroke = null,
-                                                    strokeAlpha = 1f,
-                                                    strokeLineWidth = 1.0f,
-                                                    strokeLineCap = StrokeCap.Butt,
-                                                    strokeLineJoin = StrokeJoin.Miter,
-                                                    strokeLineMiter = 1f,
-                                                    pathFillType = PathFillType.NonZero
-                                                ) {
-                                                    moveTo(3.975f, 19.8f)
-                                                    lineToRelative(-0.85f, -0.35f)
-                                                    quadToRelative(-0.775f, -0.325f, -1.037f, -1.125f)
-                                                    quadToRelative(-0.263f, -0.8f, 0.087f, -1.575f)
-                                                    lineToRelative(1.8f, -3.9f)
-                                                    close()
-                                                    moveToRelative(4f, 2.2f)
-                                                    quadToRelative(-0.825f, 0f, -1.413f, -0.587f)
-                                                    quadToRelative(-0.587f, -0.588f, -0.587f, -1.413f)
-                                                    verticalLineToRelative(-6f)
-                                                    lineToRelative(2.65f, 7.35f)
-                                                    quadToRelative(0.075f, 0.175f, 0.15f, 0.338f)
-                                                    quadToRelative(0.075f, 0.162f, 0.2f, 0.312f)
-                                                    close()
-                                                    moveToRelative(5.15f, -0.1f)
-                                                    quadToRelative(-0.8f, 0.3f, -1.55f, -0.075f)
-                                                    reflectiveQuadToRelative(-1.05f, -1.175f)
-                                                    lineToRelative(-4.45f, -12.2f)
-                                                    quadToRelative(-0.3f, -0.8f, 0.05f, -1.563f)
-                                                    quadToRelative(0.35f, -0.762f, 1.15f, -1.037f)
-                                                    lineToRelative(7.55f, -2.75f)
-                                                    quadToRelative(0.8f, -0.3f, 1.55f, 0.075f)
-                                                    reflectiveQuadToRelative(1.05f, 1.175f)
-                                                    lineToRelative(4.45f, 12.2f)
-                                                    quadToRelative(0.3f, 0.8f, -0.05f, 1.563f)
-                                                    quadToRelative(-0.35f, 0.762f, -1.15f, 1.037f)
-                                                    close()
-                                                    moveTo(10.975f, 10f)
-                                                    quadToRelative(0.425f, 0f, 0.713f, -0.288f)
-                                                    quadToRelative(0.287f, -0.287f, 0.287f, -0.712f)
-                                                    reflectiveQuadToRelative(-0.287f, -0.713f)
-                                                    quadTo(11.4f, 8f, 10.975f, 8f)
-                                                    reflectiveQuadToRelative(-0.712f, 0.287f)
-                                                    quadToRelative(-0.288f, 0.288f, -0.288f, 0.713f)
-                                                    reflectiveQuadToRelative(0.288f, 0.712f)
-                                                    quadToRelative(0.287f, 0.288f, 0.712f, 0.288f)
-                                                    close()
-                                                    moveToRelative(1.45f, 10f)
-                                                    lineToRelative(7.55f, -2.75f)
-                                                    lineTo(15.525f, 5f)
-                                                    lineToRelative(-7.55f, 2.75f)
-                                                    close()
-                                                    moveTo(7.975f, 7.75f)
-                                                    lineTo(15.525f, 5f)
-                                                    close()
-                                                }
-                                            }.build()
+                                            Spacer(modifier = Modifier.size(30.dp))
                                         }
                                     }
+                                    item {
+                                        CategoryItem(
+                                            title = "Manage Account",
+                                            icon = Icons.Outlined.AccountCircle
+                                        ) {
+                                            navigator.push(ManageProfile(user))
+                                        }
+                                    }
+
+                                    item {
+                                        CategoryItem(
+                                            title = "Change Password",
+                                            icon = Icons.Outlined.Lock,
+                                            color = Color.Black
+                                        ) {
+                                            navigator.push(ChangePassword)
+                                        }
+                                    }
+
+                                    item {
+                                        CategoryItem(
+                                            title = "Policy",
+                                            icon = Icons.Outlined.Lock
+                                        ) {
+                                            navigator.push(Policy)
+                                        }
+                                    }
+
+                                    item {
+                                        CategoryItem(
+                                            title = "Wishlist",
+                                            icon = Icons.Outlined.FavoriteBorder
+                                        ) { navigator.replace(WishList) }
+                                    }
+
+                                    item {
+                                        /**
+                                         * Icon generated from https://composables.com/icons
+                                         */
+                                        /**
+                                         * Icon generated from https://composables.com/icons
+                                         */
+                                        @Composable
+                                        fun rememberStyle(): ImageVector {
+                                            return remember {
+                                                ImageVector.Builder(
+                                                    name = "style",
+                                                    defaultWidth = 24.0.dp,
+                                                    defaultHeight = 24.0.dp,
+                                                    viewportWidth = 24.0f,
+                                                    viewportHeight = 24.0f
+                                                ).apply {
+                                                    path(
+                                                        fill = SolidColor(Color.Black),
+                                                        fillAlpha = 1f,
+                                                        stroke = null,
+                                                        strokeAlpha = 1f,
+                                                        strokeLineWidth = 1.0f,
+                                                        strokeLineCap = StrokeCap.Butt,
+                                                        strokeLineJoin = StrokeJoin.Miter,
+                                                        strokeLineMiter = 1f,
+                                                        pathFillType = PathFillType.NonZero
+                                                    ) {
+                                                        moveTo(3.975f, 19.8f)
+                                                        lineToRelative(-0.85f, -0.35f)
+                                                        quadToRelative(-0.775f, -0.325f, -1.037f, -1.125f)
+                                                        quadToRelative(-0.263f, -0.8f, 0.087f, -1.575f)
+                                                        lineToRelative(1.8f, -3.9f)
+                                                        close()
+                                                        moveToRelative(4f, 2.2f)
+                                                        quadToRelative(-0.825f, 0f, -1.413f, -0.587f)
+                                                        quadToRelative(-0.587f, -0.588f, -0.587f, -1.413f)
+                                                        verticalLineToRelative(-6f)
+                                                        lineToRelative(2.65f, 7.35f)
+                                                        quadToRelative(0.075f, 0.175f, 0.15f, 0.338f)
+                                                        quadToRelative(0.075f, 0.162f, 0.2f, 0.312f)
+                                                        close()
+                                                        moveToRelative(5.15f, -0.1f)
+                                                        quadToRelative(-0.8f, 0.3f, -1.55f, -0.075f)
+                                                        reflectiveQuadToRelative(-1.05f, -1.175f)
+                                                        lineToRelative(-4.45f, -12.2f)
+                                                        quadToRelative(-0.3f, -0.8f, 0.05f, -1.563f)
+                                                        quadToRelative(0.35f, -0.762f, 1.15f, -1.037f)
+                                                        lineToRelative(7.55f, -2.75f)
+                                                        quadToRelative(0.8f, -0.3f, 1.55f, 0.075f)
+                                                        reflectiveQuadToRelative(1.05f, 1.175f)
+                                                        lineToRelative(4.45f, 12.2f)
+                                                        quadToRelative(0.3f, 0.8f, -0.05f, 1.563f)
+                                                        quadToRelative(-0.35f, 0.762f, -1.15f, 1.037f)
+                                                        close()
+                                                        moveTo(10.975f, 10f)
+                                                        quadToRelative(0.425f, 0f, 0.713f, -0.288f)
+                                                        quadToRelative(0.287f, -0.287f, 0.287f, -0.712f)
+                                                        reflectiveQuadToRelative(-0.287f, -0.713f)
+                                                        quadTo(11.4f, 8f, 10.975f, 8f)
+                                                        reflectiveQuadToRelative(-0.712f, 0.287f)
+                                                        quadToRelative(-0.288f, 0.288f, -0.288f, 0.713f)
+                                                        reflectiveQuadToRelative(0.288f, 0.712f)
+                                                        quadToRelative(0.287f, 0.288f, 0.712f, 0.288f)
+                                                        close()
+                                                        moveToRelative(1.45f, 10f)
+                                                        lineToRelative(7.55f, -2.75f)
+                                                        lineTo(15.525f, 5f)
+                                                        lineToRelative(-7.55f, 2.75f)
+                                                        close()
+                                                        moveTo(7.975f, 7.75f)
+                                                        lineTo(15.525f, 5f)
+                                                        close()
+                                                    }
+                                                }.build()
+                                            }
+                                        }
 //                    CategoryItem(
 //                        title = "Look & Feel",
 //                        icon = rememberStyle(),
 //                        onClick = { /*TODO*/ }
 //                    )
-                                }
+                                    }
 //                                item { Divider(modifier = Modifier.padding(vertical = 12.dp)) }
-                                item {
-                                    @Composable
-                                    fun rememberQuestionMark(): ImageVector {
-                                        return remember {
-                                            ImageVector.Builder(
-                                                name = "question_mark",
-                                                defaultWidth = 24.0.dp,
-                                                defaultHeight = 24.0.dp,
-                                                viewportWidth = 24.0f,
-                                                viewportHeight = 24.0f
-                                            ).apply {
-                                                path(
-                                                    fill = SolidColor(Color.Black),
-                                                    fillAlpha = 1f,
-                                                    stroke = null,
-                                                    strokeAlpha = 1f,
-                                                    strokeLineWidth = 1.0f,
-                                                    strokeLineCap = StrokeCap.Butt,
-                                                    strokeLineJoin = StrokeJoin.Miter,
-                                                    strokeLineMiter = 1f,
-                                                    pathFillType = PathFillType.NonZero
-                                                ) {
-                                                    moveTo(12.025f, 16f)
-                                                    quadToRelative(-0.6f, 0f, -1.012f, -0.425f)
-                                                    quadToRelative(-0.413f, -0.425f, -0.363f, -1f)
-                                                    quadToRelative(0.075f, -1.05f, 0.5f, -1.825f)
-                                                    quadToRelative(0.425f, -0.775f, 1.35f, -1.6f)
-                                                    quadToRelative(1.025f, -0.9f, 1.562f, -1.563f)
-                                                    quadToRelative(0.538f, -0.662f, 0.538f, -1.512f)
-                                                    quadToRelative(0f, -1.025f, -0.687f, -1.7f)
-                                                    quadTo(13.225f, 5.7f, 12f, 5.7f)
-                                                    quadToRelative(-0.8f, 0f, -1.362f, 0.337f)
-                                                    quadToRelative(-0.563f, 0.338f, -0.913f, 0.838f)
-                                                    quadToRelative(-0.35f, 0.5f, -0.862f, 0.675f)
-                                                    quadToRelative(-0.513f, 0.175f, -0.988f, -0.025f)
-                                                    quadToRelative(-0.575f, -0.25f, -0.787f, -0.825f)
-                                                    quadToRelative(-0.213f, -0.575f, 0.087f, -1.075f)
-                                                    quadTo(7.9f, 4.5f, 9.125f, 3.75f)
-                                                    reflectiveQuadTo(12f, 3f)
-                                                    quadToRelative(2.625f, 0f, 4.038f, 1.463f)
-                                                    quadToRelative(1.412f, 1.462f, 1.412f, 3.512f)
-                                                    quadToRelative(0f, 1.25f, -0.537f, 2.138f)
-                                                    quadToRelative(-0.538f, 0.887f, -1.688f, 2.012f)
-                                                    quadToRelative(-0.85f, 0.8f, -1.2f, 1.3f)
-                                                    reflectiveQuadToRelative(-0.475f, 1.15f)
-                                                    quadToRelative(-0.1f, 0.625f, -0.525f, 1.025f)
-                                                    quadToRelative(-0.425f, 0.4f, -1f, 0.4f)
-                                                    close()
-                                                    moveTo(12f, 22f)
-                                                    quadToRelative(-0.825f, 0f, -1.412f, -0.587f)
-                                                    quadTo(10f, 20.825f, 10f, 20f)
-                                                    quadToRelative(0f, -0.825f, 0.588f, -1.413f)
-                                                    quadTo(11.175f, 18f, 12f, 18f)
-                                                    reflectiveQuadToRelative(1.413f, 0.587f)
-                                                    quadTo(14f, 19.175f, 14f, 20f)
-                                                    quadToRelative(0f, 0.825f, -0.587f, 1.413f)
-                                                    quadTo(12.825f, 22f, 12f, 22f)
-                                                    close()
-                                                }
-                                            }.build()
+                                    item {
+                                        @Composable
+                                        fun rememberQuestionMark(): ImageVector {
+                                            return remember {
+                                                ImageVector.Builder(
+                                                    name = "question_mark",
+                                                    defaultWidth = 24.0.dp,
+                                                    defaultHeight = 24.0.dp,
+                                                    viewportWidth = 24.0f,
+                                                    viewportHeight = 24.0f
+                                                ).apply {
+                                                    path(
+                                                        fill = SolidColor(Color.Black),
+                                                        fillAlpha = 1f,
+                                                        stroke = null,
+                                                        strokeAlpha = 1f,
+                                                        strokeLineWidth = 1.0f,
+                                                        strokeLineCap = StrokeCap.Butt,
+                                                        strokeLineJoin = StrokeJoin.Miter,
+                                                        strokeLineMiter = 1f,
+                                                        pathFillType = PathFillType.NonZero
+                                                    ) {
+                                                        moveTo(12.025f, 16f)
+                                                        quadToRelative(-0.6f, 0f, -1.012f, -0.425f)
+                                                        quadToRelative(-0.413f, -0.425f, -0.363f, -1f)
+                                                        quadToRelative(0.075f, -1.05f, 0.5f, -1.825f)
+                                                        quadToRelative(0.425f, -0.775f, 1.35f, -1.6f)
+                                                        quadToRelative(1.025f, -0.9f, 1.562f, -1.563f)
+                                                        quadToRelative(0.538f, -0.662f, 0.538f, -1.512f)
+                                                        quadToRelative(0f, -1.025f, -0.687f, -1.7f)
+                                                        quadTo(13.225f, 5.7f, 12f, 5.7f)
+                                                        quadToRelative(-0.8f, 0f, -1.362f, 0.337f)
+                                                        quadToRelative(-0.563f, 0.338f, -0.913f, 0.838f)
+                                                        quadToRelative(-0.35f, 0.5f, -0.862f, 0.675f)
+                                                        quadToRelative(-0.513f, 0.175f, -0.988f, -0.025f)
+                                                        quadToRelative(-0.575f, -0.25f, -0.787f, -0.825f)
+                                                        quadToRelative(-0.213f, -0.575f, 0.087f, -1.075f)
+                                                        quadTo(7.9f, 4.5f, 9.125f, 3.75f)
+                                                        reflectiveQuadTo(12f, 3f)
+                                                        quadToRelative(2.625f, 0f, 4.038f, 1.463f)
+                                                        quadToRelative(1.412f, 1.462f, 1.412f, 3.512f)
+                                                        quadToRelative(0f, 1.25f, -0.537f, 2.138f)
+                                                        quadToRelative(-0.538f, 0.887f, -1.688f, 2.012f)
+                                                        quadToRelative(-0.85f, 0.8f, -1.2f, 1.3f)
+                                                        reflectiveQuadToRelative(-0.475f, 1.15f)
+                                                        quadToRelative(-0.1f, 0.625f, -0.525f, 1.025f)
+                                                        quadToRelative(-0.425f, 0.4f, -1f, 0.4f)
+                                                        close()
+                                                        moveTo(12f, 22f)
+                                                        quadToRelative(-0.825f, 0f, -1.412f, -0.587f)
+                                                        quadTo(10f, 20.825f, 10f, 20f)
+                                                        quadToRelative(0f, -0.825f, 0.588f, -1.413f)
+                                                        quadTo(11.175f, 18f, 12f, 18f)
+                                                        reflectiveQuadToRelative(1.413f, 0.587f)
+                                                        quadTo(14f, 19.175f, 14f, 20f)
+                                                        quadToRelative(0f, 0.825f, -0.587f, 1.413f)
+                                                        quadTo(12.825f, 22f, 12f, 22f)
+                                                        close()
+                                                    }
+                                                }.build()
+                                            }
+                                        }
+                                        CategoryItem(
+                                            title = "FAQ",
+                                            icon = rememberQuestionMark()
+                                        ) {
+                                            navigator.push(FAQs)
                                         }
                                     }
-                                    CategoryItem(
-                                        title = "FAQ",
-                                        icon = rememberQuestionMark()
-                                    ) {
-                                        navigator.push(FAQs)
-                                    }
-                                }
 
-                                item {
-                                    CategoryItem(
-                                        title = "Contact Us",
-                                        icon = Icons.Outlined.Email
-                                    ) {
-                                        navigator.push(ContactUs)
-                                    }
-                                }
-                                item {
-                                    @Composable
-                                    fun rememberAutoAwesome(): ImageVector {
-                                        return remember {
-                                            ImageVector.Builder(
-                                                name = "auto_awesome",
-                                                defaultWidth = 24.0.dp,
-                                                defaultHeight = 24.0.dp,
-                                                viewportWidth = 24.0f,
-                                                viewportHeight = 24.0f
-                                            ).apply {
-                                                path(
-                                                    fill = SolidColor(Color.Black),
-                                                    fillAlpha = 1f,
-                                                    stroke = null,
-                                                    strokeAlpha = 1f,
-                                                    strokeLineWidth = 1.0f,
-                                                    strokeLineCap = StrokeCap.Butt,
-                                                    strokeLineJoin = StrokeJoin.Miter,
-                                                    strokeLineMiter = 1f,
-                                                    pathFillType = PathFillType.NonZero
-                                                ) {
-                                                    moveTo(19f, 8.3f)
-                                                    quadToRelative(-0.125f, 0f, -0.262f, -0.075f)
-                                                    quadTo(18.6f, 8.15f, 18.55f, 8f)
-                                                    lineToRelative(-0.8f, -1.75f)
-                                                    lineToRelative(-1.75f, -0.8f)
-                                                    quadToRelative(-0.15f, -0.05f, -0.225f, -0.188f)
-                                                    quadTo(15.7f, 5.125f, 15.7f, 5f)
-                                                    reflectiveQuadToRelative(0.075f, -0.263f)
-                                                    quadTo(15.85f, 4.6f, 16f, 4.55f)
-                                                    lineToRelative(1.75f, -0.8f)
-                                                    lineToRelative(0.8f, -1.75f)
-                                                    quadToRelative(0.05f, -0.15f, 0.188f, -0.225f)
-                                                    quadToRelative(0.137f, -0.075f, 0.262f, -0.075f)
-                                                    reflectiveQuadToRelative(0.263f, 0.075f)
-                                                    quadToRelative(0.137f, 0.075f, 0.187f, 0.225f)
-                                                    lineToRelative(0.8f, 1.75f)
-                                                    lineToRelative(1.75f, 0.8f)
-                                                    quadToRelative(0.15f, 0.05f, 0.225f, 0.187f)
-                                                    quadToRelative(0.075f, 0.138f, 0.075f, 0.263f)
-                                                    reflectiveQuadToRelative(-0.075f, 0.262f)
-                                                    quadTo(22.15f, 5.4f, 22f, 5.45f)
-                                                    lineToRelative(-1.75f, 0.8f)
-                                                    lineToRelative(-0.8f, 1.75f)
-                                                    quadToRelative(-0.05f, 0.15f, -0.187f, 0.225f)
-                                                    quadToRelative(-0.138f, 0.075f, -0.263f, 0.075f)
-                                                    close()
-                                                    moveToRelative(0f, 14f)
-                                                    quadToRelative(-0.125f, 0f, -0.262f, -0.075f)
-                                                    quadToRelative(-0.138f, -0.075f, -0.188f, -0.225f)
-                                                    lineToRelative(-0.8f, -1.75f)
-                                                    lineToRelative(-1.75f, -0.8f)
-                                                    quadToRelative(-0.15f, -0.05f, -0.225f, -0.188f)
-                                                    quadToRelative(-0.075f, -0.137f, -0.075f, -0.262f)
-                                                    reflectiveQuadToRelative(0.075f, -0.262f)
-                                                    quadToRelative(0.075f, -0.138f, 0.225f, -0.188f)
-                                                    lineToRelative(1.75f, -0.8f)
-                                                    lineToRelative(0.8f, -1.75f)
-                                                    quadToRelative(0.05f, -0.15f, 0.188f, -0.225f)
-                                                    quadToRelative(0.137f, -0.075f, 0.262f, -0.075f)
-                                                    reflectiveQuadToRelative(0.263f, 0.075f)
-                                                    quadToRelative(0.137f, 0.075f, 0.187f, 0.225f)
-                                                    lineToRelative(0.8f, 1.75f)
-                                                    lineToRelative(1.75f, 0.8f)
-                                                    quadToRelative(0.15f, 0.05f, 0.225f, 0.188f)
-                                                    quadToRelative(0.075f, 0.137f, 0.075f, 0.262f)
-                                                    reflectiveQuadToRelative(-0.075f, 0.262f)
-                                                    quadToRelative(-0.075f, 0.138f, -0.225f, 0.188f)
-                                                    lineToRelative(-1.75f, 0.8f)
-                                                    lineToRelative(-0.8f, 1.75f)
-                                                    quadToRelative(-0.05f, 0.15f, -0.187f, 0.225f)
-                                                    quadToRelative(-0.138f, 0.075f, -0.263f, 0.075f)
-                                                    close()
-                                                    moveTo(9f, 18.575f)
-                                                    quadToRelative(-0.275f, 0f, -0.525f, -0.15f)
-                                                    reflectiveQuadTo(8.1f, 18f)
-                                                    lineToRelative(-1.6f, -3.5f)
-                                                    lineTo(3f, 12.9f)
-                                                    quadToRelative(-0.275f, -0.125f, -0.425f, -0.375f)
-                                                    quadToRelative(-0.15f, -0.25f, -0.15f, -0.525f)
-                                                    reflectiveQuadToRelative(0.15f, -0.525f)
-                                                    quadToRelative(0.15f, -0.25f, 0.425f, -0.375f)
-                                                    lineToRelative(3.5f, -1.6f)
-                                                    lineTo(8.1f, 6f)
-                                                    quadToRelative(0.125f, -0.275f, 0.375f, -0.425f)
-                                                    quadToRelative(0.25f, -0.15f, 0.525f, -0.15f)
-                                                    reflectiveQuadToRelative(0.525f, 0.15f)
-                                                    quadToRelative(0.25f, 0.15f, 0.375f, 0.425f)
-                                                    lineToRelative(1.6f, 3.5f)
-                                                    lineToRelative(3.5f, 1.6f)
-                                                    quadToRelative(0.275f, 0.125f, 0.425f, 0.375f)
-                                                    quadToRelative(0.15f, 0.25f, 0.15f, 0.525f)
-                                                    reflectiveQuadToRelative(-0.15f, 0.525f)
-                                                    quadToRelative(-0.15f, 0.25f, -0.425f, 0.375f)
-                                                    lineToRelative(-3.5f, 1.6f)
-                                                    lineTo(9.9f, 18f)
-                                                    quadToRelative(-0.125f, 0.275f, -0.375f, 0.425f)
-                                                    quadToRelative(-0.25f, 0.15f, -0.525f, 0.15f)
-                                                    close()
-                                                    moveToRelative(0f, -3.425f)
-                                                    lineTo(10f, 13f)
-                                                    lineToRelative(2.15f, -1f)
-                                                    lineTo(10f, 11f)
-                                                    lineTo(9f, 8.85f)
-                                                    lineTo(8f, 11f)
-                                                    lineToRelative(-2.15f, 1f)
-                                                    lineTo(8f, 13f)
-                                                    close()
-                                                    moveTo(9f, 12f)
-                                                    close()
-                                                }
-                                            }.build()
+                                    item {
+                                        CategoryItem(
+                                            title = "Contact Us",
+                                            icon = Icons.Outlined.Email
+                                        ) {
+                                            navigator.push(ContactUs)
                                         }
                                     }
-                                    CategoryItem(
-                                        title = "About Us",
-                                        icon = rememberAutoAwesome()
-                                    ) { navigator.push(AboutUSCustomer) }
-                                }
-//                                item { Divider(modifier = Modifier.padding(vertical = 12.dp)) }
-                                item {
-                                    CategoryItem(
-                                        title = "Complaints",
-                                        icon = Icons.Outlined.Warning,
-                                    ) {
-                                        navigator.push(ComplaintsCustomer)
+                                    item {
+                                        @Composable
+                                        fun rememberAutoAwesome(): ImageVector {
+                                            return remember {
+                                                ImageVector.Builder(
+                                                    name = "auto_awesome",
+                                                    defaultWidth = 24.0.dp,
+                                                    defaultHeight = 24.0.dp,
+                                                    viewportWidth = 24.0f,
+                                                    viewportHeight = 24.0f
+                                                ).apply {
+                                                    path(
+                                                        fill = SolidColor(Color.Black),
+                                                        fillAlpha = 1f,
+                                                        stroke = null,
+                                                        strokeAlpha = 1f,
+                                                        strokeLineWidth = 1.0f,
+                                                        strokeLineCap = StrokeCap.Butt,
+                                                        strokeLineJoin = StrokeJoin.Miter,
+                                                        strokeLineMiter = 1f,
+                                                        pathFillType = PathFillType.NonZero
+                                                    ) {
+                                                        moveTo(19f, 8.3f)
+                                                        quadToRelative(-0.125f, 0f, -0.262f, -0.075f)
+                                                        quadTo(18.6f, 8.15f, 18.55f, 8f)
+                                                        lineToRelative(-0.8f, -1.75f)
+                                                        lineToRelative(-1.75f, -0.8f)
+                                                        quadToRelative(-0.15f, -0.05f, -0.225f, -0.188f)
+                                                        quadTo(15.7f, 5.125f, 15.7f, 5f)
+                                                        reflectiveQuadToRelative(0.075f, -0.263f)
+                                                        quadTo(15.85f, 4.6f, 16f, 4.55f)
+                                                        lineToRelative(1.75f, -0.8f)
+                                                        lineToRelative(0.8f, -1.75f)
+                                                        quadToRelative(0.05f, -0.15f, 0.188f, -0.225f)
+                                                        quadToRelative(0.137f, -0.075f, 0.262f, -0.075f)
+                                                        reflectiveQuadToRelative(0.263f, 0.075f)
+                                                        quadToRelative(0.137f, 0.075f, 0.187f, 0.225f)
+                                                        lineToRelative(0.8f, 1.75f)
+                                                        lineToRelative(1.75f, 0.8f)
+                                                        quadToRelative(0.15f, 0.05f, 0.225f, 0.187f)
+                                                        quadToRelative(0.075f, 0.138f, 0.075f, 0.263f)
+                                                        reflectiveQuadToRelative(-0.075f, 0.262f)
+                                                        quadTo(22.15f, 5.4f, 22f, 5.45f)
+                                                        lineToRelative(-1.75f, 0.8f)
+                                                        lineToRelative(-0.8f, 1.75f)
+                                                        quadToRelative(-0.05f, 0.15f, -0.187f, 0.225f)
+                                                        quadToRelative(-0.138f, 0.075f, -0.263f, 0.075f)
+                                                        close()
+                                                        moveToRelative(0f, 14f)
+                                                        quadToRelative(-0.125f, 0f, -0.262f, -0.075f)
+                                                        quadToRelative(-0.138f, -0.075f, -0.188f, -0.225f)
+                                                        lineToRelative(-0.8f, -1.75f)
+                                                        lineToRelative(-1.75f, -0.8f)
+                                                        quadToRelative(-0.15f, -0.05f, -0.225f, -0.188f)
+                                                        quadToRelative(-0.075f, -0.137f, -0.075f, -0.262f)
+                                                        reflectiveQuadToRelative(0.075f, -0.262f)
+                                                        quadToRelative(0.075f, -0.138f, 0.225f, -0.188f)
+                                                        lineToRelative(1.75f, -0.8f)
+                                                        lineToRelative(0.8f, -1.75f)
+                                                        quadToRelative(0.05f, -0.15f, 0.188f, -0.225f)
+                                                        quadToRelative(0.137f, -0.075f, 0.262f, -0.075f)
+                                                        reflectiveQuadToRelative(0.263f, 0.075f)
+                                                        quadToRelative(0.137f, 0.075f, 0.187f, 0.225f)
+                                                        lineToRelative(0.8f, 1.75f)
+                                                        lineToRelative(1.75f, 0.8f)
+                                                        quadToRelative(0.15f, 0.05f, 0.225f, 0.188f)
+                                                        quadToRelative(0.075f, 0.137f, 0.075f, 0.262f)
+                                                        reflectiveQuadToRelative(-0.075f, 0.262f)
+                                                        quadToRelative(-0.075f, 0.138f, -0.225f, 0.188f)
+                                                        lineToRelative(-1.75f, 0.8f)
+                                                        lineToRelative(-0.8f, 1.75f)
+                                                        quadToRelative(-0.05f, 0.15f, -0.187f, 0.225f)
+                                                        quadToRelative(-0.138f, 0.075f, -0.263f, 0.075f)
+                                                        close()
+                                                        moveTo(9f, 18.575f)
+                                                        quadToRelative(-0.275f, 0f, -0.525f, -0.15f)
+                                                        reflectiveQuadTo(8.1f, 18f)
+                                                        lineToRelative(-1.6f, -3.5f)
+                                                        lineTo(3f, 12.9f)
+                                                        quadToRelative(-0.275f, -0.125f, -0.425f, -0.375f)
+                                                        quadToRelative(-0.15f, -0.25f, -0.15f, -0.525f)
+                                                        reflectiveQuadToRelative(0.15f, -0.525f)
+                                                        quadToRelative(0.15f, -0.25f, 0.425f, -0.375f)
+                                                        lineToRelative(3.5f, -1.6f)
+                                                        lineTo(8.1f, 6f)
+                                                        quadToRelative(0.125f, -0.275f, 0.375f, -0.425f)
+                                                        quadToRelative(0.25f, -0.15f, 0.525f, -0.15f)
+                                                        reflectiveQuadToRelative(0.525f, 0.15f)
+                                                        quadToRelative(0.25f, 0.15f, 0.375f, 0.425f)
+                                                        lineToRelative(1.6f, 3.5f)
+                                                        lineToRelative(3.5f, 1.6f)
+                                                        quadToRelative(0.275f, 0.125f, 0.425f, 0.375f)
+                                                        quadToRelative(0.15f, 0.25f, 0.15f, 0.525f)
+                                                        reflectiveQuadToRelative(-0.15f, 0.525f)
+                                                        quadToRelative(-0.15f, 0.25f, -0.425f, 0.375f)
+                                                        lineToRelative(-3.5f, 1.6f)
+                                                        lineTo(9.9f, 18f)
+                                                        quadToRelative(-0.125f, 0.275f, -0.375f, 0.425f)
+                                                        quadToRelative(-0.25f, 0.15f, -0.525f, 0.15f)
+                                                        close()
+                                                        moveToRelative(0f, -3.425f)
+                                                        lineTo(10f, 13f)
+                                                        lineToRelative(2.15f, -1f)
+                                                        lineTo(10f, 11f)
+                                                        lineTo(9f, 8.85f)
+                                                        lineTo(8f, 11f)
+                                                        lineToRelative(-2.15f, 1f)
+                                                        lineTo(8f, 13f)
+                                                        close()
+                                                        moveTo(9f, 12f)
+                                                        close()
+                                                    }
+                                                }.build()
+                                            }
+                                        }
+                                        CategoryItem(
+                                            title = "About Us",
+                                            icon = rememberAutoAwesome()
+                                        ) { navigator.push(AboutUSCustomer) }
                                     }
-                                }
+                                    item {
+                                        CategoryItem(
+                                            title = "Coupons",
+                                            icon = Icons.Outlined.LocationOn,
+                                        ) {
+                                            navigator.push(CouponsClaimed)
+                                        }
+                                    }
+//                                item { Divider(modifier = Modifier.padding(vertical = 12.dp)) }
+                                    item {
+                                        CategoryItem(
+                                            title = "Complaints",
+                                            icon = Icons.Outlined.Warning,
+                                        ) {
+                                            navigator.push(ComplaintsCustomer)
+                                        }
+                                    }
 //                                item {
 //                                    CategoryItem(
 //                                        title = "Reviews",
@@ -493,15 +511,53 @@ object ViewProfile  : Screen {
 //                                        navigator.push(ComplaintsCustomer)
 //                                    }
 //                                }
-                                item {
-                                    CategoryItem(
-                                        title = "Log Out",
-                                        icon = Icons.Outlined.ArrowBack,
-                                        color = Color.Red
-                                    ) {
-                                        navigator.popUntilRoot()
-                                        navigator.replace(Login)
-                                        saveTokenToLocalStorage(context, "")
+                                    item {
+                                        CategoryItem(
+                                            title = "Log Out",
+                                            icon = Icons.Outlined.ArrowBack,
+                                            color = Color.Red
+                                        ) {
+                                            navigator.popUntilRoot()
+                                            navigator.replace(Login)
+                                            saveTokenToLocalStorage(context, "")
+                                        }
+                                    }
+                                }
+                            }
+                            else{
+                                Column (modifier = Modifier
+                                    .height(screenHeightDp - 50.dp)
+                                    .padding(horizontal = 20.dp), verticalArrangement = Arrangement.Center){
+                                    Text(text = "Your Profile", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.size(5.dp))
+                                    Text(text = "Log in to start planning your next trip.", fontSize = 12.sp, color = Color.Gray)
+                                    Spacer(modifier = Modifier.size(10.dp))
+                                    Box(modifier = Modifier
+                                        .background(
+                                            GlobalStrings.CustomerColorMain,
+                                            RoundedCornerShape(5.dp)
+                                        )
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            navigator.replace(Login)
+                                        }
+                                        .padding(0.dp, 10.dp)
+                                        .size(400.dp, 30.dp), contentAlignment = Alignment.Center){
+                                        Text(text = "Log in", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
+                                    }
+                                    Spacer(modifier = Modifier.size(10.dp))
+                                    Box(modifier = Modifier
+                                        .background(
+                                            GlobalStrings.CustomerColorMain,
+                                            RoundedCornerShape(5.dp)
+                                        )
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            navigator.replace(Register)
+                                        }
+                                        .padding(0.dp, 10.dp)
+                                        .size(400.dp, 30.dp), contentAlignment = Alignment.Center){
+                                        Text(text = "Register", color = Color.White, letterSpacing = 0.sp, fontWeight = FontWeight.Black)
                                     }
                                 }
                             }
@@ -666,7 +722,9 @@ fun CategoryItem(
                 }
             }
             if(title != "Log Out"){
-                Box(modifier = Modifier.fillMaxWidth().background(Color.White)){
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)){
                     Divider(
                         Modifier
                     )

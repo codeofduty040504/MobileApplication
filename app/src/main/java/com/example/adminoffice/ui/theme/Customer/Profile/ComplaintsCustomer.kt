@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
@@ -55,9 +56,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -87,7 +90,6 @@ object ComplaintsCustomer  : Screen {
     @OptIn(ExperimentalComposeUiApi::class)
     val keyboardController = LocalSoftwareKeyboardController
     var Complaints = mutableStateListOf<Complaint>()
-    var Ran = false
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -95,23 +97,42 @@ object ComplaintsCustomer  : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
         var user = getUserFromLocal(context)
+        val configuration = LocalConfiguration.current
+        val screenWidthDp: Dp = configuration.screenWidthDp.dp
+        val screenHeightDp: Dp = configuration.screenHeightDp.dp
        Scaffold() {
            Column(
                modifier = Modifier
                    .fillMaxSize()
                    .background(Color.White)
            ) {
-               Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center){
-                   Text(text = "Complaints", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+               Row(modifier = Modifier
+                   .fillMaxWidth()
+                   .padding(10.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
+                   Box(modifier = Modifier
+                       .size(40.dp)
+                       .background(GlobalStrings.CustomerColorMain, RoundedCornerShape(10.dp))
+                       .padding(10.dp)
+                       .clickable {
+                           navigator.pop()
+                       }){
+                       Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp), tint = Color.White)
+                   }
+                   Spacer(modifier = Modifier.width((screenWidthDp/4)-5.dp))
+                   Text(text = "Complaints", fontSize = 18.sp, fontWeight = FontWeight.Black)
                }
-               Divider(color = Color(0xFFE2E2E2))
                Column (modifier = Modifier.verticalScroll(rememberScrollState())){
                    for(comp in Complaints){
                        Box(modifier = Modifier
                            .padding(20.dp)
+                           .fillMaxWidth()
                            .border(0.4.dp, Color(0xFFDFDFDF), RoundedCornerShape(15.dp))){
-                           Column(modifier = Modifier.padding(5.dp)) {
-                               Row(modifier = Modifier.padding(vertical =10.dp), verticalAlignment = Alignment.CenterVertically){
+                           Column(modifier = Modifier
+                               .padding(5.dp)
+                               .fillMaxWidth()) {
+                               Row(modifier = Modifier
+                                   .padding(vertical = 10.dp)
+                                   .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
                                    Image(
                                        painter = rememberAsyncImagePainter(if(user.profilePicture=="user"){"https://icon-library.com/images/no-user-image-icon/no-user-image-icon-9.jpg"}else{
                                            user.profilePicture}),
@@ -130,26 +151,52 @@ object ComplaintsCustomer  : Screen {
                                    Spacer(modifier = Modifier.size(15.dp))
                                    Column{
                                        Text(text =user.firstname+" "+user.lastName, fontSize = 14.sp, fontWeight = FontWeight.Light)
-                                       Text(text = user.email, fontSize = 10.sp, fontWeight = FontWeight.Light, color = Color.Gray
+                                       Text(text = comp.title, fontSize = 10.sp, fontWeight = FontWeight.Light, color = Color.Gray
                                        )
                                    }
                                    Spacer(modifier = Modifier.size(30.dp))
                                    Box(modifier = Modifier
                                        .height(20.dp)
                                        .width(100.dp)
-                                       .background(if(comp.status=="pending"){Color(0xFFCA0007)
-                                       }else{Color(0xFF229728)}, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center){
+                                       .background(
+                                           if (comp.status == "pending") {
+                                               Color(0xFFCA0007)
+                                           } else {
+                                               Color(0xFF229728)
+                                           }, RoundedCornerShape(15.dp)
+                                       ), contentAlignment = Alignment.Center){
                                        Text(text = comp.status, color = Color.White, fontSize = 10.sp)
                                    }
                                    Spacer(modifier = Modifier.size(15.dp))
-                                   Box(modifier = Modifier.background(Color.Red, RoundedCornerShape(10.dp)).size(30.dp).clickable {
-                                       deleteComplaints(context,comp._id)
-                                   }, contentAlignment = Alignment.Center){
+                                   Box(modifier = Modifier
+                                       .background(Color.Red, RoundedCornerShape(10.dp))
+                                       .size(30.dp)
+                                       .clickable {
+                                           deleteComplaints(context, comp._id)
+                                       }, contentAlignment = Alignment.Center){
                                        Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.White)
                                    }
                                }
                                Box(modifier = Modifier.padding(5.dp)){
                                    Text(text = comp.description, lineHeight = 17.sp)
+                               }
+                               if(comp.image !=""){
+                                   Box(modifier = Modifier.padding(5.dp)){
+                                       Image(
+                                           painter = rememberAsyncImagePainter(comp.image),
+                                           contentDescription = "image",
+                                           modifier = Modifier
+                                               .size(80.dp)
+                                               .clip(
+                                                   RoundedCornerShape(
+                                                       (CornerSize(
+                                                           20.dp
+                                                       ))
+                                                   )
+                                               ),
+                                           contentScale = ContentScale.FillBounds
+                                       )
+                                   }
                                }
                                if(comp.feedback!=""){
                                    Column (modifier = Modifier.padding(top = 20.dp, start = 20.dp, bottom = 5.dp)){
@@ -207,13 +254,14 @@ object ComplaintsCustomer  : Screen {
                         var _id = complaint.getString("_id")
                         var title = complaint.getString("title")
                         var description = complaint.getString("description")
+                        var image = complaint.getString("image")
                         if(complaint.has("feedback")){
                             feedback = complaint.getString("feedback")
                         }
                         var category = complaint.getString("category")
                         var status = complaint.getString("status")
                         var complaintsss = Complaint(_id=_id, category = category,
-                            description=description,feedback=feedback, image = "", status =status,
+                            description=description,feedback=feedback, image = image, status =status,
                             title=title)
                         Complaints.add(complaintsss)
                     }

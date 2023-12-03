@@ -59,6 +59,25 @@ fun saveUsertoLocal(context: Context, user: DabsUser) {
     editor.apply()
 }
 
+fun clearUser(context: Context){
+    // Get the SharedPreferences object
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+
+    // Save the token to SharedPreferences
+    val editor: SharedPreferences.Editor = sharedPreferences.edit()
+    var usser = DabsUser(_id = "",
+        firstname = "",
+        lastName = "",
+        email = "",
+        contactNo = "",
+        cnic = "",
+        profilePicture = "",
+        role = "")
+    saveUsertoLocal(context,usser)
+    editor.apply()
+
+}
+
 
 fun getUserFromLocal(context: Context): DabsUser {
     // Get the SharedPreferences object
